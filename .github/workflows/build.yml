@@ -42,9 +42,10 @@ jobs:
         run: deno check main.ts
         working-directory: author/src
 
-      - name: Run tests
-        run: deno test -A
-        working-directory: author/src
+#        Commented out as there are no tests for now
+#      - name: Run tests
+#        run: deno test -A
+#        working-directory: author/src
 
       - name: Smoke run
         run: deno run main.ts
