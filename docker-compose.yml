@@ -5,11 +5,5 @@ services:
       dockerfile: Dockerfile
     image: aemm-author:dev
     container_name: aemm-author
-    # For apps that listen on a port, you could add:
-    # ports:
-    #   - "8000:8000"
-    # environment:
-    #   - DENO_DEPLOYMENT_ID=local
-    # command: ["run", "--allow-net", "src/main.ts"]
-    # The Dockerfile already defines the default command to run src/main.ts
-
+    ports:
+      - "4502:4502"
