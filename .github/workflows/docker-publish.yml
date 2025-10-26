@@ -1,0 +1,89 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Optional version tag to publish (fallback to deno.json version or short SHA)"
+        required: false
+        default: ""
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Verify formatting
+        run: deno fmt --check
+        working-directory: author/src
+
+      - name: Lint
+        run: deno lint
+        working-directory: author/src
+
+      - name: Type check
+        run: deno check main.ts
+        working-directory: author/src
+
+      - name: Run tests
+        run: deno test -A
+        working-directory: author/src
+
+      - name: Set lowercase repository name and version
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          # Try to read version from Deno config (if present)
+          VERSION_DENO=$(jq -r 'try .version catch empty' author/src/deno.json 2>/dev/null | sed 's/null//')
+          # Use provided input if any
+          VERSION_INPUT="${{ github.event.inputs.version }}"
+          # Fallback to short SHA if no version provided/found
+          if [[ -n "${VERSION_INPUT}" ]]; then
+            VERSION="${VERSION_INPUT}"
+          elif [[ -n "${VERSION_DENO}" ]]; then
+            VERSION="${VERSION_DENO}"
+          else
+            VERSION="${GITHUB_SHA::7}"
+          fi
+          echo "repo_lower=${REPO_LOWER}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Repository: ${REPO_LOWER}"
+          echo "Version: ${VERSION}"
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./author
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.vars.outputs.repo_lower }}:latest
+            ${{ env.REGISTRY }}/${{ steps.vars.outputs.repo_lower }}:${{ steps.vars.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
