@@ -50,7 +50,7 @@ jobs:
           set -euo pipefail
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           # Try to read version from Deno config (if present)
-          VERSION_DENO=$(jq -r 'try .version catch empty' author/src/deno.json 2>/dev/null | sed 's/null//')
+          VERSION_DENO=$(jq -r 'try .version catch empty' author/src/deno.json 2>/dev/null)
           # Use provided input if any
           VERSION_INPUT="${{ github.event.inputs.version }}"
           # Fallback to short SHA if no version provided/found
