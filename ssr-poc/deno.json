@@ -1,0 +1,18 @@
+{
+  "tasks": {
+    "dev": "deno run --watch --allow-all --unstable-bundle server.tsx",
+    "build": "deno run --allow-all build.ts"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "imports": {
+    "@deno/emit": "jsr:@deno/emit@^0.46.0",
+    "types/react": "npm:@types/react@^19.2.2",
+    "react": "npm:react@^19.2.0",
+    "react-dom": "npm:react-dom@^19.2.0",
+    "react-dom/server": "npm:react-dom@^19.2.0/server",
+    "react/jsx-runtime": "npm:react@^19.2.0/jsx-runtime"
+  }
+}
