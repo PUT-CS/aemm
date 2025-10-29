@@ -1,13 +1,4 @@
-# Exclude unnecessary files from the Docker build context
-.git
-.gitignore
-.DS_Store
-node_modules
-npm-debug.log
-yarn.lock
-pnpm-lock.yaml
+.react-router
 build
-dist
-target
-.vscode
-.idea
+node_modules
+README.md
