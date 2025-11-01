@@ -6,6 +6,18 @@ const PORT = 4500;
 const BASE_DIR = './content'; // Change to your content directory
 
 const server = http.createServer(async (req, res) => {
+// Add CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+// Handle preflight OPTIONS request
+    if (req.method === 'OPTIONS') {
+        res.writeHead(204);
+        res.end();
+        return;
+    }
+
     try {
         // Parse the URL and remove query params
         let requestPath = req.url.split('?')[0];
