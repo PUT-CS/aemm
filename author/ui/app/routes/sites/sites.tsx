@@ -1,4 +1,6 @@
 import type { Route } from "../+types/login";
+import SiteBrowser from "~/routes/sites/SiteBrowser";
+import {useNavigate} from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -7,5 +9,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Sites() {
-  return <div>Sites Page</div>;
+  return <div>
+    <SiteBrowser/>
+  </div>;
 }

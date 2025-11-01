@@ -1,0 +1,17 @@
+{
+  "aemm:type": "aemm:page",
+  "title": "Der Emacs",
+  "description": "Der GNU Emacs is ein extenzible, customizable, frei/libre text editor — and more.",
+  "page": [
+    {
+      "aemm:type": "aemm:container",
+      "children": [
+        {
+          "aemm:type": "aemm:anchor",
+          "href": "/en/us/emacs/guide",
+          "text": "Learn more about der Emacs"
+        }
+      ]
+    }
+  ]
+}
