@@ -1,0 +1,16 @@
+{
+  "name": "aemm",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "common",
+    "author/core"
+  ],
+  "scripts": {
+    "build": "tsc -b common author/core",
+    "watch": "tsc -b -w common author/core"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
