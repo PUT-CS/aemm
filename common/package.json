@@ -2,7 +2,7 @@
   "name": "@aemm/common",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc -b src",
-    "watch": "tsc -b -w src"
+    "build": "tsc -b .",
+    "watch": "tsc -b -w ."
   }
 }

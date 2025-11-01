@@ -1,3 +1,3 @@
-import Item from '@aemm/common/src/models/item'
+import Item from '@aemm/common/src/models/item';
 
-export let items: Item[] = [];
+export const items: Item[] = [];
