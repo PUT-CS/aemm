@@ -1,9 +1,7 @@
 import type { Route } from "../+types/login";
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Administration | AEMM" }
-  ];
+  return [{ title: "Administration | AEMM" }];
 }
 
 export default function Admin() {
