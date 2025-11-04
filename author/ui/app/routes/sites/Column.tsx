@@ -1,4 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import ColumnItem from "~/routes/sites/ColumnItem";
+import React from "react";
+import fetchPathContent from "~/routes/sites/fetchPathContent";
 
 interface ColumnProps {
   path: string;
@@ -11,17 +14,9 @@ export default function Column({
   selectedChildPath,
   onItemClick,
 }: ColumnProps) {
-  const fetchContent = async (path: string) => {
-    const response = await fetch(`http://localhost:4500${path}`);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    return response.json();
-  };
-
   const { data, isLoading, isError } = useQuery({
     queryKey: ["content", path],
-    queryFn: () => fetchContent(path),
+    queryFn: () => fetchPathContent(path),
   });
 
   const handleClick = (itemPath: string) => {
@@ -31,28 +26,25 @@ export default function Column({
     };
   };
 
+  if (isLoading) {
+    return <div className="border border-l-0 min-w-[250px]"></div>;
+  }
+
   return (
-    <div className="border p-4 m-2 min-w-[200px]">
-      {isLoading && <div className="text-sm text-gray-500">Loading...</div>}
+    <div className="border border-l-0 min-w-[250px]">
       {isError && (
         <div className="text-sm text-red-500">Error loading content</div>
       )}
       {data && data.children && (
-        <div className="space-y-1">
+        <div>
           {/* eslint-disable-next-line */}
           {data.children.map((item: any) => (
-            <a
-              href={item.path}
+            <ColumnItem
               key={item.path}
+              item={item}
               onClick={handleClick(item.path)}
-              className={`block p-2 rounded hover:bg-blue-100 cursor-pointer ${
-                selectedChildPath === item.path
-                  ? "bg-blue-200 font-semibold"
-                  : ""
-              }`}
-            >
-              <div className="text-sm">{item.name}</div>
-            </a>
+              selectedChildPath={selectedChildPath}
+            />
           ))}
         </div>
       )}

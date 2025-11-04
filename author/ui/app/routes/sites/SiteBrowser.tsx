@@ -30,11 +30,10 @@ export default function SiteBrowser() {
   };
 
   return (
-    <div className="p-4">
+    <div className="h-full flex flex-col">
       <h1 className="text-2xl font-bold mb-4">Site Browser</h1>
-      <div className="flex overflow-x-auto">
+      <div className="flex-1 flex overflow-x-auto border-l-0">
         {columnPaths.map((columnPath, index) => {
-          // Determine if this column has a selected child
           const nextPath = columnPaths[index + 1];
           return (
             <Column
