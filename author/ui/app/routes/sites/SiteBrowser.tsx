@@ -1,15 +1,14 @@
 import { useNavigate, useParams } from "react-router";
 import Column from "~/routes/sites/Column";
+import { useQuery } from "@tanstack/react-query";
+import fetchPathContent from "~/routes/sites/fetchPathContent";
 
 export default function SiteBrowser() {
   const navigate = useNavigate();
   const params = useParams();
 
-  // Get the current path from URL params (everything after /sites/)
   const currentPath = params["*"] || "";
 
-  // Build an array of paths for each column to display
-  // e.g., if currentPath is "aemm/pl/home", we show columns for: "/", "/aemm", "/aemm/pl", "/aemm/pl/home"
   const buildColumnPaths = (path: string): string[] => {
     if (!path || path === "") {
       return ["/"];
@@ -21,11 +20,21 @@ export default function SiteBrowser() {
     );
   };
 
-  const columnPaths = buildColumnPaths(currentPath);
+  const allPaths = buildColumnPaths(currentPath);
+  const lastPath = allPaths[allPaths.length - 1];
+
+  const { data: lastPathData } = useQuery({
+    queryKey: ["content", lastPath],
+    queryFn: () => fetchPathContent(lastPath),
+    enabled: !!lastPath,
+  });
+
+  const hasChildren =
+    lastPathData && lastPathData.children && lastPathData.children.length > 0;
+
+  const columnPaths = hasChildren ? allPaths : allPaths.slice(0, -1);
 
   const handleItemClick = (itemPath: string) => {
-    // Navigate to the new path, which will be everything after /sites
-    // itemPath is already the full path like "/aemm/pl"
     navigate(`/sites${itemPath}`);
   };
 
@@ -34,7 +43,7 @@ export default function SiteBrowser() {
       <h1 className="text-2xl font-bold mb-4">Site Browser</h1>
       <div className="flex-1 flex overflow-x-auto border-l-0">
         {columnPaths.map((columnPath, index) => {
-          const nextPath = columnPaths[index + 1];
+          const nextPath = allPaths[index + 1];
           return (
             <Column
               key={columnPath}
