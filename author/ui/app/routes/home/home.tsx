@@ -1,10 +1,9 @@
-import type { Route } from "./+types/home";
-import {useNavigate} from "react-router";
-import {FaTools} from "react-icons/fa";
-import {FaFileLines, FaFilePen} from "react-icons/fa6";
+import { useNavigate } from "react-router";
+import { FaTools } from "react-icons/fa";
+import { FaFileLines, FaFilePen } from "react-icons/fa6";
 import HomeIcon from "./HomeIcon";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: "Home | AEMM" },
     { name: "description", content: "Author app dashboard" },
@@ -20,17 +19,17 @@ export default function Home() {
         <HomeIcon
           text="Sites"
           icon={FaFileLines}
-          onClick={() => navigate('/sites')}
+          onClick={() => navigate("/sites")}
         />
         <HomeIcon
           text="Editor"
           icon={FaFilePen}
-          onClick={() => navigate('/editor')}
+          onClick={() => navigate("/editor")}
         />
         <HomeIcon
           text="Administration"
           icon={FaTools}
-          onClick={() => navigate('/admin')}
+          onClick={() => navigate("/admin")}
         />
       </div>
     </div>
