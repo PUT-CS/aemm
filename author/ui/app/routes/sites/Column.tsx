@@ -39,6 +39,7 @@ export default function Column({
       )}
       {data && data.children && (
         <div className="space-y-1">
+          {/* eslint-disable-next-line */}
           {data.children.map((item: any) => (
             <a
               href={item.path}

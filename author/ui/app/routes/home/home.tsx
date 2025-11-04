@@ -1,10 +1,9 @@
-import type { Route } from "./+types/home";
 import { useNavigate } from "react-router";
 import { FaTools } from "react-icons/fa";
 import { FaFileLines, FaFilePen } from "react-icons/fa6";
 import HomeIcon from "./HomeIcon";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: "Home | AEMM" },
     { name: "description", content: "Author app dashboard" },

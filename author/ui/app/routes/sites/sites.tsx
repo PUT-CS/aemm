@@ -1,8 +1,6 @@
-import type { Route } from "../+types/login";
 import SiteBrowser from "~/routes/sites/SiteBrowser";
-import { useNavigate } from "react-router";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [{ title: "Sites | AEMM" }];
 }
 
