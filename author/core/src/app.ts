@@ -1,15 +1,19 @@
 import express from 'express';
-import itemRoutes from './routes/itemRoutes';
+import router from './routes';
 import { errorHandler } from './middlewares/errorHandler';
+import cors from 'cors';
+import helmet from 'helmet';
 
 const app = express();
 
+app.use(cors());
+
+app.use(helmet());
+
 app.use(express.json());
 
-// Routes
-app.use('/api/items', itemRoutes);
+app.use(router);
 
-// Global error handler (should be after routes)
 app.use(errorHandler);
 
 export default app;
