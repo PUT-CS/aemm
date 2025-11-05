@@ -2,7 +2,5 @@
   "scr:type": "aemm:page",
   "name": "Der Hause",
   "languageCode": "de",
-  "page": {
-
-  }
+  "page": {}
 }

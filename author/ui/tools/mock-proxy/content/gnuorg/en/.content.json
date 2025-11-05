@@ -2,7 +2,5 @@
   "scr:type": "aemm:page",
   "name": "Home",
   "languageCode": "en",
-  "page": {
-
-  }
+  "page": {}
 }
