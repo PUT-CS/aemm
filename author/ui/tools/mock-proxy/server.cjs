@@ -65,7 +65,7 @@ const server = http.createServer(async (req, res) => {
             } catch (err) {
                 // .content.json doesn't exist, use default
                 contentData = {
-                    'aemm:type': 'aemm:folder',
+                    'scr:type': 'aemm:folder',
                     path: '/' + requestPath.replace(/\\/g, '/')
                 };
             }
