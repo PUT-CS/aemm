@@ -5,7 +5,7 @@ enum ScrType {
 }
 
 export default interface ScrNode {
-  'type': ScrType,
-  title?: string,
-  description?: string,
+  type: ScrType;
+  title?: string;
+  description?: string;
 }

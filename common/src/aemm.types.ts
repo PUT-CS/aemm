@@ -1,6 +1,6 @@
 interface Page {
-  'type': string,
-  htmlTitle: string,
-  description?: string,
-  components: unknown[],
+  type: string;
+  htmlTitle: string;
+  description?: string;
+  components: unknown[];
 }
