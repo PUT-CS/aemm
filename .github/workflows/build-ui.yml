@@ -1,0 +1,44 @@
+name: UI CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.19
+          cache: "npm"
+          cache-dependency-path: author/ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: author/ui
+
+      - name: Format check
+        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
+        working-directory: author/ui
+
+      - name: Type check
+        run: npm run typecheck
+        working-directory: author/ui
+
+      - name: Build
+        run: npm run build
+        working-directory: author/ui
+
+      - name: Build Docker image
+        run: docker build -t aemm-author-ui:dev author/ui

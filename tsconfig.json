@@ -1,7 +1,4 @@
 {
   "files": [],
-  "references": [
-    { "path": "common" },
-    { "path": "author/core" }
-  ]
+  "references": [{ "path": "common" }, { "path": "author/core" }]
 }
