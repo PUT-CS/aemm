@@ -4,11 +4,12 @@
   "version": "1.0.0",
   "workspaces": [
     "common",
-    "author/core"
+    "author/core",
+    "author/ui"
   ],
   "scripts": {
-    "build": "tsc -b common author/core",
-    "watch": "tsc -b -w common author/core"
+    "build": "tsc -b common author/core author/ui",
+    "watch": "tsc -b -w common author/core author/ui"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

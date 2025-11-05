@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 const http = require("http");
 const fs = require("fs").promises;
 const path = require("path");
@@ -67,7 +65,7 @@ const server = http.createServer(async (req, res) => {
       } catch (err) {
         // .content.json doesn't exist, use default
         contentData = {
-          "aemm:type": "aemm:folder",
+          "scr:type": "aemm:folder",
           path: "/" + requestPath.replace(/\\/g, "/"),
         };
       }

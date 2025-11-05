@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import Item from '@aemm/common/src/models/item';
+import Item from '@aemm/common/src/item';
 import { items } from '../models/item';
 
 // Create an item

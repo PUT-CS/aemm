@@ -1,5 +1,5 @@
 {
-  "aemm:type": "aemm:page",
+  "scr:type": "aemm:page",
   "name": "Der Hause",
   "languageCode": "de",
   "page": {}

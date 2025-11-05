@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { useNavigate } from "react-router";
+import { redirect, useNavigate } from "react-router";
 
 export default function Login() {
   const formSchema = z.object({

@@ -1,4 +1,6 @@
-export function meta() {
+import type { Route } from "../+types/login";
+
+export function meta({}: Route.MetaArgs) {
   return [{ title: "Administration | AEMM" }];
 }
 
