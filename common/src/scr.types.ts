@@ -5,7 +5,7 @@ export enum ScrType {
   FOLDER = "aemm:folder",
 }
 
-export default interface ScrNode {
+export interface ScrNode {
   type: ScrType;
   title?: string;
   description?: string;
