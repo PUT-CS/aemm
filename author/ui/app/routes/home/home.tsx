@@ -15,7 +15,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="h-full flex items-center justify-center">
       <div className="grid grid-cols-3 gap-8">
         <HomeIcon
           text="Sites"

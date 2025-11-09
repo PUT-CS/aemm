@@ -8,7 +8,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Sites() {
   return (
-    <div>
+    <div className="h-full">
       <SiteBrowser />
     </div>
   );

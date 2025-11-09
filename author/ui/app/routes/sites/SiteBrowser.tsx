@@ -1,17 +1,31 @@
 import { useNavigate, useParams } from "react-router";
+import { useEffect, useState } from "react";
 import Column from "~/routes/sites/Column";
+import { useQuery } from "@tanstack/react-query";
+import fetchPathContent from "~/routes/sites/fetchPathContent";
+import SitesToolbar from "~/routes/sites/SitesToolbar";
 
 export default function SiteBrowser() {
   const navigate = useNavigate();
   const params = useParams();
+  const urlPath = params["*"] || "";
 
-  // Get the current path from URL params (everything after /sites/)
-  const currentPath = params["*"] || "";
+  const [selectedPath, setSelectedPath] = useState<string>(
+    urlPath ? `/${urlPath}` : "/",
+  );
 
-  // Build an array of paths for each column to display
-  // e.g., if currentPath is "aemm/pl/home", we show columns for: "/", "/aemm", "/aemm/pl", "/aemm/pl/home"
+  useEffect(() => {
+    setSelectedPath(urlPath ? `/${urlPath}` : "/");
+  }, [urlPath]);
+
+  const { data: selectedPathData } = useQuery({
+    queryKey: ["content", selectedPath],
+    queryFn: () => fetchPathContent(selectedPath),
+    enabled: !!selectedPath,
+  });
+
   const buildColumnPaths = (path: string): string[] => {
-    if (!path || path === "") {
+    if (!path || path === "/") {
       return ["/"];
     }
 
@@ -21,21 +35,25 @@ export default function SiteBrowser() {
     );
   };
 
-  const columnPaths = buildColumnPaths(currentPath);
+  const allPaths = buildColumnPaths(selectedPath);
+  const hasChildren = selectedPathData?.children?.length > 0;
+  const columnPaths = hasChildren ? allPaths : allPaths.slice(0, -1);
 
   const handleItemClick = (itemPath: string) => {
-    // Navigate to the new path, which will be everything after /sites
-    // itemPath is already the full path like "/aemm/pl"
-    navigate(`/sites${itemPath}`);
+    setSelectedPath(itemPath);
+    const urlSegment = itemPath === "/" ? "" : itemPath.substring(1);
+    navigate(`/sites/${urlSegment}`, { replace: true });
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Site Browser</h1>
-      <div className="flex overflow-x-auto">
+    <div className="h-full flex flex-col">
+      <SitesToolbar
+        selectedPath={selectedPath}
+        selectedPathData={selectedPathData}
+      />
+      <div className="flex-1 flex overflow-x-auto border-l-0">
         {columnPaths.map((columnPath, index) => {
-          // Determine if this column has a selected child
-          const nextPath = columnPaths[index + 1];
+          const nextPath = allPaths[index + 1];
           return (
             <Column
               key={columnPath}
