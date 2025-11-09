@@ -1,12 +1,5 @@
 import { useState } from "react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -17,7 +10,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
-import { FaEllipsis, FaPen, FaXmark } from "react-icons/fa6";
+import { FaPen, FaXmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 
 export function DropdownActions() {
@@ -30,29 +23,21 @@ export function DropdownActions() {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost">
-            <span className="sr-only">Open menu</span>
-            <FaEllipsis />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem className="gap-2">
-            <FaPen className="size-3.5" />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => setIsDeleteDialogOpen(true)}
-            className="gap-2"
-          >
-            <FaTrash className="size-3.5" />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <FaPen className="size-4" />
+          <span className="sr-only">Edit</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          onClick={() => setIsDeleteDialogOpen(true)}
+        >
+          <FaTrash className="size-4" />
+          <span className="sr-only">Delete</span>
+        </Button>
+      </div>
 
       <AlertDialog
         open={isDeleteDialogOpen}
