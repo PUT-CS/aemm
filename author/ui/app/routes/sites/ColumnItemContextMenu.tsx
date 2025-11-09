@@ -36,7 +36,7 @@ export default function ColumnItemContextMenu() {
       <ContextMenuOption
         icon={FaTrash}
         label="Delete"
-        kind="destructive"
+        variant="destructive"
         onClick={() => console.log("Delete")}
       />
     </>
