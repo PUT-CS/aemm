@@ -28,7 +28,7 @@ export default function Admin() {
 
       {activeSection === "users" && <UsersTab />}
       {activeSection === "system" && (
-        <p className="text-muted-foreground">System settings coming soon.</p>
+        <p className="text-muted-foreground">TODO</p>
       )}
     </div>
   );
