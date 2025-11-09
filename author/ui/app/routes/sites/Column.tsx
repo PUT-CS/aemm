@@ -27,11 +27,11 @@ export default function Column({
   };
 
   if (isLoading) {
-    return <div className="border border-l-0 min-w-[250px]"></div>;
+    return <div className="border border-l-0 border-t-0 min-w-[250px]"></div>;
   }
 
   return (
-    <div className="border border-l-0 min-w-[250px]">
+    <div className="border border-l-0 border-t-0 min-w-[250px]">
       {isError && (
         <div className="text-sm text-red-500">Error loading content</div>
       )}

@@ -1,16 +1,31 @@
 import { useNavigate, useParams } from "react-router";
+import { useEffect, useState } from "react";
 import Column from "~/routes/sites/Column";
 import { useQuery } from "@tanstack/react-query";
 import fetchPathContent from "~/routes/sites/fetchPathContent";
+import SitesToolbar from "~/routes/sites/SitesToolbar";
 
 export default function SiteBrowser() {
   const navigate = useNavigate();
   const params = useParams();
+  const urlPath = params["*"] || "";
 
-  const currentPath = params["*"] || "";
+  const [selectedPath, setSelectedPath] = useState<string>(
+    urlPath ? `/${urlPath}` : "/",
+  );
+
+  useEffect(() => {
+    setSelectedPath(urlPath ? `/${urlPath}` : "/");
+  }, [urlPath]);
+
+  const { data: selectedPathData } = useQuery({
+    queryKey: ["content", selectedPath],
+    queryFn: () => fetchPathContent(selectedPath),
+    enabled: !!selectedPath,
+  });
 
   const buildColumnPaths = (path: string): string[] => {
-    if (!path || path === "") {
+    if (!path || path === "/") {
       return ["/"];
     }
 
@@ -20,27 +35,22 @@ export default function SiteBrowser() {
     );
   };
 
-  const allPaths = buildColumnPaths(currentPath);
-  const lastPath = allPaths[allPaths.length - 1];
-
-  const { data: lastPathData } = useQuery({
-    queryKey: ["content", lastPath],
-    queryFn: () => fetchPathContent(lastPath),
-    enabled: !!lastPath,
-  });
-
-  const hasChildren =
-    lastPathData && lastPathData.children && lastPathData.children.length > 0;
-
+  const allPaths = buildColumnPaths(selectedPath);
+  const hasChildren = selectedPathData?.children?.length > 0;
   const columnPaths = hasChildren ? allPaths : allPaths.slice(0, -1);
 
   const handleItemClick = (itemPath: string) => {
-    navigate(`/sites${itemPath}`);
+    setSelectedPath(itemPath);
+    const urlSegment = itemPath === "/" ? "" : itemPath.substring(1);
+    navigate(`/sites/${urlSegment}`, { replace: true });
   };
 
   return (
     <div className="h-full flex flex-col">
-      <h1 className="text-2xl font-bold mb-4">Site Browser</h1>
+      <SitesToolbar
+        selectedPath={selectedPath}
+        selectedPathData={selectedPathData}
+      />
       <div className="flex-1 flex overflow-x-auto border-l-0">
         {columnPaths.map((columnPath, index) => {
           const nextPath = allPaths[index + 1];

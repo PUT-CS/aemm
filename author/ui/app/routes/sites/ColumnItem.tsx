@@ -20,7 +20,7 @@ export default function ColumnItem(props: {
   });
 
   const bgColorClass =
-    props.selectedChildPath === props.item.path ? "bg-gray-300" : "";
+    props.selectedChildPath === props.item.path ? "bg-slate-300" : "";
 
   const hasChildren = data && data.children && data.children.length > 0;
 
@@ -32,16 +32,16 @@ export default function ColumnItem(props: {
     <ContextMenu>
       <ContextMenuTrigger>
         <div
-          className={`flex p-4 hover:bg-gray-100 cursor-pointer ${bgColorClass}`}
+          className={`flex items-center p-4 hover:bg-slate-200 cursor-pointer ${bgColorClass}`}
           onClick={handleClick}
         >
-          <FaFileLines className="w-1/6" size="20" />
+          <FaFileLines className="w-1/6" size="22" />
           <a className="text-sm">{props.item.name}</a>
           <div className="flex-1" />
-          {isLoading && <span className="text-xs text-gray-500">...</span>}
+          {isLoading && <span className="text-xs text-slate-500">...</span>}
           {isError && <span className="text-xs text-red-500">Error</span>}
           {hasChildren && (
-            <span className="flex items-center text-xs text-gray-500">
+            <span className="flex items-center text-xs text-slate-500">
               <FaChevronRight />
             </span>
           )}
