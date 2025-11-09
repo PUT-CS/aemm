@@ -1,10 +1,16 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 export interface AppError extends Error {
   status?: number;
 }
 
-export const errorHandler = (err: AppError, req: Request, res: Response) => {
+export const errorHandler = (
+  err: AppError,
+  _req: Request,
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _next: NextFunction,
+) => {
   console.error(err);
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',

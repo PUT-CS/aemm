@@ -1,11 +1,11 @@
-enum ScrType {
-  PAGE = "aemm:page",
-  CONTAINER = "aemm:container",
-  ANCHOR = "aemm:anchor",
+export enum ScrType {
+  FILE = "scr:file",
+  FOLDER = "scr:folder",
 }
 
-export default interface ScrNode {
+export interface ScrNode {
   type: ScrType;
-  title?: string;
+  name: string;
   description?: string;
+  children?: ScrNode[];
 }
