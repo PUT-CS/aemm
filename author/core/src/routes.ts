@@ -3,6 +3,6 @@ import { getNode } from './controllers/nodeController';
 
 const router = Router();
 
-router.get('*queryPath', getNode);
+router.get('/scr/*queryPath', getNode);
 
 export default router;
