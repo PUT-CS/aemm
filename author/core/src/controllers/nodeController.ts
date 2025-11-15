@@ -126,7 +126,7 @@ export const updateNode = (req: Request, res: Response) => {
     const fullPath = path.resolve(contentRoot + cleanedPath);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
-      res.status(403).end();
+      res.status(403).send('Access denied: path outside content root');
       return;
     }
 
@@ -198,5 +198,6 @@ export const updateNode = (req: Request, res: Response) => {
   } catch (err: unknown) {
     console.error(err);
     res.status(500).end();
+    return;
   }
 };
