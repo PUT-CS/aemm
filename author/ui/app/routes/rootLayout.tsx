@@ -18,7 +18,7 @@ export default function RootLayout() {
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <div className="h-screen flex flex-col">
           <TopBar />
-          <main className="flex-1 overflow-hidden">
+          <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
         </div>

@@ -125,6 +125,69 @@ body {
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* Rich text content styles */
+.rich-text-content {
+  & h1 {
+    @apply text-4xl font-bold mb-4;
+  }
+
+  & h2 {
+    @apply text-3xl font-bold mb-3;
+  }
+
+  & h3 {
+    @apply text-2xl font-bold mb-2;
+  }
+
+  & h4 {
+    @apply text-xl font-bold mb-2;
+  }
+
+  & h5 {
+    @apply text-lg font-bold mb-2;
+  }
+
+  & h6 {
+    @apply text-base font-bold mb-2;
+  }
+
+  & p {
+    @apply mb-4;
+  }
+
+  & ul {
+    @apply list-disc list-inside mb-4;
+  }
+
+  & ol {
+    @apply list-decimal list-inside mb-4;
+  }
+
+  & a {
+    @apply text-primary underline hover:no-underline;
+  }
+
+  & strong {
+    @apply font-bold;
+  }
+
+  & i {
+    @apply italic;
+  }
+
+  & em {
+    @apply italic;
+  }
+
+  & blockquote {
+    @apply border-l-4 border-muted pl-4 italic my-4;
+  }
+
+  & code {
+    @apply bg-muted px-1 py-0.5 rounded text-sm;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

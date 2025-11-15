@@ -1,8 +1,8 @@
 import {
-  type RouteConfig,
   index,
   layout,
   route,
+  type RouteConfig,
 } from "@react-router/dev/routes";
 
 export default [
@@ -11,6 +11,7 @@ export default [
     route("admin", "routes/admin/admin.tsx"),
     route("sites/*", "routes/sites/sites.tsx"),
     route("editor", "routes/editor/editor.tsx"),
+    route("demo", "routes/demo/demo.tsx"),
   ]),
   layout("components/aemm/CenteredLayout.tsx", [
     route("login", "routes/login.tsx"),
