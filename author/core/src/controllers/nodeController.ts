@@ -4,6 +4,22 @@ import * as fs from 'node:fs';
 import { ScrNode, ScrType } from '@aemm/common';
 import path from 'path';
 
+function isScrNode(obj: any): obj is ScrNode {
+  if (!obj || typeof obj !== 'object') return false;
+
+  // Check required fields
+  if (!obj.type || !obj.name) return false;
+  if (!Object.values(ScrType).includes(obj.type)) return false;
+
+  // If it's a folder, validate children
+  if (obj.type === ScrType.FOLDER && obj.children) {
+    if (!Array.isArray(obj.children)) return false;
+    return obj.children.every(isScrNode);
+  }
+
+  return true;
+}
+
 function readFileContent(filePath: string): string {
   try {
     return fs.readFileSync(filePath, 'utf8');
@@ -100,5 +116,87 @@ export const getNode = (req: Request, res: Response) => {
     console.error(err);
     res.status(500).end();
     return;
+  }
+};
+
+export const updateNode = (req: Request, res: Response) => {
+  try {
+    const cleanedPath = cleanPath(req.path);
+    const contentRoot = config.contentRoot;
+    const fullPath = path.resolve(contentRoot + cleanedPath);
+
+    if (!fullPath.startsWith(path.resolve(contentRoot))) {
+      res.status(403).end();
+      return;
+    }
+
+    if (!req.body) {
+      res.status(400).send('Request body is required');
+      return;
+    }
+
+    const contentType = req.get('Content-Type') || '';
+    const exists = fs.existsSync(fullPath);
+
+    if (exists) {
+      const stats = fs.statSync(fullPath);
+
+      if (stats.isDirectory()) {
+        // Update .content.json for directories
+        const contentJsonPath = fullPath + '/.content.json';
+        fs.writeFileSync(
+          contentJsonPath,
+          JSON.stringify(req.body, null, 2),
+          'utf8',
+        );
+        res.status(200).json(req.body);
+        return;
+      }
+    }
+
+    // Handle file creation or update
+    const dirPath = path.dirname(fullPath);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+
+    // Check if Content-Type is JSON
+    if (contentType.includes('application/json')) {
+      try {
+        const jsonData =
+          typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+        // Validate that JSON is a valid ScrNode
+        if (!isScrNode(jsonData)) {
+          res.status(400).send('Invalid ScrNode structure');
+          return;
+        }
+
+        // Write as .content.json
+        const contentJsonPath = fullPath + '/.content.json';
+        fs.writeFileSync(
+          contentJsonPath,
+          JSON.stringify(jsonData, null, 2),
+          'utf8',
+        );
+        res.status(exists ? 200 : 201).json(jsonData);
+        return;
+      } catch (err: unknown) {
+        console.error(err);
+        res.status(400).send('Invalid JSON');
+        return;
+      }
+    }
+
+    // Handle binary/text content
+    const content = Buffer.isBuffer(req.body)
+      ? req.body
+      : Buffer.from(req.body);
+    fs.writeFileSync(fullPath, content);
+    res.status(exists ? 200 : 201).send(content);
+    return;
+  } catch (err: unknown) {
+    console.error(err);
+    res.status(500).end();
   }
 };
