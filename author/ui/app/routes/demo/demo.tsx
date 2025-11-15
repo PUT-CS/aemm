@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import TextDemo from "~/routes/demo/TextDemo";
+import ImageDemo from "~/routes/demo/ImageDemo";
 
 export function meta() {
   return [
@@ -28,6 +29,14 @@ export default function Demo() {
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4 text-balance">
             <TextDemo />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2">
+          <AccordionTrigger className="py-6 text-lg [&>svg]:size-5">
+            Image
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4">
+            <ImageDemo />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

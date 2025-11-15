@@ -1,6 +1,11 @@
 import type { TextKind } from "~/components/authoring/Text/Text";
 
-export function buildTextDescription(kind: TextKind, about: string): string {
+export type DescriptionKind = TextKind | "url";
+
+export function buildTextDescription(
+  kind: DescriptionKind,
+  about: string,
+): string {
   const obj = {
     kind: kind,
     about: about,
