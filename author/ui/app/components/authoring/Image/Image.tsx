@@ -93,6 +93,11 @@ export class Image extends AEMMComponent<z.infer<typeof schema>> {
       rounded = false,
     } = this.props;
 
+    const fullSrc =
+      src.startsWith("/") && process.env["BACKEND_URL"]
+        ? `${process.env["BACKEND_URL"]}${src}`
+        : src;
+
     const objectFitClass = objectFit ? OBJECT_FIT_CLASSES[objectFit] : "";
     const roundedClass = rounded ? "rounded-lg" : "";
     const combinedClassName = [objectFitClass, roundedClass, className || ""]
@@ -101,11 +106,12 @@ export class Image extends AEMMComponent<z.infer<typeof schema>> {
 
     return (
       <img
-        src={src}
+        src={fullSrc}
         alt={alt}
         width={width}
         height={height}
         loading={loading}
+        data-aemm-component="Image"
         className={combinedClassName || undefined}
       />
     );

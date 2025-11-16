@@ -12,3 +12,15 @@ export function buildTextDescription(
   };
   return JSON.stringify(obj);
 }
+
+// Prefix each class name with "!" to make them overrides in Tailwind CSS
+export function processUserClassNames(
+  userClassNames: string | undefined,
+): string {
+  return (
+    userClassNames
+      ?.split(" ")
+      .map((className) => `!${className}`)
+      .join(" ") || ""
+  );
+}

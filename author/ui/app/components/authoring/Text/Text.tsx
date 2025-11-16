@@ -23,7 +23,7 @@ const ALLOWED_ATTRIBUTES = {
 const schema = z.object({
   text: z
     .string()
-    .min(1, "Text cannot be empty")
+    .optional()
     .describe(
       buildTextDescription("richText", "The content of the text component."),
     ),
@@ -42,14 +42,17 @@ export class Text extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
   }
+
   render() {
     const { text, mainClassName } = this.props;
-    const sanitizedHtml = sanitize(text, {
+    const sanitizedHtml = sanitize(text ?? "", {
       allowedTags: ALLOWED_TAGS,
       allowedAttributes: ALLOWED_ATTRIBUTES,
     });
+
     return (
-      <div
+      <span
+        data-aemm-component="Text"
         className={`rich-text-content ${mainClassName || ""}`}
         dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       />
