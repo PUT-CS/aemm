@@ -7,6 +7,4 @@ router.get('/scr*queryPath', getNode);
 
 router.put('/scr*queryPath', updateNode);
 
-router.get('/scr/', getNode);
-
 export default router;
