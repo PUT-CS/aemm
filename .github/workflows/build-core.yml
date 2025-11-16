@@ -21,17 +21,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.19
-          cache: "npm"
-          cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Build common package
+        run: npm ci && npm run build
+        working-directory: common
+
+      - name: Install core dependencies
         run: npm ci
+        working-directory: author/core
 
       - name: Format check
         run: npx prettier --check "author/core/**/*.{ts,js,json,md}" "common/**/*.{ts,js,json,md}"
 
       - name: Lint
-        run: npm run lint --workspace=core
+        run: npm run lint
+        working-directory: author/core
 
-      - name: Build
-        run: npm run build --workspace=core
+
+      - name: Build core
+        run: npm run build
+        working-directory: author/core
