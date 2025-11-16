@@ -21,10 +21,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.19
-          cache: "npm"
-          cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Build common package
+        run: npm ci && npm run build
+        working-directory: common
+
+      - name: Install UI dependencies
         run: npm ci
         working-directory: author/ui
 
@@ -41,4 +43,4 @@ jobs:
         working-directory: author/ui
 
       - name: Build Docker image
-        run: docker build -t aemm-author-ui:dev author/ui
+        run: docker build -f author/ui/Dockerfile -t aemm-author-ui:dev .

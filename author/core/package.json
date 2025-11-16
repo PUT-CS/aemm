@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --watch '../../common/dist/**/*.js' --exec 'ts-node' src/server.ts",
     "lint": "eslint 'src/**/*.ts'"
   },
   "keywords": [],
@@ -25,10 +26,12 @@
     "npm": "^10.9.4",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2"
   },
   "dependencies": {
+    "@aemm/common": "file:../../common",
     "cors": "^2.8.5",
     "helmet": "^8.1.0"
   }

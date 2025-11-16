@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Optional version tag to publish (fallback to deno.json version or short SHA)"
+        description: "Optional version tag to publish (fallback to short SHA)"
         required: false
         default: ""
 
@@ -22,26 +22,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          deno-version: v2.x
+          node-version: 22.19
 
-      - name: Verify formatting
-        run: deno fmt --check
-        working-directory: author/src
+      - name: Build common package
+        run: npm ci && npm run build
+        working-directory: common
 
-      - name: Lint
-        run: deno lint
-        working-directory: author/src
+      - name: Install UI dependencies
+        run: npm ci
+        working-directory: author/ui
 
       - name: Type check
-        run: deno check main.ts
-        working-directory: author/src
+        run: npm run typecheck
+        working-directory: author/ui
 
-      - name: Run tests
-        run: deno test -A
-        working-directory: author/src
+      - name: Build UI
+        run: npm run build
+        working-directory: author/ui
 
       - name: Set lowercase repository name and version
         id: vars
@@ -49,15 +49,9 @@ jobs:
         run: |
           set -euo pipefail
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          # Try to read version from Deno config (if present)
-          VERSION_DENO=$(jq -r 'try .version catch empty' author/src/deno.json 2>/dev/null)
-          # Use provided input if any
           VERSION_INPUT="${{ github.event.inputs.version }}"
-          # Fallback to short SHA if no version provided/found
           if [[ -n "${VERSION_INPUT}" ]]; then
             VERSION="${VERSION_INPUT}"
-          elif [[ -n "${VERSION_DENO}" ]]; then
-            VERSION="${VERSION_DENO}"
           else
             VERSION="${GITHUB_SHA::7}"
           fi
@@ -80,10 +74,11 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./author
+          context: .
+          file: author/ui/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ steps.vars.outputs.repo_lower }}:latest
-            ${{ env.REGISTRY }}/${{ steps.vars.outputs.repo_lower }}:${{ steps.vars.outputs.version }}
+            ${{ env.REGISTRY }}/${{ steps.vars.outputs.repo_lower }}/author-ui:latest
+            ${{ env.REGISTRY }}/${{ steps.vars.outputs.repo_lower }}/author-ui:${{ steps.vars.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

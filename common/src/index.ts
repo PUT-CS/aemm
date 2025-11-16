@@ -1,2 +1,2 @@
-export * from './aem/index';
-export * from './scr/index';
+export * from "./aemm/index";
+export * from "./scr/index";
