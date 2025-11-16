@@ -34,7 +34,6 @@ jobs:
         run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
         working-directory: author/ui
 
-
       - name: Type check
         run: npm run typecheck
         working-directory: author/ui

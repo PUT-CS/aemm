@@ -14,4 +14,3 @@
     "start:ui": "cd author/ui && npm start"
   }
 }
-

@@ -18,6 +18,7 @@ cd ../author/ui && npm install
 ```
 
 Or run the setup script:
+
 ```bash
 ./setup.sh
 ```
@@ -54,24 +55,28 @@ The `common` package is installed as a local dependency using npm's `file:` prot
 This creates a symlink: `node_modules/@aemm/common` → `../../common`
 
 Import like any other package:
+
 ```typescript
-import { ScrNode, ScrType } from '@aemm/common/scr';
+import { ScrNode, ScrType } from "@aemm/common/scr";
 ```
 
 ## Available Scripts
 
 ### Build Commands
+
 - `npm run build` - Build all projects (common → core → ui)
 - `npm run build:common` - Build shared types
 - `npm run build:core` - Build backend
 - `npm run build:ui` - Build frontend
 
 ### Development Commands
+
 - `npm run watch:common` - Watch common for changes
 - `npm run dev:core` - Run backend dev server
 - `npm run dev:ui` - Run frontend dev server
 
 ### Production Commands
+
 - `npm run start:core` - Start backend server
 - `npm run start:ui` - Start frontend server
 

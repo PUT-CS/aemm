@@ -35,7 +35,6 @@ jobs:
         run: npm ci
         working-directory: author/ui
 
-
       - name: Type check
         run: npm run typecheck
         working-directory: author/ui
