@@ -5,6 +5,7 @@
     "**/.client/**/*",
     ".react-router/types/**/*"
   ],
+  "references": [{ "path": "../../common" }],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["node", "vite/client"],
@@ -17,7 +18,6 @@
     "paths": {
       "~/*": ["./app/*"]
     },
-    "references": [{ "path": "../../common" }],
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
