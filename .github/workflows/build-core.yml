@@ -30,9 +30,7 @@ jobs:
         run: npx prettier --check "author/core/**/*.{ts,js,json,md}" "common/**/*.{ts,js,json,md}"
 
       - name: Lint
-        run: npm run lint
-        working-directory: author/core
+        run: npm run lint --workspace=core
 
       - name: Build
-        run: npm run build
-        working-directory: author/core
+        run: npm run build --workspace=core
