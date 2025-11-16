@@ -6,7 +6,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "tsc -b && react-router typegen"
+    "typecheck": "react-router typegen && tsc -b"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
