@@ -8,7 +8,7 @@ function isScrNode(obj: any): obj is ScrNode {
   if (!obj || typeof obj !== 'object') return false;
 
   // Check required fields
-  if (!obj.type || !obj.name) return false;
+  if (!obj.type || !obj.name || typeof obj.name !== 'string') return false;
   if (!Object.values(ScrType).includes(obj.type)) return false;
 
   // If it's a folder, validate children
@@ -126,7 +126,7 @@ export const updateNode = (req: Request, res: Response) => {
     const fullPath = path.resolve(contentRoot + cleanedPath);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
-      res.status(403).send('Access denied: path outside content root');
+      res.status(403).end();
       return;
     }
 
@@ -168,7 +168,11 @@ export const updateNode = (req: Request, res: Response) => {
 
         // Validate that JSON is a valid ScrNode
         if (!isScrNode(jsonData)) {
-          res.status(400).send('Invalid ScrNode structure');
+          res
+            .status(400)
+            .send(
+              'Invalid ScrNode structure: must include type and name fields, with valid ScrType enum value',
+            );
           return;
         }
 
@@ -189,11 +193,12 @@ export const updateNode = (req: Request, res: Response) => {
     }
 
     // Handle binary/text content
-    const content = Buffer.isBuffer(req.body)
-      ? req.body
-      : Buffer.from(req.body);
-    fs.writeFileSync(fullPath, content);
-    res.status(exists ? 200 : 201).send(content);
+    if (!Buffer.isBuffer(req.body)) {
+      res.status(400).send('Invalid request body format');
+      return;
+    }
+    fs.writeFileSync(fullPath, req.body);
+    res.status(exists ? 200 : 201).send(req.body);
     return;
   } catch (err: unknown) {
     console.error(err);
