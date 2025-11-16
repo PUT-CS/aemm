@@ -4,17 +4,17 @@ import * as fs from 'node:fs';
 import { ScrNode, ScrType } from '@aemm/common';
 import path from 'path';
 
-function isScrNode(obj: any): obj is ScrNode {
+function isScrNode(obj: unknown): obj is ScrNode {
   if (!obj || typeof obj !== 'object') return false;
 
-  // Check required fields
-  if (!obj.type || !obj.name || typeof obj.name !== 'string') return false;
-  if (!Object.values(ScrType).includes(obj.type)) return false;
+  const node = obj as Record<string, unknown>;
 
-  // If it's a folder, validate children
-  if (obj.type === ScrType.FOLDER && obj.children) {
-    if (!Array.isArray(obj.children)) return false;
-    return obj.children.every(isScrNode);
+  if (!node.type || !node.name || typeof node.name !== 'string') return false;
+  if (!Object.values(ScrType).includes(node.type as ScrType)) return false;
+
+  if (node.type === ScrType.FOLDER && node.children) {
+    if (!Array.isArray(node.children)) return false;
+    return node.children.every(isScrNode);
   }
 
   return true;

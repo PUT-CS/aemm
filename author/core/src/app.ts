@@ -11,8 +11,8 @@ app.use(helmet());
 app.use(express.json());
 app.use(
   express.raw({
-    type: (req) => !req.headers['content-type']?.includes('application/json'), // Accept all content types
-    limit: '50mb', // Adjust limit based on your needs
+    type: (req) => !req.headers['content-type']?.includes('application/json'),
+    limit: '50mb',
   }),
 );
 
