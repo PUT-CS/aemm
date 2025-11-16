@@ -1,9 +1,40 @@
 {
   "name": "@aemm/common",
   "version": "1.0.0",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./aemm": {
+      "types": "./dist/aemm/index.d.ts",
+      "default": "./dist/aemm/index.js"
+    },
+    "./scr": {
+      "types": "./dist/scr/index.d.ts",
+      "default": "./dist/scr/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "aem": [
+        "dist/aem/index.d.ts"
+      ],
+      "scr": [
+        "dist/scr/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b .",
     "watch": "tsc -b -w ."
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }
