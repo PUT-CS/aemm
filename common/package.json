@@ -19,11 +19,17 @@
   },
   "typesVersions": {
     "*": {
-      "aem": ["dist/aem/index.d.ts"],
-      "scr": ["dist/scr/index.d.ts"]
+      "aem": [
+        "dist/aem/index.d.ts"
+      ],
+      "scr": [
+        "dist/scr/index.d.ts"
+      ]
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b .",
     "watch": "tsc -b -w ."
