@@ -8,9 +8,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./aem": {
-      "types": "./dist/aem/index.d.ts",
-      "default": "./dist/aem/index.js"
+    "./aemm": {
+      "types": "./dist/aemm/index.d.ts",
+      "default": "./dist/aemm/index.js"
     },
     "./scr": {
       "types": "./dist/scr/index.d.ts",
