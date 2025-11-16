@@ -29,7 +29,7 @@
     "typescript-eslint": "^8.46.2"
   },
   "dependencies": {
-    "common": "workspace:*",
+    "common": "*",
     "cors": "^2.8.5",
     "helmet": "^8.1.0"
   }
