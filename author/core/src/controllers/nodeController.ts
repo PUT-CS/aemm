@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import config from '../config/config';
 import * as fs from 'node:fs';
-import { ScrNode, ScrType } from '@aemm/common';
+import { ScrNode, ScrType } from 'common/scr';
 import path from 'path';
 
 function isScrNode(obj: unknown): obj is ScrNode {

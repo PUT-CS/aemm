@@ -1,6 +1,6 @@
-import type { ColumnDef } from "@tanstack/react-table";
-import { DropdownActions } from "~/routes/admin/UsersTab/DropdownActions";
-import type { User } from "@aemm/common";
+import type {ColumnDef} from "@tanstack/react-table";
+import {DropdownActions} from "~/routes/admin/UsersTab/DropdownActions";
+import type {User} from "common/aem";
 
 export async function fetchUsers(): Promise<User[]> {
   // Placeholder function to fetch users
