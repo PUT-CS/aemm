@@ -17,6 +17,7 @@
     "paths": {
       "~/*": ["./app/*"]
     },
+    "references": [{ "path": "../../common" }],
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
