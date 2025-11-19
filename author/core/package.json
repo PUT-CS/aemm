@@ -30,9 +30,10 @@
   },
   "dependencies": {
     "@aemm/common": "file:../../common",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "cors": "^2.8.5",
-    "helmet": "^8.1.0"
+    "helmet": "^8.1.0",
+    "sqlite3": "^5.1.7"
   }
 }
