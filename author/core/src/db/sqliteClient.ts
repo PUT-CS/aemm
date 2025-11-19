@@ -44,6 +44,19 @@ export async function initDatabase(): Promise<sqlite3.Database> {
             { skipSerialize: true },
           ),
         )
+        .then(() =>
+          run(
+            `CREATE TABLE IF NOT EXISTS test_items (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              value TEXT,
+              created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );`,
+            [],
+            { skipSerialize: true },
+          ),
+        )
         .then(resolve)
         .catch(reject);
     });
@@ -129,6 +142,60 @@ export function all<T = unknown>(sql: string, params: unknown[] = []): Promise<T
         return;
       }
       resolve(rows as T[]);
+    });
+  });
+}
+
+interface RunInfo { lastID: number; changes: number }
+export function runWithInfo(
+  sql: string,
+  params: unknown[] = [],
+  options: RunOptions = {},
+): Promise<RunInfo> {
+  const database = getDatabase();
+  const executor = () =>
+    new Promise<RunInfo>((resolve, reject) => {
+      database.run(sql, params, function (error) {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve({ lastID: this.lastID, changes: this.changes });
+      });
+    });
+
+  return options.skipSerialize
+    ? executor()
+    : new Promise<RunInfo>((resolve, reject) => {
+        database.serialize(() => {
+          executor().then(resolve).catch(reject);
+        });
+      });
+}
+
+let testItemsEnsured = false;
+export async function ensureTestItemsTable(): Promise<void> {
+  if (testItemsEnsured) return;
+  const database = getDatabase();
+  await new Promise<void>((resolve, reject) => {
+    database.serialize(() => {
+      database.run(
+        `CREATE TABLE IF NOT EXISTS test_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          value TEXT,
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );`,
+        (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          testItemsEnsured = true;
+          resolve();
+        },
+      );
     });
   });
 }
