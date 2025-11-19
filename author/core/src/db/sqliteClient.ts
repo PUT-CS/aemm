@@ -31,8 +31,12 @@ export async function initDatabase(): Promise<sqlite3.Database> {
   await new Promise<void>((resolve, reject) => {
     database.serialize(() => {
       Promise.resolve()
-        .then(() => run('PRAGMA journal_mode = WAL;', [], { skipSerialize: true }))
-        .then(() => run('PRAGMA foreign_keys = ON;', [], { skipSerialize: true }))
+        .then(() =>
+          run('PRAGMA journal_mode = WAL;', [], { skipSerialize: true }),
+        )
+        .then(() =>
+          run('PRAGMA foreign_keys = ON;', [], { skipSerialize: true }),
+        )
         .then(() =>
           run(
             `CREATE TABLE IF NOT EXISTS migrations (
@@ -120,7 +124,10 @@ export function run(
       });
 }
 
-export function get<T = unknown>(sql: string, params: unknown[] = []): Promise<T | undefined> {
+export function get<T = unknown>(
+  sql: string,
+  params: unknown[] = [],
+): Promise<T | undefined> {
   const database = getDatabase();
   return new Promise((resolve, reject) => {
     database.get(sql, params, (error, row) => {
@@ -133,7 +140,10 @@ export function get<T = unknown>(sql: string, params: unknown[] = []): Promise<T
   });
 }
 
-export function all<T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> {
+export function all<T = unknown>(
+  sql: string,
+  params: unknown[] = [],
+): Promise<T[]> {
   const database = getDatabase();
   return new Promise((resolve, reject) => {
     database.all(sql, params, (error, rows) => {
@@ -146,7 +156,10 @@ export function all<T = unknown>(sql: string, params: unknown[] = []): Promise<T
   });
 }
 
-interface RunInfo { lastID: number; changes: number }
+interface RunInfo {
+  lastID: number;
+  changes: number;
+}
 export function runWithInfo(
   sql: string,
   params: unknown[] = [],
