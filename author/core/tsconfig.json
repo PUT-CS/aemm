@@ -11,12 +11,8 @@
     "forceConsistentCasingInFileNames": true,
     "composite": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "../../common"
