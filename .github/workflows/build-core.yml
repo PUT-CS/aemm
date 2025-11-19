@@ -37,6 +37,9 @@ jobs:
         run: npm run lint
         working-directory: author/core
 
-      - name: Build core
+      - name: Build
         run: npm run build
         working-directory: author/core
+
+      - name: Build Docker image
+        run: docker build -f author/core/Dockerfile -t aemm-author-core:dev .

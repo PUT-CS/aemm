@@ -9,7 +9,7 @@ interface Config {
 }
 
 const config: Config = {
-  port: Number(process.env.PORT) || 4500,
+  port: Number(process.env.PORT) || 4501,
   nodeEnv: process.env.NODE_ENV || 'development',
   contentRoot: process.env.CONTENT_ROOT || './content',
 };

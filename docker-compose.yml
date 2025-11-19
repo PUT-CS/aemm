@@ -1,9 +1,18 @@
 services:
-  author:
+  author-core:
     build:
-      context: ./author
-      dockerfile: Dockerfile
-    image: aemm-author:dev
-    container_name: aemm-author
+      context: .
+      dockerfile: author/core/Dockerfile
+    image: aemm-author-core:dev
+    container_name: aemm-author-core
     ports:
-      - "4502:4502"
+      - "4501:4501"
+
+  author-ui:
+    build:
+      context: .
+      dockerfile: author/ui/Dockerfile
+    image: aemm-author-ui:dev
+    container_name: aemm-author-ui
+    ports:
+      - "4502:3000"
