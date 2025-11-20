@@ -1,8 +1,8 @@
-import { useNavigate, useParams } from "react-router";
-import { useEffect, useState } from "react";
-import Column from "~/routes/sites/Column";
-import { useQuery } from "@tanstack/react-query";
-import fetchPathContent from "~/routes/sites/fetchPathContent";
+import {useNavigate, useParams} from "react-router";
+import {useEffect, useState} from "react";
+import Column from "~/routes/sites/SitesBrowser/Column";
+import {useQuery} from "@tanstack/react-query";
+import fetchPathContent from "~/routes/sites/SitesBrowser/fetchPathContent";
 import SitesToolbar from "~/routes/sites/SitesToolbar";
 
 export default function SiteBrowser() {

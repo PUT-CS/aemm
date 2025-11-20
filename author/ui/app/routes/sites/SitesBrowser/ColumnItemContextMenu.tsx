@@ -1,7 +1,7 @@
-import { FaCopy, FaEdit, FaEye, FaTrash } from "react-icons/fa";
-import ContextMenuOption from "~/routes/sites/ContextMenuOption";
-import { ContextMenuSeparator } from "~/components/ui/context-menu";
-import { FaPaste, FaPlus } from "react-icons/fa6";
+import {FaCopy, FaEdit, FaEye, FaTrash} from "react-icons/fa";
+import ContextMenuOption from "~/routes/sites/SitesBrowser/ContextMenuOption";
+import {ContextMenuSeparator} from "~/components/ui/context-menu";
+import {FaPaste, FaPlus} from "react-icons/fa6";
 
 export default function ColumnItemContextMenu() {
   return (

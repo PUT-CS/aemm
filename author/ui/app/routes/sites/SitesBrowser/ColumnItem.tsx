@@ -1,13 +1,9 @@
-import { FaChevronRight, FaFileLines } from "react-icons/fa6";
-import { useQuery } from "@tanstack/react-query";
-import fetchPathContent from "~/routes/sites/fetchPathContent";
+import {FaChevronRight, FaFileLines} from "react-icons/fa6";
+import {useQuery} from "@tanstack/react-query";
+import fetchPathContent from "~/routes/sites/SitesBrowser/fetchPathContent";
 import React from "react";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "~/components/ui/context-menu";
-import ColumnItemContextMenu from "~/routes/sites/ColumnItemContextMenu";
+import {ContextMenu, ContextMenuContent, ContextMenuTrigger,} from "~/components/ui/context-menu";
+import ColumnItemContextMenu from "~/routes/sites//SitesBrowser/ColumnItemContextMenu";
 
 export default function ColumnItem(props: {
   item: any;

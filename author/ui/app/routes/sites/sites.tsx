@@ -1,6 +1,5 @@
-import type { Route } from "../+types/login";
-import SiteBrowser from "~/routes/sites/SiteBrowser";
-import { useNavigate } from "react-router";
+import type {Route} from "../+types/login";
+import SiteBrowser from "~/routes/sites/SitesBrowser/SiteBrowser";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Sites | AEMM" }];

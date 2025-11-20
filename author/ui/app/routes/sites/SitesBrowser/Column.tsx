@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import ColumnItem from "~/routes/sites/ColumnItem";
+import {useQuery} from "@tanstack/react-query";
 import React from "react";
-import fetchPathContent from "~/routes/sites/fetchPathContent";
+import fetchPathContent from "~/routes/sites/SitesBrowser/fetchPathContent";
+import ColumnItem from "~/routes/sites/SitesBrowser/ColumnItem";
 
 interface ColumnProps {
   path: string;
