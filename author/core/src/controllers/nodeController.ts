@@ -155,7 +155,7 @@ export const updateNode = (req: Request, res: Response) => {
     const fullPath = path.resolve(contentRoot + cleanedPath);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
-      logger.info('updateNode forbidden', { path: req.path, status: 403 });
+      logger.warn('updateNode forbidden', { path: req.path, status: 403 });
       res.status(403).end();
       return;
     }
@@ -207,7 +207,7 @@ export const updateNode = (req: Request, res: Response) => {
 
         // Validate that JSON is a valid ScrNode
         if (!isScrNode(jsonData)) {
-          logger.info('updateNode invalid ScrNode', {
+          logger.warn('updateNode invalid ScrNode', {
             path: req.path,
             status: 400,
           });
