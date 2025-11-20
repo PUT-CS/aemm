@@ -48,7 +48,7 @@ export async function getDbHealth(
     const error: AppError =
       err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
-    logger.error('DB health error', { message: (err as Error).message });
+    logger.error('DB health error', { message: error.message });
     next(error);
   }
 }

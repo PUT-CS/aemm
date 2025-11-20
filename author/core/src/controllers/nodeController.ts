@@ -77,6 +77,7 @@ export const getNode = (req: Request, res: Response) => {
     if (!fullPathExists) {
       logger.warn('Path not found', { path: req.path, status: 404 });
       res.status(404).end();
+      return;
     }
 
     const contentJsonFullPath = fullPath + '/.content.json';
@@ -86,7 +87,6 @@ export const getNode = (req: Request, res: Response) => {
       try {
         const data = readFileContent(contentJsonFullPath);
         const contentData: ScrNode = JSON.parse(data);
-        logger.debug('Folder metadata served', { path: req.path });
         logger.info('getNode success (folder-metadata)', {
           path: req.path,
           status: 200,
@@ -116,7 +116,6 @@ export const getNode = (req: Request, res: Response) => {
           name: path.basename(fullPath),
           children: children,
         };
-        logger.debug('Directory listing served', { path: req.path });
         logger.info('getNode success (directory)', {
           path: req.path,
           status: 200,
@@ -127,7 +126,6 @@ export const getNode = (req: Request, res: Response) => {
       } else if (stats.isFile()) {
         // don't parse to JSON, since it could be any type of file
         const content = readFileContent(fullPath);
-        logger.debug('File served', { path: req.path });
         logger.info('getNode success (file)', {
           path: req.path,
           status: 200,
