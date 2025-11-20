@@ -250,7 +250,7 @@ export const updateNode = (req: Request, res: Response) => {
         res.status(statusCode).json(jsonData);
         return;
       } catch (err: unknown) {
-        logger.warn('Invalid JSON body',err, { path: req.path, status: 400 });
+        logger.warn('Invalid JSON body', err, { path: req.path, status: 400 });
         res.status(400).send('Invalid JSON');
         return;
       }
