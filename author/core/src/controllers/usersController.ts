@@ -171,7 +171,7 @@ export async function updateUser(
     await runWithInfo(sql, params);
     logger.info('User updated successfully', {
       name,
-      fieldsUpdated: fieldsToUpdate
+      fieldsUpdated: fieldsToUpdate,
     });
 
     const user = await get<UserRow>(
@@ -215,7 +215,10 @@ export async function deleteUser(
       res.status(404).json({ message: 'Not found' });
       return;
     }
-    logger.info('User deleted successfully', { name, deletedCount: info.changes });
+    logger.info('User deleted successfully', {
+      name,
+      deletedCount: info.changes,
+    });
     res.status(204).end();
   } catch (err) {
     const error: AppError =
