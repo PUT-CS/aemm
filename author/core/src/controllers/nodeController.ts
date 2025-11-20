@@ -221,7 +221,10 @@ export const updateNode = (req: Request, res: Response) => {
 
         // Validate that JSON is a valid ScrNode
         if (!isScrNode(jsonData)) {
-          logger.info('updateNode invalid ScrNode', { path: req.path, status: 400 });
+          logger.info('updateNode invalid ScrNode', {
+            path: req.path,
+            status: 400,
+          });
           res
             .status(400)
             .send(
@@ -247,7 +250,7 @@ export const updateNode = (req: Request, res: Response) => {
         res.status(statusCode).json(jsonData);
         return;
       } catch (err: unknown) {
-        logger.warn('Invalid JSON body', { path: req.path, status: 400 });
+        logger.warn('Invalid JSON body',err, { path: req.path, status: 400 });
         res.status(400).send('Invalid JSON');
         return;
       }
@@ -255,7 +258,10 @@ export const updateNode = (req: Request, res: Response) => {
 
     // Handle binary/text content
     if (!Buffer.isBuffer(req.body)) {
-      logger.warn('Invalid body (not buffer) for non-JSON content', { path: req.path, status: 400 });
+      logger.warn('Invalid body (not buffer) for non-JSON content', {
+        path: req.path,
+        status: 400,
+      });
       res.status(400).send('Invalid request body format');
       return;
     }
