@@ -1,6 +1,6 @@
 {
   "scr:type": "aemm:page",
-  "name": "Home",
+  "title": "Home",
   "languageCode": "en",
   "page": {}
 }

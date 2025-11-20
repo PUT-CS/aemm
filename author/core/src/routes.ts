@@ -1,7 +1,9 @@
-import { Router } from 'express';
-import { getNode, updateNode } from './controllers/nodeController';
+import {Router} from 'express';
+import {getNode, getTree, updateNode} from './controllers/nodeController';
 
 const router = Router();
+
+router.get('/scrtree', getTree);
 
 router.get('/scr*queryPath', getNode);
 

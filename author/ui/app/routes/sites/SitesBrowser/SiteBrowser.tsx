@@ -2,8 +2,25 @@ import {useNavigate, useParams} from "react-router";
 import {useEffect, useState} from "react";
 import Column from "~/routes/sites/SitesBrowser/Column";
 import {useQuery} from "@tanstack/react-query";
-import fetchPathContent from "~/routes/sites/SitesBrowser/fetchPathContent";
+import fetchTree from "~/routes/sites/SitesBrowser/fetchTree";
 import SitesToolbar from "~/routes/sites/SitesToolbar";
+
+// Helper to find a node at a given path in the tree
+function findNodeAtPath(tree: any, path: string): any {
+  if (!tree) return null;
+  if (path === "/") return tree;
+
+  const segments = path.split("/").filter((s) => s !== "");
+  let current = tree;
+
+  for (const segment of segments) {
+    if (!current.children) return null;
+    current = current.children.find((child: any) => child.name === segment);
+    if (!current) return null;
+  }
+
+  return current;
+}
 
 export default function SiteBrowser() {
   const navigate = useNavigate();
@@ -18,11 +35,13 @@ export default function SiteBrowser() {
     setSelectedPath(urlPath ? `/${urlPath}` : "/");
   }, [urlPath]);
 
-  const { data: selectedPathData } = useQuery({
-    queryKey: ["content", selectedPath],
-    queryFn: () => fetchPathContent(selectedPath),
-    enabled: !!selectedPath,
+  // Fetch the entire tree once
+  const { data: tree } = useQuery({
+    queryKey: ["tree"],
+    queryFn: fetchTree,
   });
+
+  const selectedPathData = tree ? findNodeAtPath(tree, selectedPath) : null;
 
   const buildColumnPaths = (path: string): string[] => {
     if (!path || path === "/") {
@@ -58,6 +77,7 @@ export default function SiteBrowser() {
             <Column
               key={columnPath}
               path={columnPath}
+              tree={tree}
               selectedChildPath={nextPath}
               onItemClick={handleItemClick}
             />
