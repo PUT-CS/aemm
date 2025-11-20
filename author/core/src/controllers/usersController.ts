@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { all, get, runWithInfo, ensureUsersTable } from '../db/sqliteClient';
 import { AppError } from '../middlewares/errorHandler';
+import { logger } from '../logger';
 
 interface UserRow {
   id: number;
@@ -82,7 +83,7 @@ export async function createUser(
       lastId = info.lastID;
     } catch (e) {
       if (e instanceof Error && /SQLITE_CONSTRAINT/.test(e.message)) {
-        console.warn(`Duplicate user creation attempted for name=${name}`);
+        logger.warn('Duplicate user creation attempted', { name });
         res.status(409).json({ message: 'User with this name already exists' });
         return;
       }
