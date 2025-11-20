@@ -1,14 +1,15 @@
-import type { IconType } from "react-icons";
-
-interface SitesToolbarProps {
-  selectedPath: string;
-  selectedPathData?: any;
-}
+import type {IconType} from "react-icons";
+import type {ScrNode} from "@aemm/common";
 
 interface ToolbarIconProps {
   icon: IconType;
   label: string;
   onClick: () => void;
+}
+
+interface SitesToolbarProps {
+  selectedPath?: string;
+  selectedPathData?: ScrNode;
 }
 
 function ToolbarIcon({ icon: Icon, label, onClick }: ToolbarIconProps) {
@@ -23,7 +24,7 @@ function ToolbarIcon({ icon: Icon, label, onClick }: ToolbarIconProps) {
   );
 }
 
-export default function SitesToolbar({ selectedPathData }: SitesToolbarProps) {
+export default function SitesToolbar({ selectedPathData, selectedPath }: SitesToolbarProps) {
   return (
     <div className="flex border-b h-12 items-center px-4">
       <div className="flex-1"></div>

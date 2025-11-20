@@ -1,5 +1,5 @@
 {
-  "scr:type": "aemm:site",
+  "type": "aemm:site",
   "title": "AEMM",
   "languageCode": "pl",
   "page": {}

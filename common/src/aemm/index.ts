@@ -1,1 +1,2 @@
-export { User } from "./aemm.types";
+export { User } from "./aemm.types.js";
+

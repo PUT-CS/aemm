@@ -4,19 +4,20 @@ import Column from "~/routes/sites/SitesBrowser/Column";
 import {useQuery} from "@tanstack/react-query";
 import fetchTree from "~/routes/sites/SitesBrowser/fetchTree";
 import SitesToolbar from "~/routes/sites/SitesToolbar";
+import type {ScrNode} from "@aemm/common";
 
 // Helper to find a node at a given path in the tree
-function findNodeAtPath(tree: any, path: string): any {
-  if (!tree) return null;
+function findNodeAtPath(tree: ScrNode | undefined, path: string): ScrNode | undefined {
+  if (!tree) return undefined;
   if (path === "/") return tree;
 
   const segments = path.split("/").filter((s) => s !== "");
-  let current = tree;
+  let current: ScrNode | undefined = tree;
 
   for (const segment of segments) {
-    if (!current.children) return null;
-    current = current.children.find((child: any) => child.name === segment);
-    if (!current) return null;
+    if (!current?.children) return undefined;
+    current = current.children.find((child) => child.name === segment);
+    if (!current) return undefined;
   }
 
   return current;
@@ -41,7 +42,7 @@ export default function SiteBrowser() {
     queryFn: fetchTree,
   });
 
-  const selectedPathData = tree ? findNodeAtPath(tree, selectedPath) : null;
+  const selectedPathData = findNodeAtPath(tree, selectedPath);
 
   const buildColumnPaths = (path: string): string[] => {
     if (!path || path === "/") {
@@ -55,7 +56,7 @@ export default function SiteBrowser() {
   };
 
   const allPaths = buildColumnPaths(selectedPath);
-  const hasChildren = selectedPathData?.children?.length > 0;
+  const hasChildren = selectedPathData?.children && selectedPathData.children.length > 0;
   const columnPaths = hasChildren ? allPaths : allPaths.slice(0, -1);
 
   const handleItemClick = (itemPath: string) => {

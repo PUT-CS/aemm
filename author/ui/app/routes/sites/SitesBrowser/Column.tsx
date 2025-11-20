@@ -1,25 +1,26 @@
 import React from "react";
 import ColumnItem from "~/routes/sites/SitesBrowser/ColumnItem";
+import type {ScrNode} from "@aemm/common";
 
 interface ColumnProps {
   path: string;
-  tree: any;
+  tree: ScrNode | undefined;
   selectedChildPath?: string;
   onItemClick: (itemPath: string) => void;
 }
 
 // Helper to find a node at a given path in the tree
-function findNodeAtPath(tree: any, path: string): any {
-  if (!tree) return null;
+function findNodeAtPath(tree: ScrNode | undefined, path: string): ScrNode | undefined {
+  if (!tree) return undefined;
   if (path === "/") return tree;
 
   const segments = path.split("/").filter((s) => s !== "");
-  let current = tree;
+  let current: ScrNode | undefined = tree;
 
   for (const segment of segments) {
-    if (!current.children) return null;
-    current = current.children.find((child: any) => child.name === segment);
-    if (!current) return null;
+    if (!current?.children) return undefined;
+    current = current.children.find((child) => child.name === segment);
+    if (!current) return undefined;
   }
 
   return current;
@@ -51,8 +52,7 @@ export default function Column({
       )}
       {data && data.children && (
         <div>
-          {/* eslint-disable-next-line */}
-          {data.children.map((item: any) => {
+          {data.children.map((item) => {
             // Construct the child path from parent path and item name
             const childPath = path === "/" ? `/${item.name}` : `${path}/${item.name}`;
             return (

@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
 import config from '../config/config';
 import * as fs from 'node:fs';
-import {ScrNode, ScrType} from '@aemm/common/scr';
+import {NodeType, ScrNode} from '@aemm/common/scr';
 import path from 'path';
 
 function isScrNode(obj: unknown): obj is ScrNode {
@@ -10,9 +10,9 @@ function isScrNode(obj: unknown): obj is ScrNode {
   const node = obj as Record<string, unknown>;
 
   if (!node.type || !node.name || typeof node.name !== 'string') return false;
-  if (!Object.values(ScrType).includes(node.type as ScrType)) return false;
+  if (!Object.values(NodeType).includes(node.type as NodeType)) return false;
 
-  if (node.type === ScrType.FOLDER && node.children) {
+  if (node.type === NodeType.FOLDER && node.children) {
     if (!Array.isArray(node.children)) return false;
     return node.children.every(isScrNode);
   }
@@ -36,7 +36,7 @@ function buildTreeNode(fullPath: string): ScrNode {
   // Handle files
   if (stats.isFile()) {
     return {
-      type: ScrType.FILE,
+      type: NodeType.FILE,
       name: nodeName,
     };
   }
@@ -75,7 +75,7 @@ function buildTreeNode(fullPath: string): ScrNode {
 
     // Return basic folder structure (including empty folders)
     return {
-      type: ScrType.FOLDER,
+      type: NodeType.FOLDER,
       name: nodeName,
       children: children.length > 0 ? children : undefined,
     };
@@ -83,9 +83,9 @@ function buildTreeNode(fullPath: string): ScrNode {
 
   // Fallback
   return {
-    type: ScrType.FILE,
+    type: NodeType.FILE,
     name: nodeName,
-  };
+  }
 }
 
 // Get entire content tree
@@ -101,10 +101,10 @@ export const getTree = (req: Request, res: Response) => {
       let folders = 0;
       let files = 0;
 
-      if (node.type === ScrType.FOLDER) {
+      if (node.type === NodeType.FOLDER) {
         folders = 1;
         if (node.children) {
-          node.children.forEach(child => {
+          node.children.forEach((child: ScrNode) => {
             const counts = countNodes(child);
             folders += counts.folders;
             files += counts.files;
@@ -134,7 +134,7 @@ function getChildrenNodes(path: string): ScrNode[] {
     .map(
       (entry) =>
         ({
-          type: entry.isDirectory() ? ScrType.FOLDER : ScrType.FILE,
+          type: entry.isDirectory() ? NodeType.FOLDER : NodeType.FILE,
           name: entry.name,
         }) as ScrNode,
     );
@@ -227,7 +227,7 @@ export const getNode = (req: Request, res: Response) => {
         console.log(`  [getNode] ✓ Returning simple folder with ${children.length} children`);
         // .content.json does not exist, return simple folder structure
         const folderNode: ScrNode = {
-          type: ScrType.FOLDER,
+          type: NodeType.FOLDER,
           name: path.basename(fullPath),
           children: children,
         };

@@ -1,4 +1,4 @@
 {
-  "scr:type": "aemm:site",
-  "title": "GNU.org"
+  "type": "aemm:page",
+  "title": "GNU"
 }
