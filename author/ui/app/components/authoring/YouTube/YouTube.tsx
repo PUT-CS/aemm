@@ -1,22 +1,21 @@
 import * as z from "zod";
 import React from "react";
 import AEMMComponent from "~/components/authoring/AEMMComponent";
-import {buildTextDescription} from "~/components/authoring/utils";
+import { buildTextDescription } from "~/components/authoring/utils";
 
 const schema = z.object({
   videoId: z
     .string()
     .min(1, "Video ID is required")
     .describe(
-      buildTextDescription(
-        "plainText",
-        "YouTube video ID (e.g., fiKG2Yb9goc)",
-      ),
+      buildTextDescription("plainText", "YouTube video ID (e.g., fiKG2Yb9goc)"),
     ),
   aspectRatio: z
     .enum(["16:9", "4:3", "1:1", "21:9", "none"])
     .optional()
-    .describe("Aspect ratio for responsive embeds. Use 'none' for fixed dimensions. Default: 16:9"),
+    .describe(
+      "Aspect ratio for responsive embeds. Use 'none' for fixed dimensions. Default: 16:9",
+    ),
   width: z
     .string()
     .optional()
@@ -90,7 +89,9 @@ export class YouTube extends AEMMComponent<z.infer<typeof schema>> {
 
     const embedSrc = `https://www.youtube.com/embed/${videoId}`;
     const useAspectRatio = aspectRatio && aspectRatio !== "none";
-    const aspectRatioClass = useAspectRatio ? ASPECT_RATIO_CLASSES[aspectRatio] : "";
+    const aspectRatioClass = useAspectRatio
+      ? ASPECT_RATIO_CLASSES[aspectRatio]
+      : "";
 
     const containerClassName = [
       "youtube-container",
@@ -127,4 +128,3 @@ export class YouTube extends AEMMComponent<z.infer<typeof schema>> {
 }
 
 export default YouTube;
-

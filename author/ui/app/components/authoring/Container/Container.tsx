@@ -6,40 +6,28 @@ const schema = z.object({
   direction: z
     .enum(["horizontal", "vertical"])
     .default("vertical")
-    .describe(
-      "Stacking direction: horizontal (row) or vertical (column)."
-    ),
+    .describe("Stacking direction: horizontal (row) or vertical (column)."),
   gap: z
     .number()
     .min(0)
     .optional()
-    .describe(
-      "Gap between child elements in pixels (default: 16)."
-    ),
+    .describe("Gap between child elements in pixels (default: 16)."),
   align: z
     .enum(["start", "center", "end", "stretch"])
     .optional()
-    .describe(
-      "Alignment of children along the cross axis."
-    ),
+    .describe("Alignment of children along the cross axis."),
   justify: z
     .enum(["start", "center", "end", "between", "around", "evenly"])
     .optional()
-    .describe(
-      "Justification of children along the main axis.",
-    ),
+    .describe("Justification of children along the main axis."),
   wrap: z
     .boolean()
     .optional()
-    .describe(
-      "Whether children should wrap to the next line.",
-    ),
+    .describe("Whether children should wrap to the next line."),
   className: z
     .string()
     .optional()
-    .describe(
-      "Additional Tailwind class names for the container.",
-    ),
+    .describe("Additional Tailwind class names for the container."),
   children: z.array(1 as any).optional(),
 });
 
@@ -81,8 +69,7 @@ export class Container extends AEMMComponent<z.infer<typeof schema>> {
       children,
     } = this.props;
 
-    const directionClass =
-      direction === "horizontal" ? "flex-row" : "flex-col";
+    const directionClass = direction === "horizontal" ? "flex-row" : "flex-col";
     const alignClass = align ? ALIGN_CLASSES[align] : "";
     const justifyClass = justify ? JUSTIFY_CLASSES[justify] : "";
     const wrapClass = wrap ? "flex-wrap" : "";
@@ -113,4 +100,3 @@ export class Container extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
-

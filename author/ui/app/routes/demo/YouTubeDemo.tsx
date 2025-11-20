@@ -1,14 +1,11 @@
-import {YouTube} from "~/components/authoring/YouTube/YouTube";
-import {DemoContainer} from "~/routes/demo/DemoContainer";
+import { YouTube } from "~/components/authoring/YouTube/YouTube";
+import { DemoContainer } from "~/routes/demo/DemoContainer";
 
 export default function YouTubeDemo() {
   return (
     <>
       <DemoContainer title="Default - Responsive 16:9 (Full Width)">
-        <YouTube
-          videoId="fiKG2Yb9goc"
-          title="Default responsive video"
-        />
+        <YouTube videoId="fiKG2Yb9goc" title="Default responsive video" />
       </DemoContainer>
 
       <DemoContainer title="4:3 Aspect Ratio - Classic TV Format">
@@ -30,11 +27,7 @@ export default function YouTubeDemo() {
       </DemoContainer>
 
       <DemoContainer title="Square Aspect Ratio (1:1) - Responsive">
-        <YouTube
-          videoId="tpsP8LMuu_M"
-          aspectRatio="1:1"
-          title="Square video"
-        />
+        <YouTube videoId="tpsP8LMuu_M" aspectRatio="1:1" title="Square video" />
       </DemoContainer>
 
       <DemoContainer title="Custom Width with Container - 50% Width">
@@ -57,4 +50,3 @@ export default function YouTubeDemo() {
     </>
   );
 }
-

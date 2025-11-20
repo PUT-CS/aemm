@@ -1,8 +1,14 @@
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "~/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 import TextDemo from "~/routes/demo/TextDemo";
 import ImageDemo from "~/routes/demo/ImageDemo";
 import LinkDemo from "~/routes/demo/LinkDemo";
 import ContainerDemo from "~/routes/demo/ContainerDemo";
+import MarginDemo from "~/routes/demo/MarginDemo";
 import EmbedDemo from "~/routes/demo/EmbedDemo";
 import YouTubeDemo from "~/routes/demo/YouTubeDemo";
 
@@ -47,6 +53,14 @@ export default function Demo() {
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4">
             <ContainerDemo />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="margin">
+          <AccordionTrigger className="py-6 text-lg [&>svg]:size-5">
+            Margin
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4">
+            <MarginDemo />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="youtube">

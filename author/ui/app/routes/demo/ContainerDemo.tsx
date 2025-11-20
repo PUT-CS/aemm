@@ -1,7 +1,7 @@
-import {Container} from "~/components/authoring/Container/Container";
-import {Text} from "~/components/authoring/Text/Text";
-import {Image} from "~/components/authoring/Image/Image";
-import {DemoContainer} from "~/routes/demo/DemoContainer";
+import { Container } from "~/components/authoring/Container/Container";
+import { Text } from "~/components/authoring/Text/Text";
+import { Image } from "~/components/authoring/Image/Image";
+import { DemoContainer } from "~/routes/demo/DemoContainer";
 
 export default function ContainerDemo() {
   return (
@@ -23,7 +23,12 @@ export default function ContainerDemo() {
       </DemoContainer>
 
       <DemoContainer title="Horizontal with Center Alignment">
-        <Container direction="horizontal" gap={16} align="center" justify="center">
+        <Container
+          direction="horizontal"
+          gap={16}
+          align="center"
+          justify="center"
+        >
           <Image
             src="https://placehold.co/100x100"
             alt="Demo image 1"
@@ -52,7 +57,12 @@ export default function ContainerDemo() {
       </DemoContainer>
 
       <DemoContainer title="Wrapping Horizontal Stack">
-        <Container direction="horizontal" gap={12} wrap={true} className="max-w-md">
+        <Container
+          direction="horizontal"
+          gap={12}
+          wrap={true}
+          className="max-w-md"
+        >
           <Text text="<span class='px-3 py-1 bg-blue-100 rounded'>Tag 1</span>" />
           <Text text="<span class='px-3 py-1 bg-blue-100 rounded'>Tag 2</span>" />
           <Text text="<span class='px-3 py-1 bg-blue-100 rounded'>Tag 3</span>" />
@@ -66,7 +76,11 @@ export default function ContainerDemo() {
       <DemoContainer title="Nested Containers">
         <Container direction="vertical" gap={20}>
           <Text text="<h4>Parent Container (Vertical)</h4>" />
-          <Container direction="horizontal" gap={16} className="p-4 border rounded">
+          <Container
+            direction="horizontal"
+            gap={16}
+            className="p-4 border rounded"
+          >
             <Container direction="vertical" gap={8}>
               <Text text="<strong>Column 1</strong>" />
               <Text text="<p>Item A</p>" />
@@ -83,4 +97,3 @@ export default function ContainerDemo() {
     </>
   );
 }
-

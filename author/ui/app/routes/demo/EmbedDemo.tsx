@@ -1,5 +1,5 @@
-import {Embed} from "~/components/authoring/Embed/Embed";
-import {DemoContainer} from "~/routes/demo/DemoContainer";
+import { Embed } from "~/components/authoring/Embed/Embed";
+import { DemoContainer } from "~/routes/demo/DemoContainer";
 
 export default function EmbedDemo() {
   return (
@@ -71,4 +71,3 @@ export default function EmbedDemo() {
     </>
   );
 }
-

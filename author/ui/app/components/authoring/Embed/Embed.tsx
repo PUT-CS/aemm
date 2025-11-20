@@ -1,7 +1,7 @@
 import * as z from "zod";
 import React from "react";
 import AEMMComponent from "~/components/authoring/AEMMComponent";
-import {buildTextDescription} from "~/components/authoring/utils";
+import { buildTextDescription } from "~/components/authoring/utils";
 
 const schema = z.object({
   src: z
@@ -15,7 +15,9 @@ const schema = z.object({
   aspectRatio: z
     .enum(["16:9", "4:3", "1:1", "21:9", "none"])
     .optional()
-    .describe("Aspect ratio for responsive embeds. Use 'none' for fixed dimensions. Default: 16:9"),
+    .describe(
+      "Aspect ratio for responsive embeds. Use 'none' for fixed dimensions. Default: 16:9",
+    ),
   width: z
     .string()
     .optional()
@@ -93,7 +95,9 @@ export class Embed extends AEMMComponent<z.infer<typeof schema>> {
     }
 
     const useAspectRatio = aspectRatio && aspectRatio !== "none";
-    const aspectRatioClass = useAspectRatio ? ASPECT_RATIO_CLASSES[aspectRatio] : "";
+    const aspectRatioClass = useAspectRatio
+      ? ASPECT_RATIO_CLASSES[aspectRatio]
+      : "";
 
     const containerClassName = [
       "embed-container",
@@ -128,4 +132,3 @@ export class Embed extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
-
