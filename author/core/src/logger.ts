@@ -5,7 +5,15 @@ import fs from 'node:fs';
 
 const logDir = path.resolve(process.cwd(), 'logs');
 if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
+  try {
+    fs.mkdirSync(logDir, { recursive: true });
+  } catch (err) {
+    console.error(
+      `Failed to create log directory at "${logDir}". Please check filesystem permissions.`,
+      err,
+    );
+    process.exit(1);
+  }
 }
 
 const level = config.nodeEnv === 'production' ? 'info' : 'debug';

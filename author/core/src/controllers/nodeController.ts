@@ -62,13 +62,11 @@ function cleanPath(inputPath: string): string {
 export const getNode = (req: Request, res: Response) => {
   try {
     const cleanedPath = cleanPath(req.path);
-    const accept = req.get('Accept') || '';
-    logger.info('getNode request', { path: req.path, cleanedPath, accept });
     const contentRoot = config.contentRoot;
     const fullPath = path.resolve(contentRoot + cleanedPath);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
-      logger.info('getNode forbidden', { path: req.path, status: 403 });
+      logger.warn('getNode forbidden', { path: req.path, status: 403 });
       res.status(403).end();
       return;
     }
@@ -87,11 +85,6 @@ export const getNode = (req: Request, res: Response) => {
       try {
         const data = readFileContent(contentJsonFullPath);
         const contentData: ScrNode = JSON.parse(data);
-        logger.info('getNode success (folder-metadata)', {
-          path: req.path,
-          status: 200,
-          responseContentType: 'application/json',
-        });
         res.json(contentData);
         return;
       } catch (err: unknown) {
@@ -158,11 +151,6 @@ export const updateNode = (req: Request, res: Response) => {
   try {
     const cleanedPath = cleanPath(req.path);
     const contentType = req.get('Content-Type') || '';
-    logger.info('updateNode request', {
-      path: req.path,
-      cleanedPath,
-      requestContentType: contentType,
-    });
     const contentRoot = config.contentRoot;
     const fullPath = path.resolve(contentRoot + cleanedPath);
 
@@ -173,7 +161,7 @@ export const updateNode = (req: Request, res: Response) => {
     }
 
     if (!req.body) {
-      logger.info('updateNode bad request (no body)', {
+      logger.warn('updateNode bad request (no body)', {
         path: req.path,
         status: 400,
         requestContentType: contentType,
