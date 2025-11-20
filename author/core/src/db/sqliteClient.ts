@@ -31,8 +31,12 @@ export async function initDatabase(): Promise<sqlite3.Database> {
   await new Promise<void>((resolve, reject) => {
     database.serialize(() => {
       Promise.resolve()
-        .then(() => run('PRAGMA journal_mode = WAL;', [], { skipSerialize: true }))
-        .then(() => run('PRAGMA foreign_keys = ON;', [], { skipSerialize: true }))
+        .then(() =>
+          run('PRAGMA journal_mode = WAL;', [], { skipSerialize: true }),
+        )
+        .then(() =>
+          run('PRAGMA foreign_keys = ON;', [], { skipSerialize: true }),
+        )
         .then(() =>
           run(
             `CREATE TABLE IF NOT EXISTS migrations (

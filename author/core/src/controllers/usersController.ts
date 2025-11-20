@@ -21,7 +21,8 @@ export async function listUsers(
     );
     res.json(users);
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
     next(error);
   }
@@ -45,7 +46,8 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
     }
     res.json(user);
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
     next(error);
   }
@@ -92,7 +94,8 @@ export async function createUser(
     );
     res.status(201).json(created);
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
     next(error);
   }
@@ -151,7 +154,8 @@ export async function updateUser(
     }
     res.json(user);
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
     next(error);
   }
@@ -169,16 +173,15 @@ export async function deleteUser(
       res.status(400).json({ message: 'Invalid name' });
       return;
     }
-    const info = await runWithInfo('DELETE FROM users WHERE name = ?;', [
-      name,
-    ]);
+    const info = await runWithInfo('DELETE FROM users WHERE name = ?;', [name]);
     if (!info.changes) {
       res.status(404).json({ message: 'Not found' });
       return;
     }
     res.status(204).end();
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
     next(error);
   }
