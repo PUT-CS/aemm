@@ -10,27 +10,25 @@ if (!fs.existsSync(logDir)) {
 
 const level = config.nodeEnv === 'production' ? 'info' : 'debug';
 
+const createFormatter = (uppercaseLevel = true) =>
+  winston.format.printf(({ level, message, timestamp, ...meta }) => {
+    const metaStr = Object.keys(meta).length ? ' ' + JSON.stringify(meta) : '';
+    const levelStr = uppercaseLevel ? level.toUpperCase() : level;
+    return `${timestamp} ${levelStr}: ${message}${metaStr}`;
+  });
+
 export const logger = winston.createLogger({
   level,
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ level, message, timestamp, ...meta }) => {
-      const metaStr = Object.keys(meta).length
-        ? ' ' + JSON.stringify(meta)
-        : '';
-      return `${timestamp} ${level.toUpperCase()}: ${message}${metaStr}`;
-    }),
+    createFormatter(true),
   ),
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.printf(({ level, message, timestamp, ...meta }) => {
-          const metaStr = Object.keys(meta).length
-            ? ' ' + JSON.stringify(meta)
-            : '';
-          return `${timestamp} ${level}: ${message}${metaStr}`;
-        }),
+        winston.format.timestamp(),
+        createFormatter(false),
       ),
     }),
     new winston.transports.File({

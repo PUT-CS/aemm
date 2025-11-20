@@ -248,7 +248,11 @@ export const updateNode = (req: Request, res: Response) => {
         res.status(statusCode).json(jsonData);
         return;
       } catch (err: unknown) {
-        logger.warn('Invalid JSON body', err, { path: req.path, status: 400 });
+        logger.warn('Invalid JSON body', {
+          path: req.path,
+          status: 400,
+          error: (err as Error).message,
+        });
         res.status(400).send('Invalid JSON');
         return;
       }
