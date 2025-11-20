@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import config from '../config/config';
 import { get, all } from '../db/sqliteClient';
 import { AppError } from '../middlewares/errorHandler';
+import { logger } from '../logger';
 
 export async function getDbHealth(
   _req: Request,
@@ -31,7 +32,7 @@ export async function getDbHealth(
       migrationsCount = row?.count ?? 0;
     }
 
-    res.json({
+    const payload = {
       ok: true,
       databasePath: config.databasePath,
       pragmas: {
@@ -40,11 +41,14 @@ export async function getDbHealth(
       },
       tables: tables.map((t) => t.name),
       migrationsCount,
-    });
+    };
+    logger.debug('DB health fetched', { tables: payload.tables.length });
+    res.json(payload);
   } catch (err) {
     const error: AppError =
       err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
+    logger.error('DB health error', { message: error.message });
     next(error);
   }
 }

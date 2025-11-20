@@ -3,6 +3,7 @@ import router from './routes';
 import { errorHandler } from './middlewares/errorHandler';
 import cors from 'cors';
 import helmet from 'helmet';
+import { requestLogger } from './middlewares/requestLogger';
 
 const app = express();
 
@@ -15,6 +16,8 @@ app.use(
     limit: '50mb',
   }),
 );
+
+app.use(requestLogger);
 
 app.use(router);
 
