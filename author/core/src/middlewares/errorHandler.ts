@@ -11,7 +11,7 @@ export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction,
 ) => {
-  console.error(err);
+  console.error(`[Error] status=${err.status || 500} message=${err.message}`);
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
   });

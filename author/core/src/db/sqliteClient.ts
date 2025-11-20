@@ -31,12 +31,8 @@ export async function initDatabase(): Promise<sqlite3.Database> {
   await new Promise<void>((resolve, reject) => {
     database.serialize(() => {
       Promise.resolve()
-        .then(() =>
-          run('PRAGMA journal_mode = WAL;', [], { skipSerialize: true }),
-        )
-        .then(() =>
-          run('PRAGMA foreign_keys = ON;', [], { skipSerialize: true }),
-        )
+        .then(() => run('PRAGMA journal_mode = WAL;', [], { skipSerialize: true }))
+        .then(() => run('PRAGMA foreign_keys = ON;', [], { skipSerialize: true }))
         .then(() =>
           run(
             `CREATE TABLE IF NOT EXISTS migrations (
@@ -50,17 +46,19 @@ export async function initDatabase(): Promise<sqlite3.Database> {
         )
         .then(() =>
           run(
-            `CREATE TABLE IF NOT EXISTS test_items (
+            `CREATE TABLE IF NOT EXISTS users (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
-              name TEXT NOT NULL,
-              value TEXT,
-              created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+              name TEXT NOT NULL UNIQUE,
+              passwordHash TEXT NOT NULL,
+              role TEXT NOT NULL
             );`,
             [],
             { skipSerialize: true },
           ),
         )
+        .then(async () => {
+          await migrateUsersTableIfNeeded();
+        })
         .then(resolve)
         .catch(reject);
     });
@@ -186,29 +184,97 @@ export function runWithInfo(
       });
 }
 
-let testItemsEnsured = false;
-export async function ensureTestItemsTable(): Promise<void> {
-  if (testItemsEnsured) return;
+let usersEnsured = false;
+export async function ensureUsersTable(): Promise<void> {
+  if (usersEnsured) return;
   const database = getDatabase();
   await new Promise<void>((resolve, reject) => {
     database.serialize(() => {
       database.run(
-        `CREATE TABLE IF NOT EXISTS test_items (
+        `CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          value TEXT,
-          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          name TEXT NOT NULL UNIQUE,
+          passwordHash TEXT NOT NULL,
+          role TEXT NOT NULL
         );`,
-        (err) => {
+        async (err) => {
           if (err) {
             reject(err);
             return;
           }
-          testItemsEnsured = true;
-          resolve();
+          try {
+            await migrateUsersTableIfNeeded();
+            usersEnsured = true;
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
         },
       );
+    });
+  });
+}
+
+async function migrateUsersTableIfNeeded(): Promise<void> {
+  const database = getDatabase();
+  const info = await all<{ name: string; type: string }>(
+    "SELECT name, type FROM sqlite_master WHERE type='table' AND name='users';",
+  );
+  if (!info.length) return; // table doesn't exist yet
+  const columns = await all<{ name: string }>('PRAGMA table_info(users);');
+  const hasId = columns.some((c) => c.name === 'id');
+  if (hasId) return; // already migrated
+
+  // Detect old column naming (password_hash vs passwordHash)
+  const hasOldPassword = columns.some((c) => c.name === 'password_hash');
+  const passwordCol = hasOldPassword ? 'password_hash' : 'passwordHash';
+
+  await new Promise<void>((resolve, reject) => {
+    database.serialize(() => {
+      database.run('BEGIN TRANSACTION;');
+      database.run('ALTER TABLE users RENAME TO users_old;', (e) => {
+        if (e) {
+          database.run('ROLLBACK;');
+          reject(e);
+        }
+      });
+      database.run(
+        `CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL UNIQUE,
+          passwordHash TEXT NOT NULL,
+          role TEXT NOT NULL
+        );`,
+        (e) => {
+          if (e) {
+            database.run('ROLLBACK;');
+            reject(e);
+          }
+        },
+      );
+      database.run(
+        `INSERT INTO users (name, passwordHash, role)
+         SELECT name, ${passwordCol} as passwordHash, role FROM users_old;`,
+        (e) => {
+          if (e) {
+            database.run('ROLLBACK;');
+            reject(e);
+          }
+        },
+      );
+      database.run('DROP TABLE users_old;', (e) => {
+        if (e) {
+          database.run('ROLLBACK;');
+          reject(e);
+        }
+      });
+      database.run('COMMIT;', (e) => {
+        if (e) {
+          reject(e);
+          return;
+        }
+        resolve();
+      });
     });
   });
 }
