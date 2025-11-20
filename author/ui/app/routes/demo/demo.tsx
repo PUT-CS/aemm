@@ -1,12 +1,10 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "~/components/ui/accordion";
 import TextDemo from "~/routes/demo/TextDemo";
 import ImageDemo from "~/routes/demo/ImageDemo";
 import LinkDemo from "~/routes/demo/LinkDemo";
+import ContainerDemo from "~/routes/demo/ContainerDemo";
+import EmbedDemo from "~/routes/demo/EmbedDemo";
+import YouTubeDemo from "~/routes/demo/YouTubeDemo";
 
 export function meta() {
   return [
@@ -37,10 +35,34 @@ export default function Demo() {
         </AccordionItem>
         <AccordionItem value="button">
           <AccordionTrigger className="py-6 text-lg [&>svg]:size-5">
-            Button
+            Link
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4">
             <LinkDemo />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="container">
+          <AccordionTrigger className="py-6 text-lg [&>svg]:size-5">
+            Container
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4">
+            <ContainerDemo />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="youtube">
+          <AccordionTrigger className="py-6 text-lg [&>svg]:size-5">
+            YouTube
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4">
+            <YouTubeDemo />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="embed">
+          <AccordionTrigger className="py-6 text-lg [&>svg]:size-5">
+            Embed (Custom)
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4">
+            <EmbedDemo />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
