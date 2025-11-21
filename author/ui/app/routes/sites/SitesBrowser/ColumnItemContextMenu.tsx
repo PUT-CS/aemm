@@ -1,24 +1,65 @@
 import {FaCopy, FaEdit, FaEye, FaTrash} from "react-icons/fa";
 import ContextMenuOption from "~/routes/sites/SitesBrowser/ContextMenuOption";
-import {ContextMenuSeparator} from "~/components/ui/context-menu";
-import {FaPaste, FaPlus} from "react-icons/fa6";
+import {
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger
+} from "~/components/ui/context-menu";
+import {FaFile, FaFolderOpen, FaGlobe, FaPaste, FaPlus, FaUpload} from "react-icons/fa6";
 
 interface ColumnItemContextMenuProps {
-  onNew: () => void;
+  onNewSite: () => void;
+  onNewPage: () => void;
+  onNewFolder: () => void;
+  onNewFileUpload: () => void;
   canCreateChildren: boolean;
 }
 
-export default function ColumnItemContextMenu({ onNew, canCreateChildren }: ColumnItemContextMenuProps) {
+export default function ColumnItemContextMenu(
+  {
+    onNewSite,
+    onNewPage,
+    onNewFolder,
+    onNewFileUpload,
+    canCreateChildren
+  }: ColumnItemContextMenuProps
+) {
   return (
     <>
       {canCreateChildren && (
         <>
-          <ContextMenuOption
-            icon={FaPlus}
-            label="New"
-            onClick={onNew}
-          />
-          <ContextMenuSeparator />
+          <ContextMenuSub>
+            <ContextMenuSubTrigger>
+              <div className={`flex items-center gap-2 w-full`}>
+                <FaPlus/>
+                <span>New</span>
+              </div>
+            </ContextMenuSubTrigger>
+            <ContextMenuSubContent>
+              <ContextMenuOption
+                icon={FaGlobe}
+                label="Site"
+                onClick={onNewSite}
+              />
+              <ContextMenuOption
+                icon={FaFile}
+                label="Page"
+                onClick={onNewPage}
+              />
+              <ContextMenuOption
+                icon={FaFolderOpen}
+                label="Folder"
+                onClick={onNewFolder}
+              />
+              <ContextMenuOption
+                icon={FaUpload}
+                label="File Upload"
+                onClick={onNewFileUpload}
+              />
+            </ContextMenuSubContent>
+          </ContextMenuSub>
+          <ContextMenuSeparator/>
         </>
       )}
       <ContextMenuOption
@@ -31,7 +72,7 @@ export default function ColumnItemContextMenu({ onNew, canCreateChildren }: Colu
         label="Edit"
         onClick={() => console.log("Edit")}
       />
-      <ContextMenuSeparator />
+      <ContextMenuSeparator/>
       <ContextMenuOption
         icon={FaCopy}
         label="Copy"
@@ -42,7 +83,7 @@ export default function ColumnItemContextMenu({ onNew, canCreateChildren }: Colu
         label="Paste"
         onClick={() => console.log("Paste")}
       />
-      <ContextMenuSeparator />
+      <ContextMenuSeparator/>
       <ContextMenuOption
         icon={FaTrash}
         label="Delete"

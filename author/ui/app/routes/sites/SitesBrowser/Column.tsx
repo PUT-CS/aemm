@@ -38,7 +38,6 @@ export default function Column({
       {data && data.children && (
         <div>
           {data.children.map((item) => {
-            // Construct the child path from parent path and item name
             const childPath = path === "/" ? `/${item.name}` : `${path}/${item.name}`;
             return (
               <ColumnItem
