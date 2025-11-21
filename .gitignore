@@ -83,17 +83,16 @@ out
 dist
 
 # Gatsby files
-.cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
 # https://nextjs.org/blog/next-9-1#public-directory-support
 # public
 
 # vuepress build output
+# VuePress-specific caches handled by the global .cache entry above
 .vuepress/dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Sveltekit cache directory
 .svelte-kit/
@@ -139,3 +138,9 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 .idea
+
+# SQLite databases
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm

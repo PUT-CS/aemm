@@ -1,8 +1,9 @@
-import {Request, Response} from 'express';
+import { Request, Response } from 'express';
 import config from '../config/config';
 import * as fs from 'node:fs';
-import {NodeType, ScrNode} from '@aemm/common/scr';
+import { ScrNode, NodeType } from '@aemm/common/scr';
 import path from 'path';
+import { logger } from '../logger';
 
 function isScrNode(obj: unknown): obj is ScrNode {
   if (!obj || typeof obj !== 'object') return false;
@@ -24,7 +25,10 @@ function readFileContent(filePath: string): string {
   try {
     return fs.readFileSync(filePath, 'utf8');
   } catch (err) {
-    console.error(`Error reading file at ${filePath}:`, err);
+    logger.error('File read error', {
+      filePath,
+      error: (err as Error).message,
+    });
     throw err;
   }
 }
@@ -159,89 +163,85 @@ export const getNode = (req: Request, res: Response) => {
   try {
     const cleanedPath = cleanPath(req.path);
     const contentRoot = config.contentRoot;
-
-    // Ensure cleanedPath is always defined, default to '/' if undefined
-    const safePath = cleanedPath || '/';
-    const fullPath = path.resolve(contentRoot + safePath);
-
-    console.log(`  [getNode] cleanedPath: "${cleanedPath}" → safePath: "${safePath}"`);
-    console.log(`  [getNode] fullPath: "${fullPath}"`);
+    const fullPath = path.resolve(contentRoot + cleanedPath);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
-      console.log(`  [getNode] ✗ Path outside content root - FORBIDDEN`);
+      logger.warn('getNode forbidden', { path: req.path, status: 403 });
       res.status(403).end();
       return;
     }
 
     const fullPathExists = fs.existsSync(fullPath);
     if (!fullPathExists) {
-      console.log(`  [getNode] ✗ Path does not exist - NOT FOUND`);
+      logger.warn('Path not found', { path: req.path, status: 404 });
       res.status(404).end();
       return;
     }
 
-    const stats = fs.statSync(fullPath);
+    const contentJsonFullPath = fullPath + '/.content.json';
+    const contentJsonExists = fs.existsSync(contentJsonFullPath);
 
-    // Handle files
-    if (stats.isFile()) {
-      console.log(`  [getNode] ✓ Returning file content`);
-      const content = readFileContent(fullPath);
-      res.header('Content-Type', 'text/plain');
-      res.send(content);
-      return;
+    if (contentJsonExists) {
+      try {
+        const data = readFileContent(contentJsonFullPath);
+        const contentData: ScrNode = JSON.parse(data);
+        res.json(contentData);
+        return;
+      } catch (err: unknown) {
+        logger.error('Failed to parse .content.json', {
+          path: req.path,
+          error: (err as Error).message,
+          status: 422,
+        });
+        res.status(422).end();
+        return;
+      }
     }
 
-    // Handle directories
-    if (stats.isDirectory()) {
-      const contentJsonFullPath = fullPath + '/.content.json';
-      const contentJsonExists = fs.existsSync(contentJsonFullPath);
-
-      // Get the actual directory children
-      const children = getChildrenNodes(fullPath);
-      console.log(`  [getNode] Directory has ${children.length} children`);
-
-      if (contentJsonExists) {
-        try {
-          console.log(`  [getNode] ✓ Merging .content.json with ${children.length} children`);
-          const data = readFileContent(contentJsonFullPath);
-          const contentData: ScrNode = JSON.parse(data);
-
-          // Remove 'name' from contentData if it exists (name always comes from directory)
-          const { name: _ignoredName, ...restContentData } = contentData;
-
-          // Merge .content.json with actual directory children
-          // name always comes from directory, restContentData can override type
-          const mergedNode: ScrNode = {
-            ...restContentData,
-            name: path.basename(fullPath),
-            children: children,
-          };
-          res.json(mergedNode);
-          return;
-        } catch (err: unknown) {
-          console.error(`  [getNode] ✗ Error parsing .content.json:`, err);
-          res.status(422).end();
-          return;
-        }
-      } else {
-        console.log(`  [getNode] ✓ Returning simple folder with ${children.length} children`);
-        // .content.json does not exist, return simple folder structure
+    if (!contentJsonExists) {
+      // .content.json does not exist, handle as a directory
+      const stats = fs.statSync(fullPath);
+      if (stats.isDirectory()) {
+        // Read directory contents, don't parse to JSON, since it could be any type of file
+        const children = getChildrenNodes(fullPath);
         const folderNode: ScrNode = {
           type: NodeType.FOLDER,
           name: path.basename(fullPath),
           children: children,
         };
+        logger.info('getNode success (directory)', {
+          path: req.path,
+          status: 200,
+          responseContentType: 'application/json',
+        });
         res.json(folderNode);
+        return;
+      } else if (stats.isFile()) {
+        // don't parse to JSON, since it could be any type of file
+        const content = readFileContent(fullPath);
+        logger.info('getNode success (file)', {
+          path: req.path,
+          status: 200,
+          responseContentType: 'text/plain',
+        });
+        res.header('Content-Type', 'text/plain');
+        res.send(content);
+        return;
+      } else {
+        logger.info('getNode not found (neither file nor dir)', {
+          path: req.path,
+          status: 404,
+        });
+        res.status(404).end();
         return;
       }
     }
-
-    // Neither file nor directory
-    console.log(`  [getNode] ✗ Not a file or directory - NOT FOUND`);
-    res.status(404).end();
-    return;
   } catch (err: unknown) {
-    console.error(`  [getNode] ✗ Exception:`, err);
+    logger.error('Unhandled getNode error', {
+      path: req.path,
+      error: (err as Error).message,
+      status: 500,
+    });
     res.status(500).end();
     return;
   }
@@ -250,15 +250,22 @@ export const getNode = (req: Request, res: Response) => {
 export const updateNode = (req: Request, res: Response) => {
   try {
     const cleanedPath = cleanPath(req.path);
+    const contentType = req.get('Content-Type') || '';
     const contentRoot = config.contentRoot;
     const fullPath = path.resolve(contentRoot + cleanedPath);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
+      logger.warn('updateNode forbidden', { path: req.path, status: 403 });
       res.status(403).end();
       return;
     }
 
     if (!req.body) {
+      logger.warn('updateNode bad request (no body)', {
+        path: req.path,
+        status: 400,
+        requestContentType: contentType,
+      });
       res.status(400).send('Request body is required');
       return;
     }
@@ -277,6 +284,11 @@ export const updateNode = (req: Request, res: Response) => {
           JSON.stringify(req.body, null, 2),
           'utf8',
         );
+        logger.info('Directory metadata updated', {
+          path: req.path,
+          status: 200,
+          responseContentType: 'application/json',
+        });
         res.status(200).json(req.body);
         return;
       }
@@ -296,6 +308,10 @@ export const updateNode = (req: Request, res: Response) => {
 
         // Validate that JSON is a valid ScrNode
         if (!isScrNode(jsonData)) {
+          logger.warn('updateNode invalid ScrNode', {
+            path: req.path,
+            status: 400,
+          });
           res
             .status(400)
             .send(
@@ -311,10 +327,21 @@ export const updateNode = (req: Request, res: Response) => {
           JSON.stringify(jsonData, null, 2),
           'utf8',
         );
-        res.status(exists ? 200 : 201).json(jsonData);
+        const statusCode = exists ? 200 : 201;
+        logger.info('Node JSON written', {
+          path: req.path,
+          type: jsonData.type,
+          status: statusCode,
+          responseContentType: 'application/json',
+        });
+        res.status(statusCode).json(jsonData);
         return;
       } catch (err: unknown) {
-        console.error(err);
+        logger.warn('Invalid JSON body', {
+          path: req.path,
+          status: 400,
+          error: (err as Error).message,
+        });
         res.status(400).send('Invalid JSON');
         return;
       }
@@ -322,14 +349,29 @@ export const updateNode = (req: Request, res: Response) => {
 
     // Handle binary/text content
     if (!Buffer.isBuffer(req.body)) {
+      logger.warn('Invalid body (not buffer) for non-JSON content', {
+        path: req.path,
+        status: 400,
+      });
       res.status(400).send('Invalid request body format');
       return;
     }
     fs.writeFileSync(fullPath, req.body);
-    res.status(exists ? 200 : 201).send(req.body);
+    const statusCode = exists ? 200 : 201;
+    logger.info('File content written', {
+      path: req.path,
+      bytes: (req.body as Buffer).length,
+      status: statusCode,
+      responseContentType: contentType || 'application/octet-stream',
+    });
+    res.status(statusCode).send(req.body);
     return;
   } catch (err: unknown) {
-    console.error(err);
+    logger.error('Unhandled updateNode error', {
+      path: req.path,
+      error: (err as Error).message,
+      status: 500,
+    });
     res.status(500).end();
     return;
   }
