@@ -1,4 +1,4 @@
-import type {ScrNode} from "@aemm/common";
+import type { ScrNode } from "@aemm/common";
 
 export default async function fetchTree(): Promise<ScrNode> {
   const response = await fetch(`http://localhost:4500/scrtree`);
@@ -7,4 +7,3 @@ export default async function fetchTree(): Promise<ScrNode> {
   }
   return response.json();
 }
-

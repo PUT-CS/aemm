@@ -1,7 +1,7 @@
 import React from "react";
 import ColumnItem from "~/routes/sites/SitesBrowser/ColumnItem";
-import type {ScrNode} from "@aemm/common";
-import {findNodeAtPath} from "~/routes/sites/SitesBrowser/treeUtils";
+import type { ScrNode } from "@aemm/common";
+import { findNodeAtPath } from "~/routes/sites/SitesBrowser/treeUtils";
 
 interface ColumnProps {
   path: string;
@@ -9,7 +9,6 @@ interface ColumnProps {
   selectedChildPath?: string;
   onItemClick: (itemPath: string) => void;
 }
-
 
 export default function Column({
   path,
@@ -38,11 +37,13 @@ export default function Column({
       {data && data.children && (
         <div>
           {data.children.map((item) => {
-            const childPath = path === "/" ? `/${item.name}` : `${path}/${item.name}`;
+            const childPath =
+              path === "/" ? `/${item.name}` : `${path}/${item.name}`;
             return (
               <ColumnItem
                 key={childPath}
-                item={{ ...item, path: childPath }}
+                item={item}
+                path={path}
                 onClick={handleClick(childPath)}
                 selectedChildPath={selectedChildPath}
               />

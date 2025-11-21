@@ -1,10 +1,10 @@
-import {useNavigate, useParams} from "react-router";
-import {useEffect, useState} from "react";
+import { useNavigate, useParams } from "react-router";
+import { useEffect, useState } from "react";
 import Column from "~/routes/sites/SitesBrowser/Column";
-import {useQuery} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import fetchTree from "~/routes/sites/SitesBrowser/fetchTree";
 import SitesToolbar from "~/routes/sites/SitesToolbar";
-import {findNodeAtPath} from "~/routes/sites/SitesBrowser/treeUtils";
+import { findNodeAtPath } from "~/routes/sites/SitesBrowser/treeUtils";
 
 export default function SiteBrowser() {
   const navigate = useNavigate();
@@ -39,7 +39,8 @@ export default function SiteBrowser() {
   };
 
   const allPaths = buildColumnPaths(selectedPath);
-  const hasChildren = selectedPathData?.children && selectedPathData.children.length > 0;
+  const hasChildren =
+    selectedPathData?.children && selectedPathData.children.length > 0;
   const columnPaths = hasChildren ? allPaths : allPaths.slice(0, -1);
 
   const handleItemClick = (itemPath: string) => {

@@ -1,3 +1,3 @@
 export default function NewFolderDialog() {
-    return <div>NewFolderDialog</div>;
+  return <div>NewFolderDialog</div>;
 }

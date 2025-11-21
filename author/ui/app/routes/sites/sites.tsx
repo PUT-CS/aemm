@@ -1,4 +1,4 @@
-import type {Route} from "../+types/login";
+import type { Route } from "../+types/login";
 import SiteBrowser from "~/routes/sites/SitesBrowser/SiteBrowser";
 
 export function meta({}: Route.MetaArgs) {

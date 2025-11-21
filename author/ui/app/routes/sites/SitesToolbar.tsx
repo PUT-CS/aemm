@@ -1,9 +1,14 @@
-import type {IconType} from "react-icons";
-import {FaCopy, FaPaste, FaPlus} from "react-icons/fa6";
-import {Button} from "~/components/ui/button";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "~/components/ui/tooltip";
-import {NodeType, type ScrNode} from "@aemm/common";
-import {useState} from "react";
+import type { IconType } from "react-icons";
+import { FaCopy, FaPaste, FaPlus } from "react-icons/fa6";
+import { Button } from "~/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { NodeType, type ScrNode } from "@aemm/common";
+import { useState } from "react";
 
 interface ToolbarIconProps {
   icon: IconType;
@@ -17,7 +22,12 @@ interface SitesToolbarProps {
   selectedPathData?: ScrNode;
 }
 
-function ToolbarIcon({ icon: Icon, label, onClick, disabled = false }: ToolbarIconProps) {
+function ToolbarIcon({
+  icon: Icon,
+  label,
+  onClick,
+  disabled = false,
+}: ToolbarIconProps) {
   return (
     <TooltipProvider delayDuration={300}>
       <Tooltip>
@@ -41,14 +51,22 @@ function ToolbarIcon({ icon: Icon, label, onClick, disabled = false }: ToolbarIc
   );
 }
 
-export default function SitesToolbar({ selectedPathData, selectedPath }: SitesToolbarProps) {
+export default function SitesToolbar({
+  selectedPathData,
+  selectedPath,
+}: SitesToolbarProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   // Check if the selected node is a FILE (can't have children)
   const canCreateChildren = selectedPathData?.type !== NodeType.FILE;
 
   const handleCreateNode = (name: string, type: NodeType, file?: File) => {
-    console.log("Creating node:", { name, type, parentPath: selectedPath, file: file?.name });
+    console.log("Creating node:", {
+      name,
+      type,
+      parentPath: selectedPath,
+      file: file?.name,
+    });
     // TODO: Implement actual node creation
   };
 

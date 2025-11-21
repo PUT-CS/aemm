@@ -1,12 +1,19 @@
-import {FaCopy, FaEdit, FaEye, FaTrash} from "react-icons/fa";
+import { FaCopy, FaEdit, FaEye, FaTrash } from "react-icons/fa";
 import ContextMenuOption from "~/routes/sites/SitesBrowser/ContextMenuOption";
 import {
   ContextMenuSeparator,
   ContextMenuSub,
   ContextMenuSubContent,
-  ContextMenuSubTrigger
+  ContextMenuSubTrigger,
 } from "~/components/ui/context-menu";
-import {FaFile, FaFolderOpen, FaGlobe, FaPaste, FaPlus, FaUpload} from "react-icons/fa6";
+import {
+  FaFile,
+  FaFolderOpen,
+  FaGlobe,
+  FaPaste,
+  FaPlus,
+  FaUpload,
+} from "react-icons/fa6";
 
 interface ColumnItemContextMenuProps {
   onNewSite: () => void;
@@ -16,15 +23,13 @@ interface ColumnItemContextMenuProps {
   canCreateChildren: boolean;
 }
 
-export default function ColumnItemContextMenu(
-  {
-    onNewSite,
-    onNewPage,
-    onNewFolder,
-    onNewFileUpload,
-    canCreateChildren
-  }: ColumnItemContextMenuProps
-) {
+export default function ColumnItemContextMenu({
+  onNewSite,
+  onNewPage,
+  onNewFolder,
+  onNewFileUpload,
+  canCreateChildren,
+}: ColumnItemContextMenuProps) {
   return (
     <>
       {canCreateChildren && (
@@ -32,7 +37,7 @@ export default function ColumnItemContextMenu(
           <ContextMenuSub>
             <ContextMenuSubTrigger>
               <div className={`flex items-center gap-2 w-full`}>
-                <FaPlus/>
+                <FaPlus />
                 <span>New</span>
               </div>
             </ContextMenuSubTrigger>
@@ -59,7 +64,7 @@ export default function ColumnItemContextMenu(
               />
             </ContextMenuSubContent>
           </ContextMenuSub>
-          <ContextMenuSeparator/>
+          <ContextMenuSeparator />
         </>
       )}
       <ContextMenuOption
@@ -72,7 +77,7 @@ export default function ColumnItemContextMenu(
         label="Edit"
         onClick={() => console.log("Edit")}
       />
-      <ContextMenuSeparator/>
+      <ContextMenuSeparator />
       <ContextMenuOption
         icon={FaCopy}
         label="Copy"
@@ -83,7 +88,7 @@ export default function ColumnItemContextMenu(
         label="Paste"
         onClick={() => console.log("Paste")}
       />
-      <ContextMenuSeparator/>
+      <ContextMenuSeparator />
       <ContextMenuOption
         icon={FaTrash}
         label="Delete"

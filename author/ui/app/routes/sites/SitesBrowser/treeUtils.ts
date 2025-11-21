@@ -1,4 +1,4 @@
-import type {ScrNode} from "@aemm/common";
+import type { ScrNode } from "@aemm/common";
 
 /**
  * Find a node at a given path in the tree structure
@@ -6,7 +6,10 @@ import type {ScrNode} from "@aemm/common";
  * @param path - The path to find (e.g., "/", "/gnuorg", "/gnuorg/en")
  * @returns The node at the given path, or undefined if not found
  */
-export function findNodeAtPath(tree: ScrNode | undefined, path: string): ScrNode | undefined {
+export function findNodeAtPath(
+  tree: ScrNode | undefined,
+  path: string,
+): ScrNode | undefined {
   if (!tree) return undefined;
   if (path === "/") return tree;
 
@@ -21,4 +24,3 @@ export function findNodeAtPath(tree: ScrNode | undefined, path: string): ScrNode
 
   return current;
 }
-

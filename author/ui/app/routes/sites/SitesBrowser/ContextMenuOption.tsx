@@ -1,5 +1,5 @@
-import {ContextMenuItem} from "~/components/ui/context-menu";
-import type {IconType} from "react-icons";
+import { ContextMenuItem } from "~/components/ui/context-menu";
+import type { IconType } from "react-icons";
 
 type OptionKind = "default" | "destructive";
 
@@ -21,10 +21,12 @@ export default function ContextMenuOption({
   return (
     <ContextMenuItem onClick={onClick} className={`${textColorClass}`}>
       <div className={`flex items-center gap-2 w-full`}>
-        {Icon && <Icon
+        {Icon && (
+          <Icon
             className="w-4 h-4"
             color={variant === "destructive" ? "red" : "gray"}
-        />}
+          />
+        )}
         <span className={`${textColorClass}`}>{label}</span>
       </div>
     </ContextMenuItem>
