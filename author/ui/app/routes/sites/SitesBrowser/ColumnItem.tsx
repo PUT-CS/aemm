@@ -21,9 +21,9 @@ import FileUploadDialog from "~/routes/sites/dialogs/FileUploadDialog";
 
 interface ColumnItemProps {
   item: ScrNode;
-  path: string;
+  itemPath: string;
   onClick: (e: React.MouseEvent) => void;
-  selectedChildPath: string | undefined;
+  selectedChildPath?: string;
 }
 
 function mapNodeTypeToIcon(type: NodeType) {
@@ -43,11 +43,11 @@ function mapNodeTypeToIcon(type: NodeType) {
 
 export default function ColumnItem({
   item,
-  path,
+  itemPath,
   onClick,
   selectedChildPath,
 }: ColumnItemProps) {
-  const isSelected = selectedChildPath === path;
+  const isSelected = selectedChildPath === itemPath;
   const hasChildren = item.children && item.children.length > 0;
 
   const [activeDialog, setActiveDialog] = useState<NodeType | null>(null);
@@ -112,10 +112,18 @@ export default function ColumnItem({
         onOpenChange={(open) => !open && handleCloseDialog()}
       >
         <DialogContent>
-          {activeDialog === NodeType.SITE && <NewSiteDialog />}
-          {activeDialog === NodeType.PAGE && <NewPageDialog />}
-          {activeDialog === NodeType.FOLDER && <NewFolderDialog />}
-          {activeDialog === NodeType.FILE && <FileUploadDialog />}
+          {activeDialog === NodeType.SITE && (
+            <NewSiteDialog parentPath={itemPath} />
+          )}
+          {activeDialog === NodeType.PAGE && (
+            <NewPageDialog parentPath={itemPath} />
+          )}
+          {activeDialog === NodeType.FOLDER && (
+            <NewFolderDialog parentPath={itemPath} />
+          )}
+          {activeDialog === NodeType.FILE && (
+            <FileUploadDialog parentPath={itemPath} />
+          )}
         </DialogContent>
       </Dialog>
     </>

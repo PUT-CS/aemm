@@ -1,3 +1,10 @@
-export default function FileUploadDialog() {
-  return <div>FileUploadDialog</div>;
+import type { DialogProps } from "~/routes/sites/dialogs/dialog.types";
+
+export default function FileUploadDialog({ parentPath }: DialogProps) {
+  return (
+    <div>
+      FileUploadDialog
+      <span>{parentPath}</span>
+    </div>
+  );
 }

@@ -43,7 +43,7 @@ export default function Column({
               <ColumnItem
                 key={childPath}
                 item={item}
-                path={path}
+                itemPath={childPath}
                 onClick={handleClick(childPath)}
                 selectedChildPath={selectedChildPath}
               />
