@@ -4,24 +4,7 @@ import Column from "~/routes/sites/SitesBrowser/Column";
 import {useQuery} from "@tanstack/react-query";
 import fetchTree from "~/routes/sites/SitesBrowser/fetchTree";
 import SitesToolbar from "~/routes/sites/SitesToolbar";
-import type {ScrNode} from "@aemm/common";
-
-// Helper to find a node at a given path in the tree
-function findNodeAtPath(tree: ScrNode | undefined, path: string): ScrNode | undefined {
-  if (!tree) return undefined;
-  if (path === "/") return tree;
-
-  const segments = path.split("/").filter((s) => s !== "");
-  let current: ScrNode | undefined = tree;
-
-  for (const segment of segments) {
-    if (!current?.children) return undefined;
-    current = current.children.find((child) => child.name === segment);
-    if (!current) return undefined;
-  }
-
-  return current;
-}
+import {findNodeAtPath} from "~/routes/sites/SitesBrowser/treeUtils";
 
 export default function SiteBrowser() {
   const navigate = useNavigate();

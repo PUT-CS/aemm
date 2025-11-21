@@ -3,14 +3,24 @@ import ContextMenuOption from "~/routes/sites/SitesBrowser/ContextMenuOption";
 import {ContextMenuSeparator} from "~/components/ui/context-menu";
 import {FaPaste, FaPlus} from "react-icons/fa6";
 
-export default function ColumnItemContextMenu() {
+interface ColumnItemContextMenuProps {
+  onNew: () => void;
+  canCreateChildren: boolean;
+}
+
+export default function ColumnItemContextMenu({ onNew, canCreateChildren }: ColumnItemContextMenuProps) {
   return (
     <>
-      <ContextMenuOption
-        icon={FaPlus}
-        label="New"
-        onClick={() => console.log("Create")}
-      />
+      {canCreateChildren && (
+        <>
+          <ContextMenuOption
+            icon={FaPlus}
+            label="New"
+            onClick={onNew}
+          />
+          <ContextMenuSeparator />
+        </>
+      )}
       <ContextMenuOption
         icon={FaEye}
         label="Preview"

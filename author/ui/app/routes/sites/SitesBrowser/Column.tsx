@@ -1,6 +1,7 @@
 import React from "react";
 import ColumnItem from "~/routes/sites/SitesBrowser/ColumnItem";
 import type {ScrNode} from "@aemm/common";
+import {findNodeAtPath} from "~/routes/sites/SitesBrowser/treeUtils";
 
 interface ColumnProps {
   path: string;
@@ -9,22 +10,6 @@ interface ColumnProps {
   onItemClick: (itemPath: string) => void;
 }
 
-// Helper to find a node at a given path in the tree
-function findNodeAtPath(tree: ScrNode | undefined, path: string): ScrNode | undefined {
-  if (!tree) return undefined;
-  if (path === "/") return tree;
-
-  const segments = path.split("/").filter((s) => s !== "");
-  let current: ScrNode | undefined = tree;
-
-  for (const segment of segments) {
-    if (!current?.children) return undefined;
-    current = current.children.find((child) => child.name === segment);
-    if (!current) return undefined;
-  }
-
-  return current;
-}
 
 export default function Column({
   path,
