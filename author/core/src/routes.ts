@@ -7,7 +7,8 @@ import {
   listUsers,
   updateUser,
 } from './controllers/usersController';
-import { writeNode } from './routes/writeNode';
+import { updateNode } from './routes/updateNode';
+import { uploadAsset } from './routes/uploadAsset';
 import { getNode } from './routes/getNode';
 import { getTree } from './routes/getTree';
 
@@ -17,7 +18,11 @@ router.get('/scrtree', getTree);
 
 router.get('/scr*queryPath', getNode);
 
-router.put('/scr*queryPath', writeNode);
+// Update node metadata (JSON/SCR nodes)
+router.put('/scr*queryPath', updateNode);
+
+// Upload asset files (images, documents, etc.)
+router.post('/scr*queryPath', uploadAsset);
 
 router.get('/db/health', getDbHealth);
 
