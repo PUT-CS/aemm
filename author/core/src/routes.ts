@@ -7,6 +7,7 @@ import {
   listUsers,
   updateUser,
 } from './controllers/usersController';
+import { uploadAsset } from './routes/uploadAsset';
 import { writeNode } from './routes/writeNode';
 import { getNode } from './routes/getNode';
 import { getTree } from './routes/getTree';
@@ -18,6 +19,8 @@ router.get('/scrtree', getTree);
 router.get('/scr*queryPath', getNode);
 
 router.put('/scr*queryPath', writeNode);
+
+router.post('/scr*queryPath', uploadAsset);
 
 router.get('/db/health', getDbHealth);
 
