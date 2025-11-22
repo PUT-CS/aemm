@@ -7,19 +7,30 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { uploadFile } from "./mutations";
 
 export default function FileUploadDialog({ parentPath }: DialogProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const queryClient = useQueryClient();
+  console.log("FileUploadDialog parentPath:", parentPath);
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => uploadFile(parentPath, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      setSelectedFile(null);
+    },
+    onError: (error: Error) => {
+      console.error("Upload failed:", error);
+      alert(`Upload failed: ${error.message}`);
+    },
+  });
 
   const handleUpload = () => {
     if (!selectedFile) return;
-
-    // TODO: Implement file upload API call
-    console.log("File upload stub:", {
-      parentPath,
-      file: selectedFile,
-    });
+    uploadMutation.mutate(selectedFile);
   };
 
   const handleFile = (file: File) => {
@@ -111,8 +122,11 @@ export default function FileUploadDialog({ parentPath }: DialogProps) {
       </div>
 
       <DialogFooter>
-        <Button onClick={handleUpload} disabled={!selectedFile}>
-          Upload
+        <Button
+          onClick={handleUpload}
+          disabled={!selectedFile || uploadMutation.isPending}
+        >
+          {uploadMutation.isPending ? "Uploading..." : "Upload"}
         </Button>
       </DialogFooter>
     </>
