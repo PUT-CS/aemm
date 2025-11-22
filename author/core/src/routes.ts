@@ -1,19 +1,23 @@
 import { Router } from 'express';
-import { getNode, updateNode } from './controllers/nodeController';
 import { getDbHealth } from './controllers/dbController';
 import {
-  listUsers,
-  getUser,
   createUser,
-  updateUser,
   deleteUser,
+  getUser,
+  listUsers,
+  updateUser,
 } from './controllers/usersController';
+import { writeNode } from './routes/writeNode';
+import { getNode } from './routes/getNode';
+import { getTree } from './routes/getTree';
 
 const router = Router();
 
+router.get('/scrtree', getTree);
+
 router.get('/scr*queryPath', getNode);
 
-router.put('/scr*queryPath', updateNode);
+router.put('/scr*queryPath', writeNode);
 
 router.get('/db/health', getDbHealth);
 

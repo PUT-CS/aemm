@@ -1,6 +1,6 @@
 {
-  "scr:type": "aemm:page",
-  "name": "Der Hause",
+  "type": "aemm:page",
+  "title": "Der Hause",
   "languageCode": "de",
   "page": {}
 }

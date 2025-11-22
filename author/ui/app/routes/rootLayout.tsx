@@ -4,12 +4,12 @@ import TopBar from "~/components/aemm/TopBar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30 * 1000,
-      gcTime: 30 * 1000,
-    },
-  },
+  // defaultOptions: {
+  //   queries: {
+  //     staleTime: 30 * 1000,
+  //     gcTime: 30 * 1000,
+  //   },
+  // },
 });
 
 export default function RootLayout() {
