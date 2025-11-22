@@ -18,13 +18,11 @@ const handleContentJson = (
   try {
     const data = fs.readFileSync(contentJsonFullPath, 'utf-8');
     const contentData: ScrNode = JSON.parse(data);
-
     logger.info('getNode success (.content.json)', {
       path: requestPath,
       status: 200,
       responseContentType: 'application/json',
     });
-
     res.json(contentData);
     return true;
   } catch (err: unknown) {
@@ -33,7 +31,6 @@ const handleContentJson = (
       error: (err as Error).message,
       status: 422,
     });
-
     res.status(422).end();
     return true;
   }
@@ -50,13 +47,11 @@ const handleDirectory = (
     name: path.basename(fullPath),
     children: children,
   };
-
   logger.info('getNode success (directory)', {
     path: requestPath,
     status: 200,
     responseContentType: 'application/json',
   });
-
   res.json(folderNode);
 };
 
@@ -66,13 +61,11 @@ const handleFile = (
   res: Response,
 ): void => {
   const content = fs.readFileSync(fullPath, 'utf-8');
-
   logger.info('getNode success (file)', {
     path: requestPath,
     status: 200,
     responseContentType: 'text/plain',
   });
-
   res.header('Content-Type', 'text/plain');
   res.send(content);
 };
@@ -121,7 +114,6 @@ export const getNode = (req: Request, res: Response) => {
         path: req.path,
         status: 404,
       });
-
       res.status(404).end();
       return;
     }
@@ -131,7 +123,6 @@ export const getNode = (req: Request, res: Response) => {
       error: (err as Error).message,
       status: 500,
     });
-
     res.status(500).end();
     return;
   }
