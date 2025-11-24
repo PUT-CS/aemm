@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadFile } from "./mutations";
 
-export default function FileUploadDialog({ parentPath }: DialogProps) {
+export default function FileUploadDialog({ parentPath, onClose }: DialogProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const queryClient = useQueryClient();
@@ -21,6 +21,7 @@ export default function FileUploadDialog({ parentPath }: DialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       setSelectedFile(null);
+      onClose?.(); // Close the dialog after successful upload
     },
     onError: (error: Error) => {
       console.error("Upload failed:", error);

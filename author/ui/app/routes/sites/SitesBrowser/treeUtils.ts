@@ -1,4 +1,4 @@
-import type { ScrNode } from "@aemm/common";
+import type { ScrNodeWithChildren } from "@aemm/common";
 
 /**
  * Find a node at a given path in the tree structure
@@ -7,14 +7,14 @@ import type { ScrNode } from "@aemm/common";
  * @returns The node at the given path, or undefined if not found
  */
 export function findNodeAtPath(
-  tree: ScrNode | undefined,
+  tree: ScrNodeWithChildren | undefined,
   path: string,
-): ScrNode | undefined {
+): ScrNodeWithChildren | undefined {
   if (!tree) return undefined;
   if (path === "/") return tree;
 
   const segments = path.split("/").filter((s) => s !== "");
-  let current: ScrNode | undefined = tree;
+  let current: ScrNodeWithChildren | undefined = tree;
 
   for (const segment of segments) {
     if (!current?.children) return undefined;

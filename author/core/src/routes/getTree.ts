@@ -18,7 +18,7 @@ export function getTree(req: Request, res: Response) {
   }
 }
 
-function buildTreeNode(fullPath: string): ScrNode {
+function buildTreeNode(fullPath: string): ScrNode & { children?: ScrNode[] } {
   const stats = fs.statSync(fullPath);
   const nodeName = path.basename(fullPath);
 
@@ -27,6 +27,8 @@ function buildTreeNode(fullPath: string): ScrNode {
     return {
       type: NodeType.FILE,
       name: nodeName,
+      createdAt: stats.birthtime,
+      updatedAt: stats.mtime,
     };
   }
 
@@ -70,13 +72,11 @@ function buildTreeNode(fullPath: string): ScrNode {
     return {
       type: NodeType.FOLDER,
       name: nodeName,
-      children: children.length > 0 ? children : undefined,
+      createdAt: stats.birthtime,
+      updatedAt: stats.mtime,
+      children,
     };
   }
 
-  // Fallback
-  return {
-    type: NodeType.FILE,
-    name: nodeName,
-  };
+  throw new Error(`Unsupported file system entry at ${fullPath}`);
 }

@@ -8,9 +8,9 @@ import {
   updateUser,
 } from './controllers/usersController';
 import { uploadAsset } from './routes/uploadAsset';
-import { writeNode } from './routes/writeNode';
 import { getNode } from './routes/getNode';
 import { getTree } from './routes/getTree';
+import { updateNode } from './routes/updateNode';
 
 const router = Router();
 
@@ -18,7 +18,7 @@ router.get('/scrtree', getTree);
 
 router.get('/scr*queryPath', getNode);
 
-router.put('/scr*queryPath', writeNode);
+router.put('/scr*queryPath', updateNode);
 
 router.post('/scr*queryPath', uploadAsset);
 
