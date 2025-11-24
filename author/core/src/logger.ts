@@ -26,10 +26,7 @@ const createFormatter = () =>
 
 export const logger = winston.createLogger({
   level,
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    createFormatter(),
-  ),
+  format: winston.format.combine(winston.format.timestamp(), createFormatter()),
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
