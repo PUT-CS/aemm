@@ -90,7 +90,7 @@ export async function updateUser(
 ) {
   try {
     const name = req.params.name;
-    if (!name || typeof name !== 'string') {
+    if (!name) {
       logger.warn('Invalid name parameter in updateUser', { name });
       res.status(400).json({ message: 'Invalid name' });
       return;
@@ -157,7 +157,7 @@ export async function deleteUser(
 ) {
   try {
     const name = req.params.name;
-    if (!name || typeof name !== 'string') {
+    if (!name) {
       logger.warn('Invalid name parameter in deleteUser', { name });
       res.status(400).json({ message: 'Invalid name' });
       return;

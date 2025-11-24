@@ -79,10 +79,6 @@ export class Database {
     logger.info('Database connection closed');
   }
 
-  public async prune(): Promise<void> {
-    logger.info('Pruning database...');
-  }
-
   public async clearDatabase(): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 
@@ -91,7 +87,6 @@ export class Database {
     logger.info('Cleared the database');
   }
 
-  // User-specific database methods
   public async getAllUsers(): Promise<Array<User>> {
     if (!this.db) throw new Error('Database not initialized');
 
@@ -109,9 +104,7 @@ export class Database {
     );
   }
 
-  public async createUser(
-    user: User
-  ): Promise<User> {
+  public async createUser(user: User): Promise<User> {
     if (!this.db) throw new Error('Database not initialized');
 
     user = userSchema.parse(user);
@@ -123,7 +116,6 @@ export class Database {
       user.role,
     );
 
-    // Fetch and validate the created user
     const createdUser = await this.db.get(
       'SELECT id, name, passwordHash, role FROM users WHERE id = ?;',
       result.lastID,
