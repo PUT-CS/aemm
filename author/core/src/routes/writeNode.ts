@@ -15,13 +15,17 @@ export const writeNode = (req: Request, res: Response) => {
     const fullPath = path.join(contentRootResolved, relativePath);
 
     if (!fullPath.startsWith(contentRootResolved)) {
-      addInfoEvent(req, res, 'writeNode.forbidden', { reason: 'path traversal' });
+      addInfoEvent(req, res, 'writeNode.forbidden', {
+        reason: 'path traversal',
+      });
       res.status(403).end();
       return;
     }
 
     if (!req.body) {
-      addInfoEvent(req, res, 'writeNode.validationFailed', { reason: 'missing body' });
+      addInfoEvent(req, res, 'writeNode.validationFailed', {
+        reason: 'missing body',
+      });
       res.status(400).send('Request body is required');
       return;
     }
@@ -32,7 +36,11 @@ export const writeNode = (req: Request, res: Response) => {
       const stats = fs.statSync(fullPath);
       if (stats.isDirectory()) {
         const contentJsonPath = path.join(fullPath, '.content.json');
-        fs.writeFileSync(contentJsonPath, JSON.stringify(req.body, null, 2), 'utf8');
+        fs.writeFileSync(
+          contentJsonPath,
+          JSON.stringify(req.body, null, 2),
+          'utf8',
+        );
         addInfoEvent(req, res, 'writeNode.directoryMetadataUpdated', {});
         res.status(200).json(req.body);
         return;
@@ -47,36 +55,55 @@ export const writeNode = (req: Request, res: Response) => {
 
     if (contentType.includes('application/json')) {
       try {
-        const jsonData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        const jsonData =
+          typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
         jsonData.id = uuidv7();
 
         if (!isScrNode(jsonData)) {
-          addInfoEvent(req, res, 'writeNode.invalidScrNode', { reason: 'structure mismatch' });
-          res.status(400).send('Invalid ScrNode structure: must include type and name fields, with valid ScrType enum value');
+          addInfoEvent(req, res, 'writeNode.invalidScrNode', {
+            reason: 'structure mismatch',
+          });
+          res
+            .status(400)
+            .send(
+              'Invalid ScrNode structure: must include type and name fields, with valid ScrType enum value',
+            );
           return;
         }
 
         const contentJsonPath = path.join(fullPath, '.content.json');
-        fs.writeFileSync(contentJsonPath, JSON.stringify(jsonData, null, 2), 'utf8');
+        fs.writeFileSync(
+          contentJsonPath,
+          JSON.stringify(jsonData, null, 2),
+          'utf8',
+        );
         const statusCode = exists ? 200 : 201;
-        addInfoEvent(req, res, 'writeNode.jsonWritten', { type: jsonData.type });
+        addInfoEvent(req, res, 'writeNode.jsonWritten', {
+          type: jsonData.type,
+        });
         res.status(statusCode).json(jsonData);
         return;
       } catch (err: unknown) {
-        addInfoEvent(req, res, 'writeNode.jsonParseFailed', { error: (err as Error).message });
+        addInfoEvent(req, res, 'writeNode.jsonParseFailed', {
+          error: (err as Error).message,
+        });
         res.status(400).send('Invalid JSON');
         return;
       }
     }
 
     if (!Buffer.isBuffer(req.body)) {
-      addInfoEvent(req, res, 'writeNode.validationFailed', { reason: 'non-buffer for binary/text' });
+      addInfoEvent(req, res, 'writeNode.validationFailed', {
+        reason: 'non-buffer for binary/text',
+      });
       res.status(400).send('Invalid request body format');
       return;
     }
     fs.writeFileSync(fullPath, req.body);
     const statusCode = exists ? 200 : 201;
-    addInfoEvent(req, res, 'writeNode.fileWritten', { bytes: (req.body as Buffer).length });
+    addInfoEvent(req, res, 'writeNode.fileWritten', {
+      bytes: (req.body as Buffer).length,
+    });
     res.status(statusCode).send(req.body);
     return;
   } catch (err: unknown) {

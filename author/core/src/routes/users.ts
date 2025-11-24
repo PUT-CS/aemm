@@ -13,7 +13,8 @@ export async function listUsers(
     addInfoEvent(_req, res, 'users.listed', { count: users.length });
     res.json(users);
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
     // Attach context event instead of direct error log
     addInfoEvent(_req, res, 'users.list.failed', { message: error.message });
@@ -25,7 +26,9 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
   try {
     const name = req.params.name;
     if (!name) {
-      addInfoEvent(req, res, 'user.get.validationFailed', { reason: 'missing name param' });
+      addInfoEvent(req, res, 'user.get.validationFailed', {
+        reason: 'missing name param',
+      });
       res.status(400).json({ message: 'Invalid name' });
       return;
     }
@@ -38,9 +41,13 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
     addInfoEvent(req, res, 'user.retrieved', { name });
     res.json(user);
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
-    addInfoEvent(req, res, 'user.get.failed', { name: req.params.name, message: error.message });
+    addInfoEvent(req, res, 'user.get.failed', {
+      name: req.params.name,
+      message: error.message,
+    });
     next(error);
   }
 }
@@ -68,9 +75,13 @@ export async function createUser(
       throw e;
     }
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
-    addInfoEvent(req, res, 'user.create.failed', { name: req.body?.name, message: error.message });
+    addInfoEvent(req, res, 'user.create.failed', {
+      name: req.body?.name,
+      message: error.message,
+    });
     next(error);
   }
 }
@@ -83,18 +94,25 @@ export async function updateUser(
   try {
     const name = req.params.name;
     if (!name) {
-      addInfoEvent(req, res, 'user.update.validationFailed', { reason: 'missing name param' });
+      addInfoEvent(req, res, 'user.update.validationFailed', {
+        reason: 'missing name param',
+      });
       res.status(400).json({ message: 'Invalid name' });
       return;
     }
     const { passwordHash, role } = req.body || {};
     if (passwordHash && typeof passwordHash !== 'string') {
-      addInfoEvent(req, res, 'user.update.validationFailed', { reason: 'passwordHash not string' });
+      addInfoEvent(req, res, 'user.update.validationFailed', {
+        reason: 'passwordHash not string',
+      });
       res.status(400).json({ message: 'passwordHash must be string' });
       return;
     }
     if (role && typeof role !== 'string') {
-      addInfoEvent(req, res, 'user.update.validationFailed', { reason: 'role not string', role });
+      addInfoEvent(req, res, 'user.update.validationFailed', {
+        reason: 'role not string',
+        role,
+      });
       res.status(400).json({ message: 'role must be string' });
       return;
     }
@@ -112,7 +130,9 @@ export async function updateUser(
     }
 
     if (fieldsToUpdate.length === 0) {
-      addInfoEvent(req, res, 'user.update.validationFailed', { reason: 'no fields provided' });
+      addInfoEvent(req, res, 'user.update.validationFailed', {
+        reason: 'no fields provided',
+      });
       res.status(400).json({ message: 'No fields to update' });
       return;
     }
@@ -136,9 +156,13 @@ export async function updateUser(
     });
     res.json(user);
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
-    addInfoEvent(req, res, 'user.update.failed', { name: req.params.name, message: error.message });
+    addInfoEvent(req, res, 'user.update.failed', {
+      name: req.params.name,
+      message: error.message,
+    });
     next(error);
   }
 }
@@ -151,7 +175,9 @@ export async function deleteUser(
   try {
     const name = req.params.name;
     if (!name) {
-      addInfoEvent(req, res, 'user.delete.validationFailed', { reason: 'missing name param' });
+      addInfoEvent(req, res, 'user.delete.validationFailed', {
+        reason: 'missing name param',
+      });
       res.status(400).json({ message: 'Invalid name' });
       return;
     }
@@ -167,9 +193,13 @@ export async function deleteUser(
     });
     res.status(204).end();
   } catch (err) {
-    const error: AppError = err instanceof Error ? err : new Error('Unknown error');
+    const error: AppError =
+      err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
-    addInfoEvent(req, res, 'user.delete.failed', { name: req.params.name, message: error.message });
+    addInfoEvent(req, res, 'user.delete.failed', {
+      name: req.params.name,
+      message: error.message,
+    });
     next(error);
   }
 }
