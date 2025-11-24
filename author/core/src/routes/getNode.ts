@@ -6,10 +6,12 @@ import { logger } from '../logger';
 import config from '../config/config';
 import { getChildrenNodes } from './util';
 import { v7 as uuidv7 } from 'uuid';
+import { addInfoEvent } from '../middlewares/requestLogger';
 
 const handleContentJson = (
   contentJsonFullPath: string,
   requestPath: string,
+  req: Request,
   res: Response,
 ): boolean => {
   if (!fs.existsSync(contentJsonFullPath)) {
@@ -19,17 +21,14 @@ const handleContentJson = (
   try {
     const data = fs.readFileSync(contentJsonFullPath, 'utf-8');
     const contentData: ScrNode = JSON.parse(data);
-    logger.info('getNode success (.content.json)', {
-      path: requestPath,
+    addInfoEvent(req, res, 'getNode.contentJson', {
       responseContentType: 'application/json',
     });
     res.json(contentData);
     return true;
   } catch (err: unknown) {
-    logger.error('Failed to parse .content.json', {
-      path: requestPath,
-      error: (err as Error).message,
-      status: 422,
+    addInfoEvent(req, res, 'getNode.contentJson.parseFailed', {
+      reason: (err as Error).message,
     });
     res.status(422).end();
     return true;
@@ -39,6 +38,7 @@ const handleContentJson = (
 const handleDirectory = (
   fullPath: string,
   requestPath: string,
+  req: Request,
   res: Response,
 ): void => {
   const children = getChildrenNodes(fullPath);
@@ -48,9 +48,7 @@ const handleDirectory = (
     name: path.basename(fullPath),
     children: children,
   };
-  logger.info('getNode success (directory)', {
-    path: requestPath,
-    status: 200,
+  addInfoEvent(req, res, 'getNode.directory', {
     responseContentType: 'application/json',
   });
   res.json(folderNode);
@@ -59,12 +57,11 @@ const handleDirectory = (
 const handleFile = (
   fullPath: string,
   requestPath: string,
+  req: Request,
   res: Response,
 ): void => {
   const content = fs.readFileSync(fullPath, 'utf-8');
-  logger.info('getNode success (file)', {
-    path: requestPath,
-    status: 200,
+  addInfoEvent(req, res, 'getNode.file', {
     responseContentType: 'text/plain',
   });
   res.header('Content-Type', 'text/plain');
@@ -74,51 +71,44 @@ const handleFile = (
 export const getNode = (req: Request, res: Response) => {
   try {
     const contentRoot = path.resolve(config.contentRoot);
-    // Strip /scr prefix from the request path
     const relativePath = req.path.replace(/^\/scr/, '');
     const fullPath = path.join(contentRoot, relativePath);
 
-    logger.info('getNode path resolution', {
-      requestPath: req.path,
-      contentRoot,
-      relativePath,
-      fullPath,
+    addInfoEvent(req, res, 'getNode.pathResolution', {
       exists: fs.existsSync(fullPath),
     });
 
     if (!fullPath.startsWith(contentRoot)) {
-      logger.warn('getNode forbidden', { path: req.path, status: 403 });
+      addInfoEvent(req, res, 'getNode.forbidden', { reason: 'path traversal' });
       res.status(403).end();
       return;
     }
 
     if (!fs.existsSync(fullPath)) {
-      logger.warn('Path not found', { path: req.path, status: 404 });
+      addInfoEvent(req, res, 'getNode.notFound', { path: req.path });
       res.status(404).end();
       return;
     }
 
     const contentJsonFullPath = path.join(fullPath, '.content.json');
-    if (handleContentJson(contentJsonFullPath, req.path, res)) {
+    if (handleContentJson(contentJsonFullPath, req.path, req, res)) {
       return;
     }
 
     const stats = fs.statSync(fullPath);
     if (stats.isDirectory()) {
-      handleDirectory(fullPath, req.path, res);
+      handleDirectory(fullPath, req.path, req, res);
       return;
     } else if (stats.isFile()) {
-      handleFile(fullPath, req.path, res);
+      handleFile(fullPath, req.path, req, res);
       return;
     } else {
-      logger.warn('getNode not found (neither file nor dir)', {
-        path: req.path,
-        status: 404,
-      });
+      addInfoEvent(req, res, 'getNode.unexpectedType', { path: req.path });
       res.status(404).end();
       return;
     }
   } catch (err: unknown) {
+    // Log only truly unexpected exceptions
     logger.error('Unhandled getNode error', {
       path: req.path,
       error: (err as Error).message,
