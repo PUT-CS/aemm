@@ -8,6 +8,7 @@ export enum NodeType {
 export interface ScrNode {
   type: NodeType;
   name: string;
+  id: string;
   title?: string;
   description?: string;
   children?: ScrNode[];

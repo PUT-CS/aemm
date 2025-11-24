@@ -1,14 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { all, get, runWithInfo, ensureUsersTable } from '../db/sqliteClient';
+import { Db, userSchema } from '../db/db';
 import { AppError } from '../middlewares/errorHandler';
 import { logger } from '../logger';
-
-interface UserRow {
-  id: number;
-  name: string;
-  passwordHash: string;
-  role: string;
-}
 
 export async function listUsers(
   _req: Request,
@@ -16,10 +9,7 @@ export async function listUsers(
   next: NextFunction,
 ) {
   try {
-    await ensureUsersTable();
-    const users = await all<UserRow>(
-      'SELECT id, name, passwordHash, role FROM users ORDER BY id ASC;',
-    );
+    const users = await Db.getAllUsers();
     logger.info('Users listed', { count: users.length });
     res.json(users);
   } catch (err) {
@@ -33,23 +23,19 @@ export async function listUsers(
 
 export async function getUser(req: Request, res: Response, next: NextFunction) {
   try {
-    await ensureUsersTable();
     const name = req.params.name;
-    if (!name || typeof name !== 'string') {
+    if (!name) {
       logger.warn('Invalid name parameter in getUser', { name });
       res.status(400).json({ message: 'Invalid name' });
       return;
     }
-    const user = await get<UserRow>(
-      'SELECT id, name, passwordHash, role FROM users WHERE name = ?;',
-      [name],
-    );
+    const user = await Db.getUser(name);
     if (!user) {
       logger.warn('User not found', { name });
       res.status(404).json({ message: 'Not found' });
       return;
     }
-    logger.info('User retrieved', { name, id: user.id });
+    logger.info('User retrieved', { name });
     res.json(user);
   } catch (err) {
     const error: AppError =
@@ -69,31 +55,14 @@ export async function createUser(
   next: NextFunction,
 ) {
   try {
-    await ensureUsersTable();
-    const { name, passwordHash, role } = req.body || {};
-    if (!name || typeof name !== 'string') {
-      logger.warn('Missing or invalid name in createUser', { name });
-      res.status(400).json({ message: 'name is required' });
-      return;
-    }
-    if (!passwordHash || typeof passwordHash !== 'string') {
-      logger.warn('Missing or invalid passwordHash in createUser', { name });
-      res.status(400).json({ message: 'passwordHash is required' });
-      return;
-    }
-    if (!role || typeof role !== 'string') {
-      logger.warn('Missing or invalid role in createUser', { name, role });
-      res.status(400).json({ message: 'role is required' });
-      return;
-    }
-    let lastId: number | null = null;
+    const user = userSchema.parse(req.body);
     try {
-      const info = await runWithInfo(
-        'INSERT INTO users (name, passwordHash, role) VALUES (?, ?, ?);',
-        [name, passwordHash, role],
-      );
-      lastId = info.lastID;
-      logger.info('User created successfully', { name, id: lastId, role });
+      const created = await Db.createUser(user);
+      logger.info('User created successfully', {
+        name: created.name,
+        role: created.role,
+      });
+      res.status(201).json(created);
     } catch (e) {
       if (e instanceof Error && /SQLITE_CONSTRAINT/.test(e.message)) {
         logger.warn('Duplicate user creation attempted', { name });
@@ -102,11 +71,6 @@ export async function createUser(
       }
       throw e;
     }
-    const created = await get<UserRow>(
-      'SELECT id, name, passwordHash, role FROM users WHERE id = ?;',
-      [lastId],
-    );
-    res.status(201).json(created);
   } catch (err) {
     const error: AppError =
       err instanceof Error ? err : new Error('Unknown error');
@@ -125,7 +89,6 @@ export async function updateUser(
   next: NextFunction,
 ) {
   try {
-    await ensureUsersTable();
     const name = req.params.name;
     if (!name || typeof name !== 'string') {
       logger.warn('Invalid name parameter in updateUser', { name });
@@ -144,40 +107,31 @@ export async function updateUser(
       return;
     }
 
-    const sets: string[] = [];
-    const params: unknown[] = [];
     const fieldsToUpdate: string[] = [];
+    const updates: { passwordHash?: string; role?: string } = {};
 
     if (passwordHash !== undefined) {
-      sets.push('passwordHash = COALESCE(?, passwordHash)');
-      params.push(passwordHash ?? null);
+      updates.passwordHash = passwordHash;
       fieldsToUpdate.push('passwordHash');
     }
     if (role !== undefined) {
-      sets.push('role = COALESCE(?, role)');
-      params.push(role ?? null);
+      updates.role = role;
       fieldsToUpdate.push('role');
     }
 
-    if (sets.length === 0) {
+    if (fieldsToUpdate.length === 0) {
       logger.warn('No fields to update in updateUser', { name });
       res.status(400).json({ message: 'No fields to update' });
       return;
     }
 
-    const sql = `UPDATE users SET ${sets.join(', ')} WHERE name = ?;`;
-    params.push(name);
-
-    await runWithInfo(sql, params);
+    await Db.updateUser(name, updates);
     logger.info('User updated successfully', {
       name,
       fieldsUpdated: fieldsToUpdate,
     });
 
-    const user = await get<UserRow>(
-      'SELECT id, name, passwordHash, role FROM users WHERE name = ?;',
-      [name],
-    );
+    const user = await Db.getUser(name);
     if (!user) {
       logger.warn('User not found after update', { name });
       res.status(404).json({ message: 'Not found' });
@@ -202,14 +156,13 @@ export async function deleteUser(
   next: NextFunction,
 ) {
   try {
-    await ensureUsersTable();
     const name = req.params.name;
     if (!name || typeof name !== 'string') {
       logger.warn('Invalid name parameter in deleteUser', { name });
       res.status(400).json({ message: 'Invalid name' });
       return;
     }
-    const info = await runWithInfo('DELETE FROM users WHERE name = ?;', [name]);
+    const info = await Db.deleteUser(name);
     if (!info.changes) {
       logger.warn('User not found for deletion', { name });
       res.status(404).json({ message: 'Not found' });

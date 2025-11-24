@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { getDbHealth } from './controllers/dbController';
 import {
   createUser,
   deleteUser,
   getUser,
   listUsers,
   updateUser,
-} from './controllers/usersController';
+} from './routes/users';
 import { writeNode } from './routes/writeNode';
 import { getNode } from './routes/getNode';
 import { getTree } from './routes/getTree';
@@ -18,8 +17,6 @@ router.get('/scrtree', getTree);
 router.get('/scr*queryPath', getNode);
 
 router.put('/scr*queryPath', writeNode);
-
-router.get('/db/health', getDbHealth);
 
 router.get('/users', listUsers);
 router.post('/users', createUser);

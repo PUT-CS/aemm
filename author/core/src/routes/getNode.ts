@@ -5,6 +5,7 @@ import path from 'path';
 import { logger } from '../logger';
 import config from '../config/config';
 import { getChildrenNodes } from './util';
+import { v7 as uuidv7 } from 'uuid';
 
 const handleContentJson = (
   contentJsonFullPath: string,
@@ -20,7 +21,6 @@ const handleContentJson = (
     const contentData: ScrNode = JSON.parse(data);
     logger.info('getNode success (.content.json)', {
       path: requestPath,
-      status: 200,
       responseContentType: 'application/json',
     });
     res.json(contentData);
@@ -44,6 +44,7 @@ const handleDirectory = (
   const children = getChildrenNodes(fullPath);
   const folderNode: ScrNode = {
     type: NodeType.FOLDER,
+    id: uuidv7(),
     name: path.basename(fullPath),
     children: children,
   };

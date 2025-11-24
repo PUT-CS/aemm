@@ -4,6 +4,7 @@ import * as fs from 'node:fs';
 import path from 'path';
 import { logger } from '../logger';
 import { isScrNode } from './util';
+import { v7 as uuidv7 } from 'uuid';
 
 export const writeNode = (req: Request, res: Response) => {
   try {
@@ -61,6 +62,7 @@ export const writeNode = (req: Request, res: Response) => {
       try {
         const jsonData =
           typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        jsonData.id = uuidv7();
 
         // Validate that JSON is a valid ScrNode
         if (!isScrNode(jsonData)) {

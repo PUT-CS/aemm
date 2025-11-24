@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import config from '../config/config';
 import { Request, Response } from 'express';
+import { v7 as uuid7 } from 'uuid';
 
 export function getTree(req: Request, res: Response) {
   try {
@@ -25,6 +26,7 @@ function buildTreeNode(fullPath: string): ScrNode {
   // Handle files
   if (stats.isFile()) {
     return {
+      id: uuid7(),
       type: NodeType.FILE,
       name: nodeName,
     };
@@ -68,6 +70,7 @@ function buildTreeNode(fullPath: string): ScrNode {
 
     // Return basic folder structure (including empty folders)
     return {
+      id: uuid7(),
       type: NodeType.FOLDER,
       name: nodeName,
       children: children.length > 0 ? children : undefined,
@@ -76,6 +79,7 @@ function buildTreeNode(fullPath: string): ScrNode {
 
   // Fallback
   return {
+    id: uuid7(),
     type: NodeType.FILE,
     name: nodeName,
   };
