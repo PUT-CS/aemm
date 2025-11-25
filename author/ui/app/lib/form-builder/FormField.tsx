@@ -91,7 +91,6 @@ export function FormField({
   const { kind, about } = parseDescription(description);
   const label = generateLabel(name);
 
-  // Checkbox for boolean fields (special layout)
   if (schema instanceof z.ZodBoolean) {
     return (
       <ShadcnFormField
@@ -118,7 +117,6 @@ export function FormField({
     );
   }
 
-  // Select for enum fields
   if (schema instanceof z.ZodEnum) {
     const options = schema.options as string[];
     return (
@@ -145,7 +143,6 @@ export function FormField({
     );
   }
 
-  // Number input
   if (schema instanceof z.ZodNumber) {
     return (
       <ShadcnFormField
@@ -168,7 +165,6 @@ export function FormField({
     );
   }
 
-  // Textarea for richText
   if (kind === "richText") {
     return (
       <ShadcnFormField
@@ -186,7 +182,6 @@ export function FormField({
     );
   }
 
-  // Default: text input (handles plainText, url, etc.)
   return (
     <ShadcnFormField
       name={name}
