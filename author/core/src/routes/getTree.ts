@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import config from '../config/config';
 import { Request, Response } from 'express';
-import { v7 as uuid7 } from 'uuid';
 
 export function getTree(req: Request, res: Response) {
   try {
@@ -19,16 +18,17 @@ export function getTree(req: Request, res: Response) {
   }
 }
 
-function buildTreeNode(fullPath: string): ScrNode {
+function buildTreeNode(fullPath: string): ScrNode & { children?: ScrNode[] } {
   const stats = fs.statSync(fullPath);
   const nodeName = path.basename(fullPath);
 
   // Handle files
   if (stats.isFile()) {
     return {
-      id: uuid7(),
       type: NodeType.FILE,
       name: nodeName,
+      createdAt: stats.birthtime,
+      updatedAt: stats.mtime,
     };
   }
 
@@ -70,17 +70,13 @@ function buildTreeNode(fullPath: string): ScrNode {
 
     // Return basic folder structure (including empty folders)
     return {
-      id: uuid7(),
       type: NodeType.FOLDER,
       name: nodeName,
-      children: children.length > 0 ? children : undefined,
+      createdAt: stats.birthtime,
+      updatedAt: stats.mtime,
+      children,
     };
   }
 
-  // Fallback
-  return {
-    id: uuid7(),
-    type: NodeType.FILE,
-    name: nodeName,
-  };
+  throw new Error(`Unsupported file system entry at ${fullPath}`);
 }

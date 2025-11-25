@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(
   express.raw({
     type: (req) => !req.headers['content-type']?.includes('application/json'),
-    limit: '50mb',
+    limit: '1024mb',
   }),
 );
 

@@ -1,11 +1,11 @@
 import React from "react";
 import ColumnItem from "~/routes/sites/SitesBrowser/ColumnItem";
-import type { ScrNode } from "@aemm/common";
 import { findNodeAtPath } from "~/routes/sites/SitesBrowser/treeUtils";
+import type { ScrNodeWithChildren } from "@aemm/common";
 
 interface ColumnProps {
   path: string;
-  tree: ScrNode | undefined;
+  tree: ScrNodeWithChildren | undefined;
   selectedChildPath?: string;
   onItemClick: (itemPath: string) => void;
 }
@@ -36,7 +36,7 @@ export default function Column({
       )}
       {data && data.children && (
         <div>
-          {data.children.map((item) => {
+          {data.children.map((item: ScrNodeWithChildren) => {
             const childPath =
               path === "/" ? `/${item.name}` : `${path}/${item.name}`;
             return (

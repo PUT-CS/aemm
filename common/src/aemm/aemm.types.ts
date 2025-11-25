@@ -1,9 +1,4 @@
-interface Page {
-  type: string;
-  htmlTitle: string;
-  description?: string;
-  components: unknown[];
-}
+import { NodeType, ScrNode } from "../scr";
 
 export type UserRole = "admin" | "editor";
 
@@ -23,4 +18,22 @@ export interface User extends Timestamps {
   username: string;
   passwordHash: string;
   role: UserRole;
+}
+
+export interface Page extends ScrNode {
+  type: NodeType.PAGE;
+  pageTemplatePath?: string;
+  htmlTitle?: string;
+  description?: string;
+  components: unknown[];
+}
+
+export interface Folder extends ScrNode {
+  type: NodeType.FOLDER;
+}
+
+export interface Site extends ScrNode {
+  type: NodeType.SITE;
+  defaultPageTemplatePath?: string;
+  description?: string;
 }

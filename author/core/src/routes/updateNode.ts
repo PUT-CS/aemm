@@ -11,8 +11,9 @@ import { isScrNode } from './util';
  */
 export const updateNode = (req: Request, res: Response) => {
   try {
+    const requestPath = req.path.replace(/^\/scr/, '');
     const contentRoot = config.contentRoot;
-    const fullPath = path.resolve(contentRoot + req.path);
+    const fullPath = path.resolve(contentRoot + requestPath);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
       logger.warn('updateNode forbidden', { path: req.path, status: 403 });
@@ -21,32 +22,25 @@ export const updateNode = (req: Request, res: Response) => {
     }
 
     if (!req.body) {
-      logger.warn('updateNode bad request (no body)', {
-        path: req.path,
-        status: 400,
-      });
+      logger.warn('updateNode bad request (no body)');
       res.status(400).send('Request body is required');
       return;
     }
 
     const exists = fs.existsSync(fullPath);
+    logger.info(`Node exists: ${exists}`);
 
     if (exists) {
       const stats = fs.statSync(fullPath);
 
       if (stats.isDirectory()) {
-        // Update .content.json for directories
         const contentJsonPath = fullPath + '/.content.json';
         fs.writeFileSync(
           contentJsonPath,
           JSON.stringify(req.body, null, 2),
           'utf8',
         );
-        logger.info('Directory metadata updated', {
-          path: req.path,
-          status: 200,
-          responseContentType: 'application/json',
-        });
+        logger.info('Directory metadata updated');
         res.status(200).json(req.body);
         return;
       }
@@ -64,16 +58,14 @@ export const updateNode = (req: Request, res: Response) => {
 
       // Validate that JSON is a valid ScrNode
       if (!isScrNode(jsonData)) {
-        logger.warn('updateNode invalid ScrNode', {
-          path: req.path,
-          status: 400,
-        });
-        res
-          .status(400)
-          .send(
-            'Invalid ScrNode structure: must include type and name fields, with valid ScrType enum value',
-          );
+        logger.warn('updateNode invalid ScrNode');
+        res.status(400).send('Invalid ScrNode structure');
         return;
+      }
+
+      // Create the folder itself if it doesn't exist
+      if (!fs.existsSync(fullPath)) {
+        fs.mkdirSync(fullPath, { recursive: true });
       }
 
       // Write as .content.json
@@ -84,18 +76,11 @@ export const updateNode = (req: Request, res: Response) => {
         'utf8',
       );
       const statusCode = exists ? 200 : 201;
-      logger.info('Node JSON written', {
-        path: req.path,
-        type: jsonData.type,
-        status: statusCode,
-        responseContentType: 'application/json',
-      });
+      logger.info('Node JSON written');
       res.status(statusCode).json(jsonData);
       return;
     } catch (err: unknown) {
       logger.warn('Invalid JSON body', {
-        path: req.path,
-        status: 400,
         error: (err as Error).message,
       });
       res.status(400).send('Invalid JSON');
@@ -103,9 +88,7 @@ export const updateNode = (req: Request, res: Response) => {
     }
   } catch (err: unknown) {
     logger.error('Unhandled updateNode error', {
-      path: req.path,
       error: (err as Error).message,
-      status: 500,
     });
     res.status(500).end();
     return;

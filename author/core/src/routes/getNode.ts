@@ -8,6 +8,8 @@ import { getChildrenNodes } from './util';
 import { v7 as uuidv7 } from 'uuid';
 import { addInfoEvent } from '../middlewares/requestLogger';
 
+type ScrNodeWithChildren = ScrNode & { children?: ScrNodeWithChildren[] };
+
 const handleContentJson = (
   contentJsonFullPath: string,
   requestPath: string,
@@ -42,11 +44,12 @@ const handleDirectory = (
   res: Response,
 ): void => {
   const children = getChildrenNodes(fullPath);
-  const folderNode: ScrNode = {
+  const folderNode: ScrNodeWithChildren = {
     type: NodeType.FOLDER,
-    id: uuidv7(),
     name: path.basename(fullPath),
     children: children,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
   addInfoEvent(req, res, 'getNode.directory', {
     responseContentType: 'application/json',
@@ -108,11 +111,8 @@ export const getNode = (req: Request, res: Response) => {
       return;
     }
   } catch (err: unknown) {
-    // Log only truly unexpected exceptions
     logger.error('Unhandled getNode error', {
-      path: req.path,
       error: (err as Error).message,
-      status: 500,
     });
     res.status(500).end();
     return;
