@@ -1,1 +1,6 @@
-export { NodeType, ScrNode } from "./scr.types.js";
+export {
+  NodeType,
+  ScrNode,
+  ScrNodeWithChildren,
+  ScrNodeWithoutTimestamps,
+} from "./scr.types.js";

@@ -10,9 +10,11 @@ import { logger } from '../logger';
  */
 export const uploadAsset = (req: Request, res: Response) => {
   try {
-    const contentType = req.get('Content-Type') || '';
+    const requestPath = req.path.replace(/^\/scr/, '');
     const contentRoot = config.contentRoot;
-    const fullPath = path.resolve(contentRoot + req.path);
+    const fullPath = path.resolve(contentRoot + requestPath);
+
+    logger.debug(`uploadAsset called for path: ${fullPath}`);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
       logger.warn('uploadAsset forbidden', { path: req.path, status: 403 });
@@ -21,16 +23,13 @@ export const uploadAsset = (req: Request, res: Response) => {
     }
 
     if (!req.body) {
-      logger.warn('uploadAsset bad request (no body)', {
-        path: req.path,
-        status: 400,
-        requestContentType: contentType,
-      });
+      logger.warn('uploadAsset bad request (no body)');
       res.status(400).send('Request body is required');
       return;
     }
 
     const exists = fs.existsSync(fullPath);
+    logger.debug(`File exists: ${exists}`);
 
     // Handle file creation or update
     const dirPath = path.dirname(fullPath);
@@ -40,30 +39,18 @@ export const uploadAsset = (req: Request, res: Response) => {
 
     // Handle binary/text content
     if (!Buffer.isBuffer(req.body)) {
-      logger.warn('Invalid body (not buffer) for asset upload', {
-        path: req.path,
-        status: 400,
-      });
+      logger.warn('Invalid body (not buffer) for asset upload');
       res.status(400).send('Invalid request body format');
       return;
     }
 
     fs.writeFileSync(fullPath, req.body);
     const statusCode = exists ? 200 : 201;
-    logger.info('File content written', {
-      path: req.path,
-      bytes: (req.body as Buffer).length,
-      status: statusCode,
-      responseContentType: contentType || 'application/octet-stream',
-    });
+    logger.info('File content written', { bytes: (req.body as Buffer).length });
     res.status(statusCode).send(req.body);
     return;
   } catch (err: unknown) {
-    logger.error('Unhandled uploadAsset error', {
-      path: req.path,
-      error: (err as Error).message,
-      status: 500,
-    });
+    logger.error('Unhandled uploadAsset error', { error: err });
     res.status(500).end();
     return;
   }

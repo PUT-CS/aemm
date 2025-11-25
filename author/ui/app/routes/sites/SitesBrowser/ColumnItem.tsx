@@ -20,7 +20,7 @@ import NewFolderDialog from "~/routes/sites/dialogs/NewFolderDialog";
 import FileUploadDialog from "~/routes/sites/dialogs/FileUploadDialog";
 
 interface ColumnItemProps {
-  item: ScrNode;
+  item: ScrNode & { children?: unknown[] };
   itemPath: string;
   onClick: (e: React.MouseEvent) => void;
   selectedChildPath?: string;
@@ -113,16 +113,22 @@ export default function ColumnItem({
       >
         <DialogContent>
           {activeDialog === NodeType.SITE && (
-            <NewSiteDialog parentPath={itemPath} />
+            <NewSiteDialog parentPath={itemPath} onClose={handleCloseDialog} />
           )}
           {activeDialog === NodeType.PAGE && (
-            <NewPageDialog parentPath={itemPath} />
+            <NewPageDialog parentPath={itemPath} onClose={handleCloseDialog} />
           )}
           {activeDialog === NodeType.FOLDER && (
-            <NewFolderDialog parentPath={itemPath} />
+            <NewFolderDialog
+              parentPath={itemPath}
+              onClose={handleCloseDialog}
+            />
           )}
           {activeDialog === NodeType.FILE && (
-            <FileUploadDialog parentPath={itemPath} />
+            <FileUploadDialog
+              parentPath={itemPath}
+              onClose={handleCloseDialog}
+            />
           )}
         </DialogContent>
       </Dialog>

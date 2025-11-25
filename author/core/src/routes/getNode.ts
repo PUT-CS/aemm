@@ -6,6 +6,8 @@ import { logger } from '../logger';
 import config from '../config/config';
 import { getChildrenNodes } from './util';
 
+type ScrNodeWithChildren = ScrNode & { children?: ScrNodeWithChildren[] };
+
 const handleContentJson = (
   contentJsonFullPath: string,
   requestPath: string,
@@ -42,10 +44,12 @@ const handleDirectory = (
   res: Response,
 ): void => {
   const children = getChildrenNodes(fullPath);
-  const folderNode: ScrNode = {
+  const folderNode: ScrNodeWithChildren = {
     type: NodeType.FOLDER,
     name: path.basename(fullPath),
     children: children,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
   logger.info('getNode success (directory)', {
     path: requestPath,
@@ -73,7 +77,6 @@ const handleFile = (
 export const getNode = (req: Request, res: Response) => {
   try {
     const contentRoot = path.resolve(config.contentRoot);
-    // Strip /scr prefix from the request path
     const relativePath = req.path.replace(/^\/scr/, '');
     const fullPath = path.join(contentRoot, relativePath);
 
@@ -110,18 +113,13 @@ export const getNode = (req: Request, res: Response) => {
       handleFile(fullPath, req.path, res);
       return;
     } else {
-      logger.warn('getNode not found (neither file nor dir)', {
-        path: req.path,
-        status: 404,
-      });
+      logger.warn('getNode not found (neither file nor dir)');
       res.status(404).end();
       return;
     }
   } catch (err: unknown) {
     logger.error('Unhandled getNode error', {
-      path: req.path,
       error: (err as Error).message,
-      status: 500,
     });
     res.status(500).end();
     return;
