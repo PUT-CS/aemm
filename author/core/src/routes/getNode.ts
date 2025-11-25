@@ -5,7 +5,6 @@ import path from 'path';
 import { logger } from '../logger';
 import config from '../config/config';
 import { getChildrenNodes } from './util';
-import { v7 as uuidv7 } from 'uuid';
 import { addInfoEvent } from '../middlewares/requestLogger';
 
 type ScrNodeWithChildren = ScrNode & { children?: ScrNodeWithChildren[] };
