@@ -87,7 +87,7 @@ export const getNode = (req: Request, res: Response) => {
     }
 
     if (!fs.existsSync(fullPath)) {
-      addInfoEvent(req, res, 'getNode.notFound', { path: req.path });
+      addInfoEvent(req, res, 'getNode.notFound');
       res.status(404).end();
       return;
     }
@@ -105,7 +105,7 @@ export const getNode = (req: Request, res: Response) => {
       handleFile(fullPath, req.path, req, res);
       return;
     } else {
-      addInfoEvent(req, res, 'getNode.unexpectedType', { path: req.path });
+      addInfoEvent(req, res, 'getNode.unexpectedType');
       res.status(404).end();
       return;
     }

@@ -10,6 +10,7 @@ import { uploadAsset } from './routes/uploadAsset';
 import { getNode } from './routes/getNode';
 import { getTree } from './routes/getTree';
 import { updateNode } from './routes/updateNode';
+import { deleteNode } from './routes/deleteNode';
 
 const router = Router();
 
@@ -20,6 +21,8 @@ router.get('/scr*queryPath', getNode);
 router.put('/scr*queryPath', updateNode);
 
 router.post('/scr*queryPath', uploadAsset);
+
+router.delete('/scr*queryPath', deleteNode);
 
 router.get('/users', listUsers);
 router.post('/users', createUser);
