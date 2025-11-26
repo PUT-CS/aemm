@@ -5,7 +5,6 @@ import { addInfoEvent } from '../middlewares/requestLogger';
 import fs from 'node:fs';
 import { logger } from '../logger';
 
-
 export const deleteNode = (req: Request, res: Response) => {
   try {
     const contentRoot = path.resolve(config.contentRoot);
@@ -13,7 +12,9 @@ export const deleteNode = (req: Request, res: Response) => {
     const fullPath = path.join(contentRoot, relativePath);
 
     if (!fullPath.startsWith(contentRoot)) {
-      addInfoEvent(req, res, 'deleteNode.forbidden', { reason: 'path traversal' });
+      addInfoEvent(req, res, 'deleteNode.forbidden', {
+        reason: 'path traversal',
+      });
       res.status(403).end();
       return;
     }
@@ -24,10 +25,9 @@ export const deleteNode = (req: Request, res: Response) => {
       return;
     }
 
-    fs.rmSync(fullPath, {recursive: true, force: true});
+    fs.rmSync(fullPath, { recursive: true, force: true });
     res.status(200).end();
     return;
-
   } catch (err: unknown) {
     logger.error('Unhandled deleteNode error', {
       error: (err as Error).message,
@@ -35,4 +35,4 @@ export const deleteNode = (req: Request, res: Response) => {
     res.status(500).end();
     return;
   }
-}
+};
