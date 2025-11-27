@@ -3,9 +3,22 @@ import config from '../config/config';
 import * as fs from 'node:fs';
 import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
-import { isScrNode } from './util';
 import { randomUUID } from 'node:crypto';
 import { logger } from '../logger';
+import { z } from 'zod';
+import { NodeType } from '@aemm/common';
+
+// @ts-expect-error -- recursive schema
+const incomingScrNodeSchema = z.lazy(() =>
+  z
+    .object({
+      type: z.enum(NodeType),
+      id: z.uuidv4(),
+      name: z.string().min(1),
+      children: z.array(incomingScrNodeSchema).optional(),
+    })
+    .strict(),
+);
 
 /**
  * Updates a node's metadata (JSON content).
@@ -59,10 +72,11 @@ export const updateNode = (req: Request, res: Response) => {
         typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
       // Assign a new UUID if not present
-      jsonData.id = randomUUID()
+      jsonData.id = randomUUID();
 
       // Validate that JSON is a valid ScrNode
-      if (!isScrNode(jsonData)) {
+      const validationResult = incomingScrNodeSchema.safeParse(jsonData);
+      if (!validationResult.success) {
         addInfoEvent(req, res, 'updateNode.invalidScrNode');
         res.status(400).send('Invalid ScrNode structure');
         return;
