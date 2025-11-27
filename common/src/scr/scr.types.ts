@@ -19,4 +19,3 @@ export interface ScrNodeWithChildren extends ScrNode {
 }
 
 export type ScrNodeWithoutTimestamps = Omit<ScrNode, keyof Timestamps>;
-
