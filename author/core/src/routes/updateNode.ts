@@ -2,8 +2,23 @@ import { Request, Response } from 'express';
 import config from '../config/config';
 import * as fs from 'node:fs';
 import path from 'path';
+import { addInfoEvent } from '../middlewares/requestLogger';
+import { randomUUID } from 'node:crypto';
 import { logger } from '../logger';
-import { isScrNode } from './util';
+import { z } from 'zod';
+import { NodeType } from '@aemm/common';
+
+// @ts-expect-error -- recursive schema
+const incomingScrNodeSchema = z.lazy(() =>
+  z
+    .object({
+      type: z.enum(NodeType),
+      id: z.uuidv4(),
+      name: z.string().min(1),
+      children: z.array(incomingScrNodeSchema).optional(),
+    })
+    .strict(),
+);
 
 /**
  * Updates a node's metadata (JSON content).
@@ -16,19 +31,19 @@ export const updateNode = (req: Request, res: Response) => {
     const fullPath = path.resolve(contentRoot + requestPath);
 
     if (!fullPath.startsWith(path.resolve(contentRoot))) {
-      logger.warn('updateNode forbidden', { path: req.path, status: 403 });
+      addInfoEvent(req, res, 'updateNode.forbidden');
       res.status(403).end();
       return;
     }
 
     if (!req.body) {
-      logger.warn('updateNode bad request (no body)');
+      addInfoEvent(req, res, 'updateNode.badRequest', { reason: 'no body' });
       res.status(400).send('Request body is required');
       return;
     }
 
     const exists = fs.existsSync(fullPath);
-    logger.info(`Node exists: ${exists}`);
+    addInfoEvent(req, res, 'updateNode.nodeExists', { exists });
 
     if (exists) {
       const stats = fs.statSync(fullPath);
@@ -40,7 +55,7 @@ export const updateNode = (req: Request, res: Response) => {
           JSON.stringify(req.body, null, 2),
           'utf8',
         );
-        logger.info('Directory metadata updated');
+        addInfoEvent(req, res, 'updateNode.directoryMetadataUpdated');
         res.status(200).json(req.body);
         return;
       }
@@ -56,9 +71,13 @@ export const updateNode = (req: Request, res: Response) => {
       const jsonData =
         typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
+      // Assign a new UUID if not present
+      jsonData.id = randomUUID();
+
       // Validate that JSON is a valid ScrNode
-      if (!isScrNode(jsonData)) {
-        logger.warn('updateNode invalid ScrNode');
+      const validationResult = incomingScrNodeSchema.safeParse(jsonData);
+      if (!validationResult.success) {
+        addInfoEvent(req, res, 'updateNode.invalidScrNode');
         res.status(400).send('Invalid ScrNode structure');
         return;
       }
@@ -76,11 +95,11 @@ export const updateNode = (req: Request, res: Response) => {
         'utf8',
       );
       const statusCode = exists ? 200 : 201;
-      logger.info('Node JSON written');
+      addInfoEvent(req, res, 'updateNode.nodeJsonWritten');
       res.status(statusCode).json(jsonData);
       return;
     } catch (err: unknown) {
-      logger.warn('Invalid JSON body', {
+      addInfoEvent(req, res, 'updateNode.invalidJsonBody', {
         error: (err as Error).message,
       });
       res.status(400).send('Invalid JSON');

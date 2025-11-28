@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { logger } from '../logger';
+import { addInfoEvent } from './requestLogger';
 
 export interface AppError extends Error {
   status?: number;
@@ -7,16 +7,20 @@ export interface AppError extends Error {
 
 export const errorHandler = (
   err: AppError,
-  _req: Request,
+  req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction,
 ) => {
-  logger.error('Request error', {
-    status: err.status || 500,
-    message: err.message,
+  const status = err.status || 500;
+
+  // Attach error event for unified logging in requestLogger
+  addInfoEvent(req, res, 'request.error', {
+    message: err.message || 'Internal Server Error',
+    errorName: err.name,
   });
-  res.status(err.status || 500).json({
+
+  res.status(status).json({
     message: err.message || 'Internal Server Error',
   });
 };

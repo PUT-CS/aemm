@@ -5,12 +5,14 @@ import path from 'path';
 import { logger } from '../logger';
 import config from '../config/config';
 import { getChildrenNodes } from './util';
+import { addInfoEvent } from '../middlewares/requestLogger';
 
 type ScrNodeWithChildren = ScrNode & { children?: ScrNodeWithChildren[] };
 
 const handleContentJson = (
   contentJsonFullPath: string,
   requestPath: string,
+  req: Request,
   res: Response,
 ): boolean => {
   if (!fs.existsSync(contentJsonFullPath)) {
@@ -20,18 +22,14 @@ const handleContentJson = (
   try {
     const data = fs.readFileSync(contentJsonFullPath, 'utf-8');
     const contentData: ScrNode = JSON.parse(data);
-    logger.info('getNode success (.content.json)', {
-      path: requestPath,
-      status: 200,
+    addInfoEvent(req, res, 'getNode.contentJson', {
       responseContentType: 'application/json',
     });
     res.json(contentData);
     return true;
   } catch (err: unknown) {
-    logger.error('Failed to parse .content.json', {
-      path: requestPath,
-      error: (err as Error).message,
-      status: 422,
+    addInfoEvent(req, res, 'getNode.contentJson.parseFailed', {
+      reason: (err as Error).message,
     });
     res.status(422).end();
     return true;
@@ -41,6 +39,7 @@ const handleContentJson = (
 const handleDirectory = (
   fullPath: string,
   requestPath: string,
+  req: Request,
   res: Response,
 ): void => {
   const children = getChildrenNodes(fullPath);
@@ -51,9 +50,7 @@ const handleDirectory = (
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  logger.info('getNode success (directory)', {
-    path: requestPath,
-    status: 200,
+  addInfoEvent(req, res, 'getNode.directory', {
     responseContentType: 'application/json',
   });
   res.json(folderNode);
@@ -62,12 +59,11 @@ const handleDirectory = (
 const handleFile = (
   fullPath: string,
   requestPath: string,
+  req: Request,
   res: Response,
 ): void => {
   const content = fs.readFileSync(fullPath, 'utf-8');
-  logger.info('getNode success (file)', {
-    path: requestPath,
-    status: 200,
+  addInfoEvent(req, res, 'getNode.file', {
     responseContentType: 'text/plain',
   });
   res.header('Content-Type', 'text/plain');
@@ -80,40 +76,36 @@ export const getNode = (req: Request, res: Response) => {
     const relativePath = req.path.replace(/^\/scr/, '');
     const fullPath = path.join(contentRoot, relativePath);
 
-    logger.info('getNode path resolution', {
-      requestPath: req.path,
-      contentRoot,
-      relativePath,
-      fullPath,
+    addInfoEvent(req, res, 'getNode.pathResolution', {
       exists: fs.existsSync(fullPath),
     });
 
     if (!fullPath.startsWith(contentRoot)) {
-      logger.warn('getNode forbidden', { path: req.path, status: 403 });
+      addInfoEvent(req, res, 'getNode.forbidden', { reason: 'path traversal' });
       res.status(403).end();
       return;
     }
 
     if (!fs.existsSync(fullPath)) {
-      logger.warn('Path not found', { path: req.path, status: 404 });
+      addInfoEvent(req, res, 'getNode.notFound');
       res.status(404).end();
       return;
     }
 
     const contentJsonFullPath = path.join(fullPath, '.content.json');
-    if (handleContentJson(contentJsonFullPath, req.path, res)) {
+    if (handleContentJson(contentJsonFullPath, req.path, req, res)) {
       return;
     }
 
     const stats = fs.statSync(fullPath);
     if (stats.isDirectory()) {
-      handleDirectory(fullPath, req.path, res);
+      handleDirectory(fullPath, req.path, req, res);
       return;
     } else if (stats.isFile()) {
-      handleFile(fullPath, req.path, res);
+      handleFile(fullPath, req.path, req, res);
       return;
     } else {
-      logger.warn('getNode not found (neither file nor dir)');
+      addInfoEvent(req, res, 'getNode.unexpectedType');
       res.status(404).end();
       return;
     }

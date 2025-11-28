@@ -1,16 +1,16 @@
 import { Router } from 'express';
-import { getDbHealth } from './controllers/dbController';
 import {
   createUser,
   deleteUser,
   getUser,
   listUsers,
   updateUser,
-} from './controllers/usersController';
+} from './routes/users';
 import { uploadAsset } from './routes/uploadAsset';
 import { getNode } from './routes/getNode';
 import { getTree } from './routes/getTree';
 import { updateNode } from './routes/updateNode';
+import { deleteNode } from './routes/deleteNode';
 
 const router = Router();
 
@@ -22,7 +22,7 @@ router.put('/scr*queryPath', updateNode);
 
 router.post('/scr*queryPath', uploadAsset);
 
-router.get('/db/health', getDbHealth);
+router.delete('/scr*queryPath', deleteNode);
 
 router.get('/users', listUsers);
 router.post('/users', createUser);

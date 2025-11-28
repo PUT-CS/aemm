@@ -7,6 +7,7 @@ WORKDIR /workspace
 COPY common/package.json common/package-lock.json ./common/
 COPY common/src ./common/src/
 COPY common/tsconfig.json ./common/
+RUN cd common && npm install && npm run build
 
 FROM base AS development-dependencies
 WORKDIR /workspace
