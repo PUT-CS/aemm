@@ -58,7 +58,17 @@ export async function createUser(
   next: NextFunction,
 ) {
   try {
-    const user = userSchema.parse(req.body);
+    const parsed = userSchema.safeParse(req.body);
+    if (!parsed.success) {
+      addInfoEvent(req, res, 'user.create.validationFailed', {
+        errors: parsed.error.issues,
+      });
+      res
+        .status(400)
+        .json({ message: 'Invalid user', errors: parsed.error.issues });
+      return;
+    }
+    const user = parsed.data;
     try {
       const created = await Db.createUser(user);
       addInfoEvent(req, res, 'user.created', {

@@ -26,6 +26,7 @@ export const deleteNode = (req: Request, res: Response) => {
     }
 
     fs.rmSync(fullPath, { recursive: true, force: true });
+    addInfoEvent(req, res, 'deleteNode.success', { path: req.path });
     res.status(200).end();
     return;
   } catch (err: unknown) {
