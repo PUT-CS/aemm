@@ -18,6 +18,7 @@ import NewSiteDialog from "~/routes/sites/dialogs/NewSiteDialog";
 import NewPageDialog from "~/routes/sites/dialogs/NewPageDialog";
 import NewFolderDialog from "~/routes/sites/dialogs/NewFolderDialog";
 import FileUploadDialog from "~/routes/sites/dialogs/FileUploadDialog";
+import DeleteNodeDialog from "~/routes/sites/dialogs/DeleteNodeDialog";
 
 interface ColumnItemProps {
   item: ScrNode & { children?: unknown[] };
@@ -51,6 +52,8 @@ export default function ColumnItem({
   const hasChildren = item.children && item.children.length > 0;
 
   const [activeDialog, setActiveDialog] = useState<NodeType | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleClick = (e: React.MouseEvent) => {
     onClick(e);
@@ -58,6 +61,20 @@ export default function ColumnItem({
 
   const handleCloseDialog = () => {
     setActiveDialog(null);
+    setIsEditMode(false);
+  };
+
+  const handleEdit = () => {
+    setIsEditMode(true);
+    setActiveDialog(item.type);
+  };
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
   };
 
   return (
@@ -103,6 +120,8 @@ export default function ColumnItem({
             onNewPage={() => setActiveDialog(NodeType.PAGE)}
             onNewFolder={() => setActiveDialog(NodeType.FOLDER)}
             onNewFileUpload={() => setActiveDialog(NodeType.FILE)}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
             canCreateChildren={item.type !== NodeType.FILE}
           />
         </ContextMenuContent>
@@ -113,15 +132,27 @@ export default function ColumnItem({
       >
         <DialogContent>
           {activeDialog === NodeType.SITE && (
-            <NewSiteDialog parentPath={itemPath} onClose={handleCloseDialog} />
+            <NewSiteDialog
+              parentPath={itemPath}
+              onClose={handleCloseDialog}
+              existingNode={isEditMode ? item : undefined}
+              nodePath={isEditMode ? itemPath : undefined}
+            />
           )}
           {activeDialog === NodeType.PAGE && (
-            <NewPageDialog parentPath={itemPath} onClose={handleCloseDialog} />
+            <NewPageDialog
+              parentPath={itemPath}
+              onClose={handleCloseDialog}
+              existingNode={isEditMode ? item : undefined}
+              nodePath={isEditMode ? itemPath : undefined}
+            />
           )}
           {activeDialog === NodeType.FOLDER && (
             <NewFolderDialog
               parentPath={itemPath}
               onClose={handleCloseDialog}
+              existingNode={isEditMode ? item : undefined}
+              nodePath={isEditMode ? itemPath : undefined}
             />
           )}
           {activeDialog === NodeType.FILE && (
@@ -132,6 +163,11 @@ export default function ColumnItem({
           )}
         </DialogContent>
       </Dialog>
+      <DeleteNodeDialog
+        open={showDeleteDialog}
+        nodePath={itemPath}
+        onCancel={handleCancelDelete}
+      />
     </>
   );
 }

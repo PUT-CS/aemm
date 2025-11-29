@@ -7,9 +7,9 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { NodeType, type Site, type Timestamps } from "@aemm/common";
-import { uploadNode } from "./mutations";
 import { AutoForm } from "~/lib/form-builder";
 import { buildTextDescription } from "~/components/authoring/utils";
+import { createNode, editNode } from "~/routes/sites/dialogs/mutations";
 
 type SitePayload = Omit<Site, keyof Timestamps>;
 
@@ -52,11 +52,24 @@ const newSiteSchema = z.object({
     ),
 });
 
-export default function NewSiteDialog({ parentPath, onClose }: DialogProps) {
+export default function NewSiteDialog({
+  parentPath,
+  onClose,
+  existingNode,
+  nodePath,
+}: DialogProps) {
   const queryClient = useQueryClient();
+  const isEditMode = !!existingNode && !!nodePath;
+  const existingSite = existingNode as Site | undefined;
 
   const uploadMutation = useMutation({
-    mutationFn: (node: SitePayload) => uploadNode(parentPath, node),
+    mutationFn: (node: Site | SitePayload) => {
+      if (isEditMode && nodePath) {
+        return editNode(nodePath, node as Site);
+      } else {
+        return createNode(parentPath, node as SitePayload);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       onClose?.();
@@ -68,26 +81,46 @@ export default function NewSiteDialog({ parentPath, onClose }: DialogProps) {
   });
 
   const onSubmit = (data: z.infer<typeof newSiteSchema>) => {
-    const newSiteNode: SitePayload = {
-      type: NodeType.SITE,
-      ...data,
-    };
-    uploadMutation.mutate(newSiteNode);
+    if (isEditMode && existingSite) {
+      // Preserve all existing fields when editing
+      const updatedSiteNode: Site = {
+        ...existingSite,
+        ...data,
+      };
+      uploadMutation.mutate(updatedSiteNode);
+    } else {
+      const newSiteNode: SitePayload = {
+        type: NodeType.SITE,
+        ...data,
+      };
+      uploadMutation.mutate(newSiteNode);
+    }
   };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Create Site</DialogTitle>
+        <DialogTitle>{isEditMode ? "Edit Site" : "Create Site"}</DialogTitle>
         <DialogDescription>
-          It will be available under {parentPath}
+          {isEditMode
+            ? `Editing site at ${nodePath}`
+            : `It will be available under ${parentPath}`}
         </DialogDescription>
       </DialogHeader>
       <AutoForm
         schema={newSiteSchema}
-        defaultValues={{ name: "" }}
+        defaultValues={
+          isEditMode
+            ? {
+                name: existingSite?.name || "",
+                title: existingSite?.title,
+                description: existingSite?.description,
+                defaultPageTemplatePath: existingSite?.defaultPageTemplatePath,
+              }
+            : { name: "" }
+        }
         onSubmit={onSubmit}
-        submitLabel="Create"
+        submitLabel={isEditMode ? "Update" : "Create"}
         isSubmitting={uploadMutation.isPending}
       />
     </>

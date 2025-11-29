@@ -7,9 +7,9 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { NodeType, type Page, type Timestamps } from "@aemm/common";
-import { uploadNode } from "./mutations";
 import { AutoForm } from "~/lib/form-builder";
 import { buildTextDescription } from "~/components/authoring/utils";
+import { createNode, editNode } from "~/routes/sites/dialogs/mutations";
 
 type PagePayload = Omit<Page, keyof Timestamps>;
 
@@ -52,11 +52,24 @@ const newPageSchema = z.object({
     ),
 });
 
-export default function NewPageDialog({ parentPath, onClose }: DialogProps) {
+export default function NewPageDialog({
+  parentPath,
+  onClose,
+  existingNode,
+  nodePath,
+}: DialogProps) {
   const queryClient = useQueryClient();
+  const isEditMode = !!existingNode && !!nodePath;
+  const existingPage = existingNode as Page | undefined;
 
   const uploadMutation = useMutation({
-    mutationFn: (node: PagePayload) => uploadNode(parentPath, node),
+    mutationFn: (node: Page | PagePayload) => {
+      if (isEditMode && nodePath) {
+        return editNode(nodePath, node as Page);
+      } else {
+        return createNode(parentPath, node as PagePayload);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       onClose?.();
@@ -68,27 +81,47 @@ export default function NewPageDialog({ parentPath, onClose }: DialogProps) {
   });
 
   const onSubmit = (data: z.infer<typeof newPageSchema>) => {
-    const newPageNode: PagePayload = {
-      type: NodeType.PAGE,
-      ...data,
-      components: [],
-    };
-    uploadMutation.mutate(newPageNode);
+    if (isEditMode && existingPage) {
+      // Preserve all existing fields when editing
+      const updatedPageNode: Page = {
+        ...existingPage,
+        ...data,
+      };
+      uploadMutation.mutate(updatedPageNode);
+    } else {
+      const newPageNode: PagePayload = {
+        type: NodeType.PAGE,
+        components: [],
+        ...data,
+      };
+      uploadMutation.mutate(newPageNode);
+    }
   };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Create Page</DialogTitle>
+        <DialogTitle>{isEditMode ? "Edit Page" : "Create Page"}</DialogTitle>
         <DialogDescription>
-          It will be available under {parentPath}
+          {isEditMode
+            ? `Editing page at ${nodePath}`
+            : `It will be available under ${parentPath}`}
         </DialogDescription>
       </DialogHeader>
       <AutoForm
         schema={newPageSchema}
-        defaultValues={{ name: "" }}
+        defaultValues={
+          isEditMode
+            ? {
+                name: existingPage?.name || "",
+                title: existingPage?.title,
+                description: existingPage?.description,
+                pageTemplatePath: existingPage?.pageTemplatePath,
+              }
+            : { name: "" }
+        }
         onSubmit={onSubmit}
-        submitLabel="Create"
+        submitLabel={isEditMode ? "Update" : "Create"}
         isSubmitting={uploadMutation.isPending}
       />
     </>

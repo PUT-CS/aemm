@@ -1,5 +1,5 @@
 import { BACKEND_URL } from "~/consts";
-import type { ScrNodeWithoutTimestamps } from "@aemm/common";
+import type { ScrNode, ScrNodeWithoutTimestamps } from "@aemm/common";
 
 export async function uploadFile(parentPath: string, file: File) {
   const filePath = `${parentPath}/${file.name}`;
@@ -17,12 +17,15 @@ export async function uploadFile(parentPath: string, file: File) {
   return response;
 }
 
-export async function uploadNode(
+/**
+ * Creates a new node at the specified parent path.
+ */
+export async function createNode(
   parentPath: string,
-  node: ScrNodeWithoutTimestamps,
+  node: ScrNodeWithoutTimestamps | ScrNode,
 ) {
   const nodePath = `${parentPath}/${node.name}`;
-  console.log("Uploading node to", `${BACKEND_URL}/scr${nodePath}`);
+  console.log("Creating node at", `${BACKEND_URL}/scr${nodePath}`);
   const response = await fetch(`${BACKEND_URL}/scr${nodePath}`, {
     method: "PUT",
     headers: {
@@ -31,7 +34,36 @@ export async function uploadNode(
     body: JSON.stringify(node),
   });
   if (!response.ok) {
-    throw new Error(`Failed to upload node: ${response.statusText}`);
+    throw new Error(`Failed to create node: ${response.statusText}`);
+  }
+  return response;
+}
+
+/**
+ * Edits an existing node at the specified path.
+ */
+export async function editNode(nodePath: string, node: ScrNode) {
+  console.log("Editing node at", `${BACKEND_URL}/scr${nodePath}`);
+  const response = await fetch(`${BACKEND_URL}/scr${nodePath}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(node),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to edit node: ${response.statusText}`);
+  }
+  return response;
+}
+
+export async function deleteNode(nodePath: string) {
+  console.log("Deleting node at", `${BACKEND_URL}/scr${nodePath}`);
+  const response = await fetch(`${BACKEND_URL}/scr${nodePath}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete node: ${response.statusText}`);
   }
   return response;
 }

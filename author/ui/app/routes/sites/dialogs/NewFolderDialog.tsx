@@ -6,10 +6,15 @@ import {
 } from "~/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { NodeType, type ScrNodeWithoutTimestamps } from "@aemm/common";
-import { uploadNode } from "./mutations";
+import {
+  type Folder,
+  NodeType,
+  type ScrNode,
+  type ScrNodeWithoutTimestamps,
+} from "@aemm/common";
 import { AutoForm } from "~/lib/form-builder";
 import { buildTextDescription } from "~/components/authoring/utils";
+import { createNode, editNode } from "~/routes/sites/dialogs/mutations";
 
 const newFolderSchema = z.object({
   name: z
@@ -32,12 +37,24 @@ const newFolderSchema = z.object({
     ),
 });
 
-export default function NewFolderDialog({ parentPath, onClose }: DialogProps) {
+export default function NewFolderDialog({
+  parentPath,
+  onClose,
+  existingNode,
+  nodePath,
+}: DialogProps) {
   const queryClient = useQueryClient();
+  const isEditMode = !!existingNode && !!nodePath;
+  const existingFolder = existingNode as Folder | undefined;
 
   const uploadMutation = useMutation({
-    mutationFn: (node: ScrNodeWithoutTimestamps) =>
-      uploadNode(parentPath, node),
+    mutationFn: (node: ScrNode | ScrNodeWithoutTimestamps) => {
+      if (isEditMode && nodePath) {
+        return editNode(nodePath, node as ScrNode);
+      } else {
+        return createNode(parentPath, node as ScrNodeWithoutTimestamps);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       onClose?.();
@@ -49,26 +66,46 @@ export default function NewFolderDialog({ parentPath, onClose }: DialogProps) {
   });
 
   const onSubmit = (data: z.infer<typeof newFolderSchema>) => {
-    const newFolderNode: ScrNodeWithoutTimestamps = {
-      type: NodeType.FOLDER,
-      ...data,
-    };
-    uploadMutation.mutate(newFolderNode);
+    if (isEditMode && existingFolder) {
+      // Preserve all existing fields when editing
+      const updatedFolderNode: Folder = {
+        ...existingFolder,
+        ...data,
+      };
+      uploadMutation.mutate(updatedFolderNode);
+    } else {
+      const newFolderNode: ScrNodeWithoutTimestamps = {
+        type: NodeType.FOLDER,
+        ...data,
+      };
+      uploadMutation.mutate(newFolderNode);
+    }
   };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Create Folder</DialogTitle>
+        <DialogTitle>
+          {isEditMode ? "Edit Folder" : "Create Folder"}
+        </DialogTitle>
         <DialogDescription>
-          It will be available under {parentPath}
+          {isEditMode
+            ? `Editing folder at ${nodePath}`
+            : `It will be available under ${parentPath}`}
         </DialogDescription>
       </DialogHeader>
       <AutoForm
         schema={newFolderSchema}
-        defaultValues={{ name: "" }}
+        defaultValues={
+          isEditMode
+            ? {
+                name: existingFolder?.name || "",
+                title: existingFolder?.title,
+              }
+            : { name: "" }
+        }
         onSubmit={onSubmit}
-        submitLabel="Create"
+        submitLabel={isEditMode ? "Update" : "Create"}
         isSubmitting={uploadMutation.isPending}
       />
     </>
