@@ -28,16 +28,19 @@ export class Margin extends AEMMComponent<z.infer<typeof schema>> {
   render() {
     const { horizontal = 0, vertical = 0, className, children } = this.props;
 
-    const marginClasses = [
-      horizontal > 0 ? `mx-[${horizontal}px]` : "",
-      vertical > 0 ? `my-[${vertical}px]` : "",
-      className || "",
-    ]
-      .filter(Boolean)
-      .join(" ");
+    const marginStyle = {
+      marginLeft: horizontal ? `${horizontal}px` : undefined,
+      marginRight: horizontal ? `${horizontal}px` : undefined,
+      marginTop: vertical ? `${vertical}px` : undefined,
+      marginBottom: vertical ? `${vertical}px` : undefined,
+    };
 
     return (
-      <div data-aemm-component="Margin" className={marginClasses}>
+      <div
+        data-aemm-component="Margin"
+        className={className}
+        style={marginStyle}
+      >
         {children}
       </div>
     );
