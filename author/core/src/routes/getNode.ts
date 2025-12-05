@@ -1,13 +1,10 @@
 import { Request, Response } from 'express';
 import * as fs from 'node:fs';
-import { NodeType, ScrNode } from '@aemm/common/scr';
+import { ScrNode } from '@aemm/common/scr';
 import path from 'path';
 import { logger } from '../logger';
 import config from '../config/config';
-import { getChildrenNodes } from './util';
 import { addInfoEvent } from '../middlewares/requestLogger';
-
-type ScrNodeWithChildren = ScrNode & { children?: ScrNodeWithChildren[] };
 
 const handleContentJson = (
   contentJsonFullPath: string,
@@ -34,26 +31,6 @@ const handleContentJson = (
     res.status(422).end();
     return true;
   }
-};
-
-const handleDirectory = (
-  fullPath: string,
-  requestPath: string,
-  req: Request,
-  res: Response,
-): void => {
-  const children = getChildrenNodes(fullPath);
-  const folderNode: ScrNodeWithChildren = {
-    type: NodeType.FOLDER,
-    name: path.basename(fullPath),
-    children: children,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-  addInfoEvent(req, res, 'getNode.directory', {
-    responseContentType: 'application/json',
-  });
-  res.json(folderNode);
 };
 
 const handleFile = (
@@ -98,10 +75,7 @@ export const getNode = (req: Request, res: Response) => {
     }
 
     const stats = fs.statSync(fullPath);
-    if (stats.isDirectory()) {
-      handleDirectory(fullPath, req.path, req, res);
-      return;
-    } else if (stats.isFile()) {
+    if (stats.isFile()) {
       handleFile(fullPath, req.path, req, res);
       return;
     } else {

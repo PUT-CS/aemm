@@ -20,6 +20,8 @@ interface ColumnItemContextMenuProps {
   onNewPage: () => void;
   onNewFolder: () => void;
   onNewFileUpload: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
   canCreateChildren: boolean;
 }
 
@@ -28,6 +30,8 @@ export default function ColumnItemContextMenu({
   onNewPage,
   onNewFolder,
   onNewFileUpload,
+  onEdit,
+  onDelete,
   canCreateChildren,
 }: ColumnItemContextMenuProps) {
   return (
@@ -75,8 +79,8 @@ export default function ColumnItemContextMenu({
       <ContextMenuOption
         icon={FaEdit}
         label="Edit"
-        onClick={() => console.log("Edit")}
-      />
+        onClick={onEdit}
+      ></ContextMenuOption>
       <ContextMenuSeparator />
       <ContextMenuOption
         icon={FaCopy}
@@ -93,7 +97,7 @@ export default function ColumnItemContextMenu({
         icon={FaTrash}
         label="Delete"
         variant="destructive"
-        onClick={() => console.log("Delete")}
+        onClick={onDelete}
       />
     </>
   );

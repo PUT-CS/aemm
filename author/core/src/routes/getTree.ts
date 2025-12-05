@@ -25,6 +25,7 @@ function buildTreeNode(fullPath: string): ScrNode & { children?: ScrNode[] } {
   // Handle files
   if (stats.isFile()) {
     return {
+      id: fullPath,
       type: NodeType.FILE,
       name: nodeName,
       createdAt: stats.birthtime,
@@ -43,40 +44,29 @@ function buildTreeNode(fullPath: string): ScrNode & { children?: ScrNode[] } {
       .filter((entry) => entry.name !== '.content.json')
       .map((entry) => buildTreeNode(path.join(fullPath, entry.name)));
 
-    if (contentJsonExists) {
-      try {
-        const data = fs.readFileSync(contentJsonPath, 'utf-8');
-        const contentData = JSON.parse(data);
-
-        // Remove 'name' from contentData if it exists (name always comes from directory)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { name: _ignoredName, ...restContentData } = contentData;
-
-        // Merge .content.json with directory children
-        // name always comes from directory, title is the display label from .content.json
-        return {
-          ...restContentData,
-          name: nodeName,
-          children: children.length > 0 ? children : undefined,
-        };
-      } catch (err) {
-        console.error(
-          `Error parsing .content.json at ${contentJsonPath}:`,
-          err,
-        );
-        // Fall through to return basic folder
-      }
+    if (!contentJsonExists) {
+      throw new Error(`Missing .content.json in directory at ${fullPath}`);
     }
 
-    // Return basic folder structure (including empty folders)
-    return {
-      type: NodeType.FOLDER,
-      name: nodeName,
-      createdAt: stats.birthtime,
-      updatedAt: stats.mtime,
-      children,
-    };
-  }
+    try {
+      const data = fs.readFileSync(contentJsonPath, 'utf-8');
+      const contentData = JSON.parse(data);
 
+      // Remove 'name' from contentData if it exists (name always comes from directory)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { name: _ignoredName, ...restContentData } = contentData;
+
+      // Merge .content.json with directory children
+      // name always comes from directory, title is the display label from .content.json
+      return {
+        ...restContentData,
+        name: nodeName,
+        children: children.length > 0 ? children : undefined,
+      };
+    } catch (err) {
+      console.error(`Error parsing .content.json at ${contentJsonPath}:`, err);
+      // Fall through to return basic folder
+    }
+  }
   throw new Error(`Unsupported file system entry at ${fullPath}`);
 }
