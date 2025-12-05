@@ -57,6 +57,7 @@ export default function SitesToolbar({ selectedPathData }: SitesToolbarProps) {
         <div className="text-sm font-semibold text-slate-900">
           {selectedPathData?.title ?? selectedPathData?.name}
         </div>
+        <div className="flex-1"></div>
       </div>
     </>
   );

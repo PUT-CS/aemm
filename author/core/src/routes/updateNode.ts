@@ -6,7 +6,7 @@ import { addInfoEvent } from '../middlewares/requestLogger';
 import { randomUUID } from 'node:crypto';
 import { logger } from '../logger';
 import { z } from 'zod';
-import { NodeType } from '@aemm/common';
+import { NodeType, ScrNode } from '@aemm/common';
 
 // eslint-disable-next-line
 const incomingScrNodeSchema: z.ZodType<any> = z.lazy(
@@ -40,12 +40,12 @@ function validateRequestPath(
   return fullPath;
 }
 
-function parseRequestBody(body: any): any {
-  return typeof body === 'string' ? JSON.parse(body) : body;
+function parseRequestBody<T>(body: unknown): T {
+  return typeof body === 'string' ? JSON.parse(body) : (body as T);
 }
 
 function validateNodeSchema(
-  jsonData: any,
+  jsonData: unknown,
   req: Request,
   res: Response,
 ): boolean {
@@ -64,9 +64,13 @@ function validateNodeSchema(
  * Removes the children field from node data before persisting to disk.
  * Children should be determined at runtime by reading the filesystem.
  */
-function removeChildrenField(data: any): any {
-  const { children, ...dataWithoutChildren } = data;
-  return dataWithoutChildren;
+interface HasChildren {
+  children?: unknown;
+}
+function removeChildrenField(data: HasChildren): unknown {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { children, ...rest } = data;
+  return rest;
 }
 
 /**
@@ -100,10 +104,10 @@ export const createNode = (req: Request, res: Response) => {
     }
 
     try {
-      const jsonData = parseRequestBody(req.body);
+      const jsonData = parseRequestBody<ScrNode>(req.body);
 
-      // Assign a new UUID if not present
-      if (!jsonData.id) {
+      // Assign a new UUID if not present or blank
+      if (!jsonData.id || jsonData.id.trim() === '') {
         jsonData.id = randomUUID();
       }
 
@@ -117,7 +121,9 @@ export const createNode = (req: Request, res: Response) => {
 
       // Write as .content.json (without children field)
       const contentJsonPath = fullPath + '/.content.json';
-      const dataToWrite = removeChildrenField(jsonData);
+      const dataToWrite = removeChildrenField(
+        jsonData as unknown as HasChildren,
+      );
       fs.writeFileSync(
         contentJsonPath,
         JSON.stringify(dataToWrite, null, 2),
@@ -191,7 +197,7 @@ export const editNode = (req: Request, res: Response) => {
       }
     }
 
-    const newData = parseRequestBody(req.body);
+    const newData = parseRequestBody<ScrNode>(req.body);
 
     // If name has changed, rename the directory
     if (
@@ -224,7 +230,9 @@ export const editNode = (req: Request, res: Response) => {
 
       // Write the updated content to the new location (without children field)
       const newContentJsonPath = newPath + '/.content.json';
-      const dataToWrite = removeChildrenField(newData);
+      const dataToWrite = removeChildrenField(
+        newData as unknown as HasChildren,
+      );
       fs.writeFileSync(
         newContentJsonPath,
         JSON.stringify(dataToWrite, null, 2),
@@ -235,7 +243,7 @@ export const editNode = (req: Request, res: Response) => {
     }
 
     // No rename needed, just update the content (without children field)
-    const dataToWrite = removeChildrenField(newData);
+    const dataToWrite = removeChildrenField(newData as unknown as HasChildren);
     fs.writeFileSync(
       contentJsonPath,
       JSON.stringify(dataToWrite, null, 2),

@@ -75,6 +75,7 @@ export default function NewFolderDialog({
       uploadMutation.mutate(updatedFolderNode);
     } else {
       const newFolderNode: ScrNodeWithoutTimestamps = {
+        id: "",
         type: NodeType.FOLDER,
         ...data,
       };

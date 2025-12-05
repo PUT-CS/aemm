@@ -90,6 +90,7 @@ export default function NewPageDialog({
       uploadMutation.mutate(updatedPageNode);
     } else {
       const newPageNode: PagePayload = {
+        id: "",
         type: NodeType.PAGE,
         components: [],
         ...data,

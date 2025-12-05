@@ -9,6 +9,7 @@ export enum NodeType {
 }
 
 export interface ScrNode extends Timestamps {
+  id: string;
   type: NodeType;
   name: string;
   title?: string;

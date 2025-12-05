@@ -90,6 +90,7 @@ export default function NewSiteDialog({
       uploadMutation.mutate(updatedSiteNode);
     } else {
       const newSiteNode: SitePayload = {
+        id: "",
         type: NodeType.SITE,
         ...data,
       };
