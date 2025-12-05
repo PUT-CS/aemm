@@ -53,7 +53,7 @@ const JUSTIFY_CLASSES: Record<
   evenly: "justify-evenly",
 };
 
-export class Container extends AEMMComponent<z.infer<typeof schema>> {
+class Container extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
   }
@@ -100,3 +100,5 @@ export class Container extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Container;

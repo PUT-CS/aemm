@@ -76,7 +76,7 @@ const OBJECT_FIT_CLASSES: Record<
   "scale-down": "object-scale-down",
 };
 
-export class Image extends AEMMComponent<z.infer<typeof schema>> {
+class Image extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
   }
@@ -117,3 +117,5 @@ export class Image extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Image;

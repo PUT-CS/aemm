@@ -31,7 +31,7 @@ const schema = z.object({
     ),
 });
 
-export class Link extends AEMMComponent<z.infer<typeof schema>> {
+class Link extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
   }
@@ -55,3 +55,5 @@ export class Link extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Link;

@@ -67,7 +67,7 @@ const ASPECT_RATIO_CLASSES: Record<string, string> = {
   "21:9": "aspect-[21/9]",
 };
 
-export class Embed extends AEMMComponent<z.infer<typeof schema>> {
+class Embed extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
   }
@@ -132,3 +132,5 @@ export class Embed extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Embed;

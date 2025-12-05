@@ -20,7 +20,7 @@ const schema = z.object({
   children: z.any().optional(),
 });
 
-export class Margin extends AEMMComponent<z.infer<typeof schema>> {
+class Margin extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
   }
@@ -43,3 +43,5 @@ export class Margin extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Margin;
