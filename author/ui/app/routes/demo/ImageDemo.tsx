@@ -1,4 +1,4 @@
-import { Image } from "~/components/authoring/Image/Image";
+import Image from "~/components/authoring/Image/Image";
 import { DemoContainer } from "./DemoContainer";
 
 export default function ImageDemo() {

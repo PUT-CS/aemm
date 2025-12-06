@@ -1,4 +1,4 @@
-import { YouTube } from "~/components/authoring/YouTube/YouTube";
+import YouTube from "~/components/authoring/YouTube/YouTube";
 import { DemoContainer } from "~/routes/demo/DemoContainer";
 
 export default function YouTubeDemo() {

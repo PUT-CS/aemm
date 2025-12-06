@@ -1,4 +1,4 @@
-import { Text } from "~/components/authoring/Text/Text";
+import Text from "~/components/authoring/Text/Text";
 import { DemoContainer } from "./DemoContainer";
 
 export default function TextDemo() {

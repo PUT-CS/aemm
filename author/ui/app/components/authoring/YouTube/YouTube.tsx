@@ -61,7 +61,7 @@ const ASPECT_RATIO_CLASSES: Record<string, string> = {
   "21:9": "aspect-[21/9]",
 };
 
-export class YouTube extends AEMMComponent<z.infer<typeof schema>> {
+class YouTube extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
   }
