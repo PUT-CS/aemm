@@ -1,0 +1,182 @@
+import type { ReactNode } from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
+
+export interface EditorNode {
+  id: string;
+  type: string;
+  props: Record<string, any>;
+  children: EditorNode[];
+}
+
+function generateId() {
+  return `node-${Date.now()}-${Math.random().toString(36).slice(3, 10)}`;
+}
+
+export function useEditor() {
+  const [nodes, setNodes] = useState<EditorNode[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const addNode = useCallback(
+    (type: string, parentId: string | null = null) => {
+      const newNode: EditorNode = {
+        id: generateId(),
+        type,
+        props: {},
+        children: [],
+      };
+      setNodes((prev) =>
+        parentId
+          ? insertIntoParent(prev, parentId, newNode)
+          : [...prev, newNode],
+      );
+      return newNode.id;
+    },
+    [],
+  );
+
+  const deleteNode = useCallback((id: string) => {
+    setNodes(removeById(nodes, id));
+    setSelectedId((prev) => (prev === id ? null : prev));
+  }, []);
+
+  const updateNode = useCallback((id: string, props: Record<string, any>) => {
+    setNodes(updateById(nodes, id, props));
+  }, []);
+
+  const moveNode = useCallback(
+    (id: string, toParentId: string | null, toIndex: number) => {
+      const nodeToMove = findById(nodes, id);
+      if (!nodeToMove) {
+        throw new Error("Attempt to move a non-existent node");
+      }
+      const newNodes = removeById(nodes, nodeToMove?.id);
+      const nodesWithInserted = insertAt(
+        newNodes,
+        toParentId,
+        nodeToMove,
+        toIndex,
+      );
+      setNodes(nodesWithInserted);
+    },
+    [],
+  );
+
+  return {
+    nodes,
+    selectedId,
+    setSelectedId,
+    addNode,
+    deleteNode,
+    updateNode,
+    moveNode,
+  };
+}
+
+function findById(nodes: EditorNode[], id: string): EditorNode | null {
+  for (const node of nodes) {
+    if (node.id === id) return node;
+    const found = findById(node.children, id);
+    if (found) return found;
+  }
+  return null;
+}
+
+function removeById(tree: EditorNode[], id: string): EditorNode[] {
+  const removeRecursively = (node: EditorNode): EditorNode => {
+    return {
+      ...node,
+      children: node.children.filter((n) => n.id !== id).map(removeRecursively),
+    };
+  };
+  return tree.filter((n) => n.id !== id).map(removeRecursively);
+}
+
+function updateById(
+  nodes: EditorNode[],
+  id: string,
+  props: Record<string, any>,
+): EditorNode[] {
+  const updateNode = (node: EditorNode): EditorNode => {
+    if (node.id === id) {
+      return { ...node, props };
+    }
+
+    return {
+      ...node,
+      children: node.children.map(updateNode),
+    };
+  };
+  return nodes.map(updateNode);
+}
+
+function insertIntoParent(
+  nodes: EditorNode[],
+  parentId: string,
+  newNode: EditorNode,
+): EditorNode[] {
+  const insertIntoNode = (node: EditorNode): EditorNode => {
+    if (node.id === parentId) {
+      return {
+        ...node,
+        children: [...node.children, newNode],
+      };
+    }
+
+    return {
+      ...node,
+      children: node.children.map(insertIntoNode),
+    };
+  };
+
+  return nodes.map(insertIntoNode);
+}
+
+function insertIntoArrayAt<T>(array: T[], element: T, index: number) {
+  return [...array.slice(0, index), element, ...array.slice(index)];
+}
+
+function insertAt(
+  nodes: EditorNode[],
+  parentId: string | null,
+  nodeToInsert: EditorNode,
+  index: number,
+): EditorNode[] {
+  const insertAtInner = (node: EditorNode): EditorNode => {
+    if (node.id === parentId) {
+      return {
+        ...node,
+        children: insertIntoArrayAt(node.children, nodeToInsert, index),
+      };
+    }
+
+    return {
+      ...node,
+      children: node.children.map(insertAtInner),
+    };
+  };
+
+  if (!parentId) {
+    return insertIntoArrayAt(nodes, nodeToInsert, index);
+  }
+
+  return nodes.map(insertAtInner);
+}
+
+export type EditorContextValue = ReturnType<typeof useEditor>;
+const EditorContext = createContext<EditorContextValue | null>(null);
+
+export function EditorContextProvider({ children }: { children: ReactNode }) {
+  const value = useEditor();
+  return (
+    <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
+  );
+}
+
+export function useEditorContext() {
+  const ctx = useContext(EditorContext);
+  if (!ctx)
+    throw new Error(
+      "useEditorContext must be used within EditorContextProvider",
+    );
+  return ctx;
+}
