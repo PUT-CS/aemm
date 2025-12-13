@@ -36,6 +36,13 @@ class Link extends AEMMComponent<z.infer<typeof schema>> {
     return schema;
   }
 
+  getDefaultProps() {
+    return {
+      text: "Link text",
+      href: "#",
+    };
+  }
+
   render() {
     const { text, href, openInNewTab, mainClassName } = this.props;
 

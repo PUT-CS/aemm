@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import React, { createContext, useCallback, useContext, useState } from "react";
+import COMPONENT_REGISTRY from "~/components/authoring/registry";
 
 export interface EditorNode {
   id: string;
@@ -12,6 +13,19 @@ function generateId() {
   return `node-${Date.now()}-${Math.random().toString(36).slice(3, 10)}`;
 }
 
+function getDefaultProps(type: string): Record<string, any> {
+  const Component = COMPONENT_REGISTRY[type as keyof typeof COMPONENT_REGISTRY];
+  if (!Component) return {};
+
+  try {
+    // @ts-ignore
+    const instance = new Component({});
+    return instance.getDefaultProps() || {};
+  } catch (e) {
+    return {};
+  }
+}
+
 export function useEditor() {
   const [nodes, setNodes] = useState<EditorNode[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -21,7 +35,7 @@ export function useEditor() {
       const newNode: EditorNode = {
         id: generateId(),
         type,
-        props: {},
+        props: getDefaultProps(type),
         children: [],
       };
       setNodes((prev) =>

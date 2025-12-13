@@ -6,8 +6,8 @@ export default class AEMMComponent<T> extends React.Component<T> {
     throw new Error("getSchema method not implemented.");
   }
 
-  getMaxChildren(): number {
-    return Infinity;
+  getDefaultProps(): Partial<T> {
+    return {} as Partial<T>;
   }
 
   isAuthoring(): boolean {

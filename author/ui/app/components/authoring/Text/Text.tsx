@@ -43,6 +43,12 @@ class Text extends AEMMComponent<z.infer<typeof schema>> {
     return schema;
   }
 
+  getDefaultProps() {
+    return {
+      text: "Edit this text",
+    };
+  }
+
   render() {
     const { text, mainClassName } = this.props;
     const sanitizedHtml = sanitize(text ?? "", {

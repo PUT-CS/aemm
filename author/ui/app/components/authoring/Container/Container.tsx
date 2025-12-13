@@ -1,6 +1,6 @@
 import * as z from "zod";
 import React from "react";
-import AEMMComponent from "~/components/authoring/AEMMComponent";
+import AEMMContainerComponent from "~/components/authoring/AEMMContainerComponent";
 
 const schema = z.object({
   direction: z
@@ -53,9 +53,16 @@ const JUSTIFY_CLASSES: Record<
   evenly: "justify-evenly",
 };
 
-class Container extends AEMMComponent<z.infer<typeof schema>> {
+class Container extends AEMMContainerComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
+  }
+
+  getDefaultProps() {
+    return {
+      direction: "vertical" as const,
+      gap: 16,
+    };
   }
 
   render() {

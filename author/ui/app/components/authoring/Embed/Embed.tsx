@@ -72,6 +72,15 @@ class Embed extends AEMMComponent<z.infer<typeof schema>> {
     return schema;
   }
 
+  getDefaultProps() {
+    return {
+      src: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      aspectRatio: "16:9" as const,
+      allowFullscreen: true,
+      title: "Embedded content",
+    };
+  }
+
   render() {
     const {
       src,

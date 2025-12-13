@@ -66,6 +66,14 @@ class YouTube extends AEMMComponent<z.infer<typeof schema>> {
     return schema;
   }
 
+  getDefaultProps() {
+    return {
+      videoId: "dQw4w9WgXcQ",
+      aspectRatio: "16:9" as const,
+      title: "YouTube video",
+    };
+  }
+
   render() {
     const {
       videoId,

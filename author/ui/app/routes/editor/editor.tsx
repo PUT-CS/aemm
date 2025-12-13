@@ -15,6 +15,8 @@ import {
 } from "~/routes/editor/EditorContextProvider";
 import { Draggable } from "~/routes/editor/Draggable";
 import { Droppable } from "~/routes/editor/Droppable";
+import RenderComponent from "~/routes/editor/RenderComponent";
+import { FaPlus } from "react-icons/fa6";
 
 // Client-only route - prevents SSR hydration mismatch with dnd-kit
 export async function clientLoader() {
@@ -66,13 +68,17 @@ function EditorInner() {
           <SidebarFooter />
         </Sidebar>
         <SidebarTrigger />
-        <Droppable id={"canvas"}>
+        <div className="flex-1">
           {nodes.map((node) => (
-            <Droppable id={node.id}>
-              <div>{JSON.stringify(node, null, 2)}</div>
-            </Droppable>
+            <RenderComponent node={node} />
           ))}
-        </Droppable>
+          <Droppable id={"canvas"}>
+            <div className="flex items-center justify-center">
+              <FaPlus />
+            </div>
+          </Droppable>
+          {JSON.stringify(nodes, null, 2)}
+        </div>
       </SidebarProvider>
     </DndContext>
   );
