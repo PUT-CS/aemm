@@ -1,6 +1,6 @@
 import * as z from "zod";
 import React from "react";
-import AEMMComponent from "~/components/authoring/AEMMComponent";
+import AEMMContainerComponent from "~/components/authoring/AEMMContainerComponent";
 
 const schema = z.object({
   horizontal: z
@@ -20,9 +20,16 @@ const schema = z.object({
   children: z.any().optional(),
 });
 
-export class Margin extends AEMMComponent<z.infer<typeof schema>> {
+class Margin extends AEMMContainerComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
+  }
+
+  getDefaultProps() {
+    return {
+      horizontal: 0,
+      vertical: 16,
+    };
   }
 
   render() {
@@ -46,3 +53,5 @@ export class Margin extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Margin;

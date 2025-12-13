@@ -1,4 +1,4 @@
-import { Embed } from "~/components/authoring/Embed/Embed";
+import Embed from "~/components/authoring/Embed/Embed";
 import { DemoContainer } from "~/routes/demo/DemoContainer";
 
 export default function EmbedDemo() {

@@ -76,9 +76,17 @@ const OBJECT_FIT_CLASSES: Record<
   "scale-down": "object-scale-down",
 };
 
-export class Image extends AEMMComponent<z.infer<typeof schema>> {
+class Image extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
+  }
+
+  getDefaultProps() {
+    return {
+      src: "https://via.placeholder.com/400x300?text=Image+Placeholder",
+      alt: "Placeholder image",
+      loading: "lazy" as const,
+    };
   }
 
   render() {
@@ -92,6 +100,18 @@ export class Image extends AEMMComponent<z.infer<typeof schema>> {
       loading = "lazy",
       rounded = false,
     } = this.props;
+
+    if (!src) {
+      return (
+        <div>
+          {this.isAuthoring() ? (
+            <span style={{ color: "red" }}>
+              Image component requires a valid "src" property.
+            </span>
+          ) : null}
+        </div>
+      );
+    }
 
     const fullSrc =
       src.startsWith("/") && process.env["BACKEND_URL"]
@@ -117,3 +137,5 @@ export class Image extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Image;

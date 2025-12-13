@@ -1,6 +1,6 @@
-import { Container } from "~/components/authoring/Container/Container";
-import { Text } from "~/components/authoring/Text/Text";
-import { Image } from "~/components/authoring/Image/Image";
+import Container from "~/components/authoring/Container/Container";
+import Text from "~/components/authoring/Text/Text";
+import Image from "~/components/authoring/Image/Image";
 import { DemoContainer } from "~/routes/demo/DemoContainer";
 
 export default function ContainerDemo() {

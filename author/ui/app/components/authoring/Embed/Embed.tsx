@@ -67,9 +67,18 @@ const ASPECT_RATIO_CLASSES: Record<string, string> = {
   "21:9": "aspect-[21/9]",
 };
 
-export class Embed extends AEMMComponent<z.infer<typeof schema>> {
+class Embed extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
+  }
+
+  getDefaultProps() {
+    return {
+      src: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      aspectRatio: "16:9" as const,
+      allowFullscreen: true,
+      title: "Embedded content",
+    };
   }
 
   render() {
@@ -132,3 +141,5 @@ export class Embed extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Embed;

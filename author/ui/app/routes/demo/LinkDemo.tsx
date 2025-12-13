@@ -1,5 +1,5 @@
 import { DemoContainer } from "~/routes/demo/DemoContainer";
-import { Link } from "~/components/authoring/Link/Link";
+import Link from "~/components/authoring/Link/Link";
 
 export default function LinkDemo() {
   return (

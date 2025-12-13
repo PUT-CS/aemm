@@ -38,9 +38,15 @@ const schema = z.object({
     ),
 });
 
-export class Text extends AEMMComponent<z.infer<typeof schema>> {
+class Text extends AEMMComponent<z.infer<typeof schema>> {
   getSchema() {
     return schema;
+  }
+
+  getDefaultProps() {
+    return {
+      text: "Edit this text",
+    };
   }
 
   render() {
@@ -59,3 +65,5 @@ export class Text extends AEMMComponent<z.infer<typeof schema>> {
     );
   }
 }
+
+export default Text;

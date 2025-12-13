@@ -1,6 +1,6 @@
-import { Margin } from "~/components/authoring/Margin/Margin";
-import { Text } from "~/components/authoring/Text/Text";
-import { Container } from "~/components/authoring/Container/Container";
+import Margin from "~/components/authoring/Margin/Margin";
+import Text from "~/components/authoring/Text/Text";
+import Container from "~/components/authoring/Container/Container";
 import { DemoContainer } from "~/routes/demo/DemoContainer";
 
 export default function MarginDemo() {
