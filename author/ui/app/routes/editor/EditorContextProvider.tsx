@@ -10,7 +10,7 @@ export interface EditorNode {
 }
 
 function generateId() {
-  return `node-${Date.now()}-${Math.random().toString(36).slice(3, 10)}`;
+  return crypto.randomUUID();
 }
 
 function getDefaultProps(type: string): Record<string, any> {

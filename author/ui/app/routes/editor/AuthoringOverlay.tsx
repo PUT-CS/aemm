@@ -7,8 +7,9 @@ import {
 import COMPONENT_REGISTRY from "~/components/authoring/registry";
 import { FaCaretUp, FaGripVertical, FaPlus, FaTrashCan } from "react-icons/fa6";
 import { FaEdit } from "react-icons/fa";
-import React from "react";
+import React, { useState } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { EditNodeDialog } from "~/routes/editor/EditNodeDialog";
 
 const PILL_BASE =
   "px-3 h-7 text-xs leading-none text-white rounded-lg flex items-center justify-center";
@@ -24,8 +25,9 @@ interface AuthoringOverlayProps {
 }
 
 export default function AuthoringOverlay({ node }: AuthoringOverlayProps) {
-  const { selectedId, setSelectedId, deleteNode, getParentNode } =
+  const { selectedId, setSelectedId, deleteNode, getParentNode, updateNode } =
     useEditorContext();
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const Component = COMPONENT_REGISTRY[
     node.type as keyof typeof COMPONENT_REGISTRY
@@ -59,6 +61,15 @@ export default function AuthoringOverlay({ node }: AuthoringOverlayProps) {
     id: `inside:${node.id}`,
     disabled: !canHaveChildren,
   });
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditDialogOpen(true);
+  };
+
+  const handleSave = (props: Record<string, any>) => {
+    updateNode(node.id, props);
+  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -96,7 +107,7 @@ export default function AuthoringOverlay({ node }: AuthoringOverlayProps) {
           <div className="absolute flex gap-1 -top-3 left-2 z-20">
             <div className={PILL_LABEL}>{node.type}</div>
             <div className={PILL_LABEL}>{node.id}</div>
-            <button className={PILL_BLUE}>
+            <button onClick={handleEdit} className={PILL_BLUE}>
               <FaEdit size={ICON_SIZE} />
             </button>
             <button onClick={handleDelete} className={PILL_RED}>
@@ -147,13 +158,16 @@ export default function AuthoringOverlay({ node }: AuthoringOverlayProps) {
             children={children}
           />
         )}
-
-        <div className="text-xs text-gray-500 mt-1">
-          {JSON.stringify(node.props, null, 2)}
-        </div>
       </div>
 
       <div ref={setDropAfterRef} className={dropZoneClasses(isOverAfter)} />
+
+      <EditNodeDialog
+        node={node}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={handleSave}
+      />
     </div>
   );
 }

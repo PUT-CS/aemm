@@ -25,6 +25,7 @@ import {
 } from "~/routes/editor/EditorContextProvider";
 import { Draggable } from "~/routes/editor/Draggable";
 import AuthoringOverlay from "~/routes/editor/AuthoringOverlay";
+import { FaPlus } from "react-icons/fa6";
 
 // Client-only route - prevents SSR hydration mismatch with dnd-kit
 export async function clientLoader() {
@@ -55,7 +56,7 @@ function CanvasDropZone({ isEmpty }: { isEmpty: boolean }) {
     >
       {isEmpty ? (
         <div className="text-gray-400 text-sm">
-          Drop a component here to get started
+          <FaPlus size={24} />
         </div>
       ) : (
         isOver && (
