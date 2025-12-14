@@ -63,7 +63,7 @@ const ASPECT_RATIO_CLASSES: Record<string, string> = {
 
 class YouTube extends AEMMComponent<z.infer<typeof schema>> {
   static defaultProps = {
-    videoId: "dQw4w9WgXcQ",
+    videoId: "fiKG2Yb9goc",
     aspectRatio: "16:9" as const,
     title: "YouTube video",
   };

@@ -89,6 +89,41 @@ export function useEditor() {
     [nodes],
   );
 
+  const getNodeIndex = useCallback(
+    (nodeId: string): { parentId: string | null; index: number } | null => {
+      // Check root level
+      const rootIndex = nodes.findIndex((n) => n.id === nodeId);
+      if (rootIndex !== -1) {
+        return { parentId: null, index: rootIndex };
+      }
+
+      // Search in children recursively
+      const findIndex = (
+        children: EditorNode[],
+        parentId: string,
+      ): { parentId: string | null; index: number } | null => {
+        const index = children.findIndex((n) => n.id === nodeId);
+        if (index !== -1) {
+          return { parentId, index };
+        }
+
+        for (const child of children) {
+          const found = findIndex(child.children, child.id);
+          if (found) return found;
+        }
+        return null;
+      };
+
+      for (const node of nodes) {
+        const found = findIndex(node.children, node.id);
+        if (found) return found;
+      }
+
+      return null;
+    },
+    [nodes],
+  );
+
   return {
     nodes,
     selectedId,
@@ -98,6 +133,7 @@ export function useEditor() {
     updateNode,
     moveNode,
     getParentNode,
+    getNodeIndex,
   };
 }
 
