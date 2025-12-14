@@ -15,7 +15,7 @@ import {
 } from "~/routes/editor/EditorContextProvider";
 import { Draggable } from "~/routes/editor/Draggable";
 import { Droppable } from "~/routes/editor/Droppable";
-import RenderComponent from "~/routes/editor/RenderComponent";
+import AuthoringOverlay from "~/routes/editor/AuthoringOverlay";
 import { FaPlus } from "react-icons/fa6";
 
 // Client-only route - prevents SSR hydration mismatch with dnd-kit
@@ -74,7 +74,7 @@ function EditorInner() {
           onClick={() => setSelectedId(null)}
         >
           {nodes.map((node) => (
-            <RenderComponent key={node.id} node={node} />
+            <AuthoringOverlay key={node.id} node={node} />
           ))}
           <Droppable id={"canvas"}>
             <div className="text-gray-400">
