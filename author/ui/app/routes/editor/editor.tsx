@@ -73,6 +73,11 @@ function EditorInner() {
   const { nodes, addNode, setSelectedId, moveNode, getNodeIndex } =
     useEditorContext();
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [pendingMove, setPendingMove] = React.useState<{
+    nodeId: string;
+    parentId: string | null;
+    index: number;
+  } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -81,6 +86,13 @@ function EditorInner() {
       },
     }),
   );
+
+  React.useEffect(() => {
+    if (pendingMove) {
+      moveNode(pendingMove.nodeId, pendingMove.parentId, pendingMove.index);
+      setPendingMove(null);
+    }
+  }, [pendingMove, moveNode]);
 
   const handleDragStart = ({ active }: any) => {
     setActiveId(active.id);
@@ -105,20 +117,43 @@ function EditorInner() {
       return;
     }
 
+    if (!overId.includes(":")) {
+      addNode(type, null);
+      return;
+    }
+
     const [dropType, targetNodeId] = overId.split(":");
+
+    if (!targetNodeId) {
+      addNode(type, null);
+      return;
+    }
+
+    if (dropType === "inside") {
+      addNode(type, targetNodeId);
+      return;
+    }
+
     const targetInfo = getNodeIndex(targetNodeId);
+    if (!targetInfo) {
+      addNode(type, null);
+      return;
+    }
 
-    if (!targetInfo) return;
-
-    const nodeId = addNode(
-      type,
-      dropType === "inside" ? targetNodeId : targetInfo.parentId,
-    );
+    const nodeId = addNode(type, targetInfo.parentId);
 
     if (dropType === "before") {
-      moveNode(nodeId, targetInfo.parentId, targetInfo.index);
+      setPendingMove({
+        nodeId,
+        parentId: targetInfo.parentId,
+        index: targetInfo.index,
+      });
     } else if (dropType === "after") {
-      moveNode(nodeId, targetInfo.parentId, targetInfo.index + 1);
+      setPendingMove({
+        nodeId,
+        parentId: targetInfo.parentId,
+        index: targetInfo.index + 1,
+      });
     }
   };
 
