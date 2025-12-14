@@ -49,7 +49,9 @@ function parseRequestBody<T>(body: unknown): T {
  */
 function backupNode(path: string, node: unknown): void {
   const backupNode = node as ScrNode;
-  const backupPath = path.substring(-5) + '-' + backupNode.updatedAt + '.json';
+  const fileNameLength = 8;
+  const backupPath =
+    path.substring(0, fileNameLength) + '-' + backupNode.updatedAt + '.json';
 
   fs.writeFileSync(backupPath, JSON.stringify(backupNode, null, 2), 'utf8');
 }

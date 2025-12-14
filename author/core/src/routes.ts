@@ -11,6 +11,8 @@ import { getNode } from './routes/getNode';
 import { getTree } from './routes/getTree';
 import { createNode, editNode } from './routes/updateNode';
 import { deleteNode } from './routes/deleteNode';
+import { getBackup } from './routes/getBackup';
+import { setBackup } from './routes/setBackup';
 
 const router = Router();
 
@@ -21,6 +23,8 @@ router.put('/scr*queryPath', createNode);
 router.patch('/scr*queryPath', editNode);
 router.post('/scr*queryPath', uploadAsset);
 router.delete('/scr*queryPath', deleteNode);
+router.get('/backup*queryPath', getBackup);
+router.put('/backup*queryPath', setBackup);
 
 router.get('/users', listUsers);
 router.post('/users', createUser);
