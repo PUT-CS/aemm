@@ -32,15 +32,13 @@ const schema = z.object({
 });
 
 class Link extends AEMMComponent<z.infer<typeof schema>> {
+  static defaultProps = {
+    text: "Link text",
+    href: "#",
+  };
+
   getSchema() {
     return schema;
-  }
-
-  getDefaultProps() {
-    return {
-      text: "Link text",
-      href: "#",
-    };
   }
 
   render() {

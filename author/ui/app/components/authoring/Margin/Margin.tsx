@@ -21,15 +21,13 @@ const schema = z.object({
 });
 
 class Margin extends AEMMContainerComponent<z.infer<typeof schema>> {
+  static defaultProps = {
+    horizontal: 16,
+    vertical: 16,
+  };
+
   getSchema() {
     return schema;
-  }
-
-  getDefaultProps() {
-    return {
-      horizontal: 16,
-      vertical: 16,
-    };
   }
 
   render() {

@@ -19,8 +19,7 @@ function getDefaultProps(type: string): Record<string, any> {
 
   try {
     // @ts-ignore
-    const instance = new Component({});
-    return instance.getDefaultProps() || {};
+    return Component.defaultProps || {};
   } catch (e) {
     return {};
   }

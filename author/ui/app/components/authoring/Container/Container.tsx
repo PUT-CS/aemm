@@ -54,15 +54,13 @@ const JUSTIFY_CLASSES: Record<
 };
 
 class Container extends AEMMContainerComponent<z.infer<typeof schema>> {
+  static defaultProps = {
+    direction: "vertical" as const,
+    gap: 16,
+  };
+
   getSchema() {
     return schema;
-  }
-
-  getDefaultProps() {
-    return {
-      direction: "vertical" as const,
-      gap: 16,
-    };
   }
 
   render() {
