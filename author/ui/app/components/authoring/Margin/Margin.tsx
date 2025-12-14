@@ -27,7 +27,7 @@ class Margin extends AEMMContainerComponent<z.infer<typeof schema>> {
 
   getDefaultProps() {
     return {
-      horizontal: 0,
+      horizontal: 16,
       vertical: 16,
     };
   }

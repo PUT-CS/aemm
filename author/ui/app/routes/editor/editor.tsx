@@ -34,7 +34,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 function EditorInner() {
-  const { nodes, addNode } = useEditorContext();
+  const { nodes, addNode, setSelectedId } = useEditorContext();
 
   const handleDragEnd = ({ active, over }: any) => {
     if (!over) return;
@@ -68,16 +68,22 @@ function EditorInner() {
           <SidebarFooter />
         </Sidebar>
         <SidebarTrigger />
-        <div className="flex-1">
+        <div
+          id="editor-canvas"
+          className="flex-1 p-4 isolate text-base"
+          onClick={() => setSelectedId(null)}
+        >
           {nodes.map((node) => (
-            <RenderComponent node={node} />
+            <RenderComponent key={node.id} node={node} />
           ))}
           <Droppable id={"canvas"}>
-            <div className="flex items-center justify-center">
+            <div className="text-gray-400">
               <FaPlus />
             </div>
           </Droppable>
-          {JSON.stringify(nodes, null, 2)}
+          <div className="mt-4 text-xs text-gray-500">
+            {JSON.stringify(nodes, null, 2)}
+          </div>
         </div>
       </SidebarProvider>
     </DndContext>

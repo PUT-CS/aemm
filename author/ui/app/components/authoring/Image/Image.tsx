@@ -83,9 +83,8 @@ class Image extends AEMMComponent<z.infer<typeof schema>> {
 
   getDefaultProps() {
     return {
-      src: "https://via.placeholder.com/400x300?text=Image+Placeholder",
+      src: "https://raw.githubusercontent.com/NicheDevelopers/ace-of-hearts/refs/heads/main/public/dziadu.webp?token=GHSAT0AAAAAADKWJH3QIJN622TM76N65THU2J5L77Q",
       alt: "Placeholder image",
-      loading: "lazy" as const,
     };
   }
 

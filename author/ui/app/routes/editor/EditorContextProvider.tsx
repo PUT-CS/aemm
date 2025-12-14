@@ -43,19 +43,27 @@ export function useEditor() {
           ? insertIntoParent(prev, parentId, newNode)
           : [...prev, newNode],
       );
+      setSelectedId(newNode.id);
       return newNode.id;
     },
     [],
   );
 
-  const deleteNode = useCallback((id: string) => {
-    setNodes(removeById(nodes, id));
-    setSelectedId((prev) => (prev === id ? null : prev));
-  }, []);
+  const deleteNode = useCallback(
+    (id: string) => {
+      const parent = findParentById(nodes, id);
+      setNodes(removeById(nodes, id));
+      setSelectedId((prev) => (prev ? (parent ? parent.id : null) : null));
+    },
+    [nodes],
+  );
 
-  const updateNode = useCallback((id: string, props: Record<string, any>) => {
-    setNodes(updateById(nodes, id, props));
-  }, []);
+  const updateNode = useCallback(
+    (id: string, props: Record<string, any>) => {
+      setNodes(updateById(nodes, id, props));
+    },
+    [nodes],
+  );
 
   const moveNode = useCallback(
     (id: string, toParentId: string | null, toIndex: number) => {
@@ -72,7 +80,14 @@ export function useEditor() {
       );
       setNodes(nodesWithInserted);
     },
-    [],
+    [nodes],
+  );
+
+  const getParentNode = useCallback(
+    (nodeId: string): EditorNode | null => {
+      return findParentById(nodes, nodeId);
+    },
+    [nodes],
   );
 
   return {
@@ -83,6 +98,7 @@ export function useEditor() {
     deleteNode,
     updateNode,
     moveNode,
+    getParentNode,
   };
 }
 
@@ -174,6 +190,17 @@ function insertAt(
   }
 
   return nodes.map(insertAtInner);
+}
+
+function findParentById(tree: EditorNode[], nodeId: string): EditorNode | null {
+  for (const node of tree) {
+    if (node.children.some((child) => child.id === nodeId)) {
+      return node;
+    }
+    const foundInChildren = findParentById(node.children, nodeId);
+    if (foundInChildren) return foundInChildren;
+  }
+  return null;
 }
 
 export type EditorContextValue = ReturnType<typeof useEditor>;
