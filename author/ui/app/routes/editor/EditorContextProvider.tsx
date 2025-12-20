@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import React, { createContext, useCallback, useContext, useState } from "react";
 import COMPONENT_REGISTRY from "~/components/authoring/registry";
+import { BACKEND_URL } from "~/consts";
+import type { Page } from "@aemm/common";
 
 export interface EditorNode {
   id: string;
@@ -25,9 +27,91 @@ function getDefaultProps(type: string): Record<string, any> {
   }
 }
 
-export function useEditor() {
+export function useEditor(path: string) {
   const [nodes, setNodes] = useState<EditorNode[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load content from backend
+  const loadContent = useCallback(async () => {
+    if (!path) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${BACKEND_URL}/scr${path}`);
+      if (response.ok) {
+        const pageData: Page = await response.json();
+        // Extract components from the Page node
+        if (pageData.components && Array.isArray(pageData.components)) {
+          setNodes(pageData.components as EditorNode[]);
+        } else {
+          setNodes([]);
+        }
+      } else if (response.status === 404) {
+        // Page doesn't exist yet, start with empty
+        setNodes([]);
+      } else {
+        console.error("Failed to load content:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error loading content:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [path]);
+
+  // Save content to backend
+  const saveContent = useCallback(async () => {
+    if (!path) return;
+
+    try {
+      setIsSaving(true);
+      // First fetch the current page to get all fields
+      const getResponse = await fetch(`${BACKEND_URL}/scr${path}`);
+      if (!getResponse.ok) {
+        throw new Error("Failed to fetch current page data");
+      }
+
+      const currentPage: Page = await getResponse.json();
+
+      // Update only the components field
+      const updatedPage: Page = {
+        ...currentPage,
+        components: nodes,
+      };
+
+      // Use PATCH to update the page
+      const response = await fetch(`${BACKEND_URL}/scr${path}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedPage),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to save content:", response.statusText);
+        alert("Failed to save content");
+      } else {
+        // Success feedback
+        console.log("Content saved successfully");
+      }
+    } catch (error) {
+      console.error("Error saving content:", error);
+      alert("Error saving content");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [path, nodes]);
+
+  // Load content on mount or when path changes
+  React.useEffect(() => {
+    loadContent();
+  }, [loadContent]);
 
   const addNode = useCallback(
     (type: string, parentId: string | null = null) => {
@@ -134,6 +218,9 @@ export function useEditor() {
     moveNode,
     getParentNode,
     getNodeIndex,
+    saveContent,
+    isLoading,
+    isSaving,
   };
 }
 
@@ -241,8 +328,14 @@ function findParentById(tree: EditorNode[], nodeId: string): EditorNode | null {
 export type EditorContextValue = ReturnType<typeof useEditor>;
 const EditorContext = createContext<EditorContextValue | null>(null);
 
-export function EditorContextProvider({ children }: { children: ReactNode }) {
-  const value = useEditor();
+export function EditorContextProvider({
+  children,
+  path,
+}: {
+  children: ReactNode;
+  path: string;
+}) {
+  const value = useEditor(path);
   return (
     <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
   );

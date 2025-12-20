@@ -1,6 +1,7 @@
 import React from "react";
 import type { Route } from "../+types/login";
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
+import { useParams } from "react-router";
 import {
   closestCenter,
   DndContext,
@@ -19,6 +20,7 @@ import { ComponentsSidebar } from "~/routes/editor/ComponentsSidebar";
 import { EditorCanvas } from "~/routes/editor/EditorCanvas";
 import { DragOverlayContent } from "~/routes/editor/DragOverlayContent";
 import { useDragDropHandlers } from "~/routes/editor/useDragDropHandlers";
+import { EditorTopBar } from "~/routes/editor/EditorTopBar";
 
 // Client-only route - prevents SSR hydration mismatch with dnd-kit
 export async function clientLoader() {
@@ -36,7 +38,15 @@ export function meta({}: Route.MetaArgs) {
 }
 
 function EditorInner() {
-  const { nodes, addNode, moveNode, getNodeIndex } = useEditorContext();
+  const {
+    nodes,
+    addNode,
+    moveNode,
+    getNodeIndex,
+    saveContent,
+    isLoading,
+    isSaving,
+  } = useEditorContext();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [pendingMove, setPendingMove] = React.useState<{
     nodeId: string;
@@ -106,6 +116,14 @@ function EditorInner() {
 
   const activeNode = getActiveNode();
 
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        Loading content...
+      </div>
+    );
+  }
+
   return (
     <DndContext
       onDragStart={handleDragStart}
@@ -114,11 +132,14 @@ function EditorInner() {
       sensors={sensors}
       collisionDetection={customCollisionDetection}
     >
-      <SidebarProvider>
-        <ComponentsSidebar />
-        <SidebarTrigger />
-        <EditorCanvas isDragging={activeId !== null} />
-      </SidebarProvider>
+      <div className="flex flex-col h-screen">
+        <EditorTopBar />
+        <SidebarProvider className="flex-1">
+          <ComponentsSidebar />
+          <SidebarTrigger />
+          <EditorCanvas isDragging={activeId !== null} />
+        </SidebarProvider>
+      </div>
       <DragOverlay dropAnimation={null}>
         <DragOverlayContent activeId={activeId} activeNode={activeNode} />
       </DragOverlay>
@@ -127,8 +148,14 @@ function EditorInner() {
 }
 
 export default function Editor() {
+  const params = useParams();
+  // Extract path from wildcard route parameter
+  // /editor/content/my-page -> path = /content/my-page
+  const splat = params["*"] || "";
+  const path = splat ? `/${splat}` : "";
+
   return (
-    <EditorContextProvider>
+    <EditorContextProvider path={path}>
       <EditorInner />
     </EditorContextProvider>
   );

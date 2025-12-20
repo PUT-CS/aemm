@@ -1,4 +1,16 @@
-import { FaCopy, FaEdit, FaEye, FaTrash } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
+import {
+  FaCopy,
+  FaEye,
+  FaFile,
+  FaFolderOpen,
+  FaGlobe,
+  FaPaste,
+  FaPenToSquare,
+  FaPlus,
+  FaTrash,
+  FaUpload,
+} from "react-icons/fa6";
 import ContextMenuOption from "~/routes/sites/SitesBrowser/ContextMenuOption";
 import {
   ContextMenuSeparator,
@@ -6,23 +18,19 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
 } from "~/components/ui/context-menu";
-import {
-  FaFile,
-  FaFolderOpen,
-  FaGlobe,
-  FaPaste,
-  FaPlus,
-  FaUpload,
-} from "react-icons/fa6";
+import { NodeType } from "@aemm/common";
 
 interface ColumnItemContextMenuProps {
   onNewSite: () => void;
   onNewPage: () => void;
   onNewFolder: () => void;
   onNewFileUpload: () => void;
-  onEdit: () => void;
+  onEditProperties: () => void;
+  onEditContent: () => void;
+  onPreview: () => void;
   onDelete: () => void;
   canCreateChildren: boolean;
+  nodeType: NodeType;
 }
 
 export default function ColumnItemContextMenu({
@@ -30,10 +38,15 @@ export default function ColumnItemContextMenu({
   onNewPage,
   onNewFolder,
   onNewFileUpload,
-  onEdit,
+  onEditProperties,
+  onEditContent,
+  onPreview,
   onDelete,
   canCreateChildren,
+  nodeType,
 }: ColumnItemContextMenuProps) {
+  const isPage = nodeType === NodeType.PAGE;
+
   return (
     <>
       {canCreateChildren && (
@@ -71,16 +84,19 @@ export default function ColumnItemContextMenu({
           <ContextMenuSeparator />
         </>
       )}
-      <ContextMenuOption
-        icon={FaEye}
-        label="Preview"
-        onClick={() => console.log("Preview")}
-      />
+      <ContextMenuOption icon={FaEye} label="Preview" onClick={onPreview} />
+      {isPage && (
+        <ContextMenuOption
+          icon={FaPenToSquare}
+          label="Edit Content"
+          onClick={onEditContent}
+        />
+      )}
       <ContextMenuOption
         icon={FaEdit}
-        label="Edit"
-        onClick={onEdit}
-      ></ContextMenuOption>
+        label="Edit Properties"
+        onClick={onEditProperties}
+      />
       <ContextMenuSeparator />
       <ContextMenuOption
         icon={FaCopy}
