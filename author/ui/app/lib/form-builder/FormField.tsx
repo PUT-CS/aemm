@@ -44,18 +44,27 @@ function generateLabel(name: string): string {
     .trim();
 }
 
-// Unwrap optional fields
 function unwrapOptional(schema: any): {
   schema: any;
   required: boolean;
   description?: string;
 } {
-  if (schema instanceof z.ZodOptional) {
-    const description =
-      (schema as any).description || (schema.unwrap() as any).description;
-    return { schema: schema.unwrap(), required: false, description };
+  let currentSchema = schema;
+  let description = (schema as any).description;
+
+  // Unwrap ZodDefault
+  if (currentSchema instanceof z.ZodDefault) {
+    description =
+      description || (currentSchema._def.innerType as any).description;
+    currentSchema = currentSchema._def.innerType;
   }
-  return { schema, required: true, description: (schema as any).description };
+
+  if (currentSchema instanceof z.ZodOptional) {
+    description = description || (currentSchema.unwrap() as any).description;
+    return { schema: currentSchema.unwrap(), required: false, description };
+  }
+
+  return { schema: currentSchema, required: true, description };
 }
 
 // Reusable wrapper for standard form fields
