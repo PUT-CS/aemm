@@ -28,12 +28,12 @@ const schema = z.object({
     .number()
     .min(0)
     .optional()
-    .describe("Horizontal margin (left and right) in pixels. Default: 0"),
+    .describe("Horizontal margin (left and right) in pixels. Default: 16"),
   vertical: z
     .number()
     .min(0)
     .optional()
-    .describe("Vertical margin (top and bottom) in pixels. Default: 0"),
+    .describe("Vertical margin (top and bottom) in pixels. Default: 16"),
   className: z
     .string()
     .optional()
@@ -67,6 +67,8 @@ class Container extends AEMMContainerComponent<z.infer<typeof schema>> {
   static defaultProps = {
     direction: "vertical" as const,
     gap: 16,
+    horizontal: 16,
+    vertical: 16,
   };
 
   getSchema() {
@@ -80,8 +82,8 @@ class Container extends AEMMContainerComponent<z.infer<typeof schema>> {
       align,
       justify,
       wrap = false,
-      horizontal = 0,
-      vertical = 0,
+      horizontal = 16,
+      vertical = 16,
       className,
       children,
     } = this.props;

@@ -18,6 +18,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+const MDEditor = React.lazy(() =>
+  import("@uiw/react-md-editor").then((mod) => ({ default: mod.default })),
+);
+
 interface FormFieldProps {
   name: string;
   control: any;
@@ -52,7 +56,6 @@ function unwrapOptional(schema: any): {
   let currentSchema = schema;
   let description = (schema as any).description;
 
-  // Unwrap ZodDefault
   if (currentSchema instanceof z.ZodDefault) {
     description =
       description || (currentSchema._def.innerType as any).description;
@@ -181,10 +184,20 @@ export function FormField({
         control={control}
         render={({ field }) => (
           <StandardFieldWrapper label={label} description={about}>
-            <textarea
-              {...field}
-              className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-            />
+            <React.Suspense
+              fallback={
+                <div className="h-[300px] flex items-center justify-center border rounded">
+                  Loading editor...
+                </div>
+              }
+            >
+              <MDEditor
+                value={field.value || ""}
+                onChange={(val) => field.onChange(val || "")}
+                preview="edit"
+                height={300}
+              />
+            </React.Suspense>
           </StandardFieldWrapper>
         )}
       />
