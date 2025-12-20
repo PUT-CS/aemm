@@ -47,11 +47,14 @@ function parseRequestBody<T>(body: unknown): T {
 /**
  * Backs up the existing node data before modification.
  */
-function backupNode(path: string, node: unknown): void {
+function backupNode(filePath: string, node: unknown): void {
   const backupNode = node as ScrNode;
-  const fileNameLength = 8;
-  const backupPath =
-    path.substring(0, fileNameLength) + '-' + backupNode.updatedAt + '.json';
+
+  const timestamp = new Date().toISOString();
+
+  const dir = path.dirname(filePath);
+  const backupFileName = `.content-${timestamp}.json`;
+  const backupPath = path.join(dir, backupFileName);
 
   fs.writeFileSync(backupPath, JSON.stringify(backupNode, null, 2), 'utf8');
 }
@@ -261,8 +264,9 @@ export const editNode = (req: Request, res: Response) => {
       );
 
       backupNode(newContentJsonPath, dataToWrite);
-      // @ts-expect-error
-      // Update timestamp before writing it to a file
+      // @ts-expect-error - Handles missing timestamp
+      dataToWrite.createdAt = dataToWrite.createdAt || new Date();
+      // @ts-expect-error - Update timestamp before writing it to a file
       dataToWrite.updatedAt = new Date();
       fs.writeFileSync(
         newContentJsonPath,
@@ -277,8 +281,9 @@ export const editNode = (req: Request, res: Response) => {
     const dataToWrite = removeChildrenField(newData as unknown as HasChildren);
 
     backupNode(contentJsonPath, dataToWrite);
-    // @ts-expect-error
-    // Update timestamp before writing it to a file
+    // @ts-expect-error - Handles missing timestamp
+    dataToWrite.createdAt = dataToWrite.createdAt || new Date();
+    // @ts-expect-error - Update timestamp before writing it to a file
     dataToWrite.updatedAt = new Date();
     fs.writeFileSync(
       contentJsonPath,
