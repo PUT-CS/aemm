@@ -1,21 +1,13 @@
 import React from "react";
 import type { Route } from "../+types/login";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarProvider,
-  SidebarTrigger,
-} from "~/components/ui/sidebar";
-import COMPONENT_REGISTRY from "~/components/authoring/registry";
-import AEMMContainerComponent from "~/components/authoring/AEMMContainerComponent";
+import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
 import {
   closestCenter,
   DndContext,
   DragOverlay,
   PointerSensor,
-  useDroppable,
+  pointerWithin,
+  rectIntersection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -23,9 +15,10 @@ import {
   EditorContextProvider,
   useEditorContext,
 } from "~/routes/editor/EditorContextProvider";
-import { Draggable } from "~/routes/editor/Draggable";
-import AuthoringOverlay from "~/routes/editor/AuthoringOverlay";
-import { FaPlus } from "react-icons/fa6";
+import { ComponentsSidebar } from "~/routes/editor/ComponentsSidebar";
+import { EditorCanvas } from "~/routes/editor/EditorCanvas";
+import { DragOverlayContent } from "~/routes/editor/DragOverlayContent";
+import { useDragDropHandlers } from "~/routes/editor/useDragDropHandlers";
 
 // Client-only route - prevents SSR hydration mismatch with dnd-kit
 export async function clientLoader() {
@@ -42,36 +35,8 @@ export function meta({}: Route.MetaArgs) {
   return [{ title: "Editor | AEMM" }];
 }
 
-function CanvasDropZone({ isEmpty }: { isEmpty: boolean }) {
-  const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`min-h-24 border-2 border-dashed rounded-lg flex items-center justify-center transition-colors ${
-        isEmpty
-          ? "border-gray-300 bg-gray-50"
-          : "border-transparent hover:border-gray-300"
-      } ${isOver ? "border-blue-500 bg-blue-50" : ""}`}
-    >
-      {isEmpty ? (
-        <div className="text-gray-400 text-sm">
-          <FaPlus size={24} />
-        </div>
-      ) : (
-        isOver && (
-          <div className="text-blue-600 text-sm font-medium">
-            Drop here to add to root
-          </div>
-        )
-      )}
-    </div>
-  );
-}
-
 function EditorInner() {
-  const { nodes, addNode, setSelectedId, moveNode, getNodeIndex } =
-    useEditorContext();
+  const { nodes, addNode, moveNode, getNodeIndex } = useEditorContext();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [pendingMove, setPendingMove] = React.useState<{
     nodeId: string;
@@ -85,6 +50,29 @@ function EditorInner() {
         distance: 3,
       },
     }),
+  );
+
+  // Custom collision detection: prioritize pointerWithin for better edge detection
+  const customCollisionDetection = React.useCallback((args: any) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+
+    const intersectionCollisions = rectIntersection(args);
+    if (intersectionCollisions.length > 0) {
+      return intersectionCollisions;
+    }
+
+    return closestCenter(args);
+  }, []);
+
+  const { handleDragEnd, findNode } = useDragDropHandlers(
+    nodes,
+    addNode,
+    moveNode,
+    getNodeIndex,
+    setPendingMove,
   );
 
   React.useEffect(() => {
@@ -102,113 +90,9 @@ function EditorInner() {
     setActiveId(null);
   };
 
-  const findNode = (nodes: any[], id: string): any => {
-    for (const node of nodes) {
-      if (node.id === id) return node;
-      const found = findNode(node.children || [], id);
-      if (found) return found;
-    }
-    return null;
-  };
-
-  const handleAddComponent = (type: string, overId: string) => {
-    if (overId === "canvas") {
-      addNode(type, null);
-      return;
-    }
-
-    if (!overId.includes(":")) {
-      addNode(type, null);
-      return;
-    }
-
-    const [dropType, targetNodeId] = overId.split(":");
-
-    if (!targetNodeId) {
-      addNode(type, null);
-      return;
-    }
-
-    if (dropType === "inside") {
-      addNode(type, targetNodeId);
-      return;
-    }
-
-    const targetInfo = getNodeIndex(targetNodeId);
-    if (!targetInfo) {
-      addNode(type, null);
-      return;
-    }
-
-    const nodeId = addNode(type, targetInfo.parentId);
-
-    if (dropType === "before") {
-      setPendingMove({
-        nodeId,
-        parentId: targetInfo.parentId,
-        index: targetInfo.index,
-      });
-    } else if (dropType === "after") {
-      setPendingMove({
-        nodeId,
-        parentId: targetInfo.parentId,
-        index: targetInfo.index + 1,
-      });
-    }
-  };
-
-  const handleMoveNode = (nodeId: string, overId: string) => {
-    if (overId === "canvas") {
-      moveNode(nodeId, null, nodes.length);
-      return;
-    }
-
-    const [dropType, targetNodeId] = overId.split(":");
-    if (nodeId === targetNodeId) return;
-
-    const sourceInfo = getNodeIndex(nodeId);
-    const targetInfo = getNodeIndex(targetNodeId);
-
-    if (!targetInfo) return;
-
-    if (dropType === "before") {
-      moveNode(nodeId, targetInfo.parentId, targetInfo.index);
-    } else if (dropType === "after") {
-      const targetIndex =
-        sourceInfo?.parentId === targetInfo.parentId &&
-        sourceInfo.index < targetInfo.index
-          ? targetInfo.index
-          : targetInfo.index + 1;
-      moveNode(nodeId, targetInfo.parentId, targetIndex);
-    } else if (dropType === "inside") {
-      const targetNode = findNode(nodes, targetNodeId);
-      if (!targetNode) return;
-
-      const Component =
-        COMPONENT_REGISTRY[targetNode.type as keyof typeof COMPONENT_REGISTRY];
-      const canHaveChildren =
-        Component?.prototype instanceof AEMMContainerComponent;
-
-      if (canHaveChildren) {
-        moveNode(nodeId, targetNodeId, targetNode.children.length);
-      }
-    }
-  };
-
-  const handleDragEnd = ({ active, over }: any) => {
+  const onDragEnd = (event: any) => {
     setActiveId(null);
-    if (!over) return;
-
-    const activeId = active.id as string;
-    const overId = over.id as string;
-
-    if (activeId.startsWith("component:")) {
-      const type = activeId.replace("component:", "");
-      handleAddComponent(type, overId);
-    } else if (activeId.startsWith("node:")) {
-      const nodeId = activeId.replace("node:", "");
-      handleMoveNode(nodeId, overId);
-    }
+    handleDragEnd(event);
   };
 
   const getActiveNode = () => {
@@ -225,54 +109,18 @@ function EditorInner() {
   return (
     <DndContext
       onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+      onDragEnd={onDragEnd}
       onDragCancel={handleDragCancel}
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={customCollisionDetection}
     >
       <SidebarProvider>
-        <Sidebar variant="sidebar" collapsible="offcanvas">
-          <SidebarHeader>Components</SidebarHeader>
-          <SidebarContent className="p-2">
-            {Object.keys(COMPONENT_REGISTRY).map((component) => (
-              <Draggable key={component} id={`component:${component}`}>
-                <div className="p-2 mb-2 border rounded cursor-grab hover:bg-gray-100">
-                  {component}
-                </div>
-              </Draggable>
-            ))}
-          </SidebarContent>
-          <SidebarFooter />
-        </Sidebar>
+        <ComponentsSidebar />
         <SidebarTrigger />
-        <div
-          id="editor-canvas"
-          className="flex-1 p-4 isolate text-base"
-          onClick={() => setSelectedId(null)}
-        >
-          {nodes.map((node) => (
-            <AuthoringOverlay key={node.id} node={node} />
-          ))}
-          <CanvasDropZone isEmpty={nodes.length === 0} />
-          <div className="mt-4 text-xs text-gray-500">
-            {JSON.stringify(nodes, null, 2)}
-          </div>
-        </div>
+        <EditorCanvas isDragging={activeId !== null} />
       </SidebarProvider>
       <DragOverlay dropAnimation={null}>
-        {activeNode ? (
-          <div className="border-2 border-blue-500 bg-white rounded shadow-lg p-2 opacity-90">
-            <div className="text-xs font-semibold text-blue-600">
-              {activeNode.type}
-            </div>
-          </div>
-        ) : activeId?.startsWith("component:") ? (
-          <div className="border-2 border-blue-500 bg-white rounded shadow-lg p-2 opacity-90">
-            <div className="text-xs font-semibold text-blue-600">
-              {activeId.split(":")[1]}
-            </div>
-          </div>
-        ) : null}
+        <DragOverlayContent activeId={activeId} activeNode={activeNode} />
       </DragOverlay>
     </DndContext>
   );
