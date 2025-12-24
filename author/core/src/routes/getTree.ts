@@ -3,18 +3,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import config from '../config/config';
 import { Request, Response } from 'express';
+import { serverErrorLog } from './util';
 
 export function getTree(req: Request, res: Response) {
   try {
     const contentRoot = config.contentRoot;
-    console.log(`\n[getTree] Building entire tree from: ${contentRoot}`);
-
     const tree = buildTreeNode(contentRoot);
 
     res.status(200).json(tree);
   } catch (err: unknown) {
-    console.error(`[getTree] ✗ Exception:`, err);
-    res.status(500).end();
+    serverErrorLog(err, res);
   }
 }
 

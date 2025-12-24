@@ -5,7 +5,7 @@ import { parseReqPath, serverErrorLog } from './util';
 
 export const deleteNode = (req: Request, res: Response) => {
   try {
-    const fullPath = parseReqPath(req, res, "scr");
+    const fullPath = parseReqPath(req, res, 'scr');
     fs.rmSync(fullPath, { recursive: true, force: true });
     addInfoEvent(req, res, 'deleteNode.success', { path: req.path });
     res.status(200).end();

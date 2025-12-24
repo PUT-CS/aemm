@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
-import config from '../config/config';
 import * as fs from 'node:fs';
 import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
 import { randomUUID } from 'node:crypto';
 import { logger } from '../logger';
-import { z } from 'zod';
 import { NodeType, ScrNode } from '@aemm/common';
+import { parseReqPath, serverErrorLog } from './util';
+import { parseRequestBody } from './util';
+import { z } from 'zod';
 
 // eslint-disable-next-line
 const incomingScrNodeSchema: z.ZodType<any> = z.lazy(
@@ -19,30 +20,6 @@ const incomingScrNodeSchema: z.ZodType<any> = z.lazy(
       })
       .passthrough(), // Allow additional fields like timestamps, description, components, etc.
 );
-
-/**
- * Helper functions
- */
-function validateRequestPath(
-  req: Request,
-  res: Response,
-  contentRoot: string,
-): string | null {
-  const requestPath = req.path.replace(/^\/scr/, '');
-  const fullPath = path.resolve(contentRoot + requestPath);
-
-  if (!fullPath.startsWith(path.resolve(contentRoot))) {
-    addInfoEvent(req, res, 'forbidden');
-    res.status(403).end();
-    return null;
-  }
-
-  return fullPath;
-}
-
-function parseRequestBody<T>(body: unknown): T {
-  return typeof body === 'string' ? JSON.parse(body) : (body as T);
-}
 
 /**
  * Backs up the provided node data to a timestamped JSON file next to the original file.
@@ -110,9 +87,7 @@ function removeChildrenField(data: HasChildren): unknown {
  */
 export const createNode = (req: Request, res: Response) => {
   try {
-    const contentRoot = config.contentRoot;
-    const fullPath = validateRequestPath(req, res, contentRoot);
-    if (!fullPath) return;
+    const fullPath = parseReqPath(req, res, 'scr', true);
 
     if (!req.body) {
       addInfoEvent(req, res, 'createNode.badRequest', { reason: 'no body' });
@@ -169,10 +144,7 @@ export const createNode = (req: Request, res: Response) => {
       return;
     }
   } catch (err: unknown) {
-    logger.error('Unhandled createNode error', {
-      error: (err as Error).message,
-    });
-    res.status(500).end();
+    serverErrorLog(err, res);
     return;
   }
 };
@@ -183,22 +155,11 @@ export const createNode = (req: Request, res: Response) => {
  */
 export const editNode = (req: Request, res: Response) => {
   try {
-    const contentRoot = config.contentRoot;
-    const fullPath = validateRequestPath(req, res, contentRoot);
-    if (!fullPath) return;
+    const fullPath = parseReqPath(req, res, 'scr');
 
     if (!req.body) {
       addInfoEvent(req, res, 'editNode.badRequest', { reason: 'no body' });
       res.status(400).send('Request body is required');
-      return;
-    }
-
-    const exists = fs.existsSync(fullPath);
-    addInfoEvent(req, res, 'editNode.nodeExists', { exists });
-
-    if (!exists) {
-      addInfoEvent(req, res, 'editNode.notFound');
-      res.status(404).send('Node does not exist');
       return;
     }
 
@@ -263,6 +224,7 @@ export const editNode = (req: Request, res: Response) => {
         removeChildrenField(newData as unknown as HasChildren)
       );
 
+      // Backup old content and update timestamps
       backupNode(newContentJsonPath, dataToWrite);
       dataToWrite.createdAt = dataToWrite.createdAt || new Date();
       dataToWrite.updatedAt = new Date();
@@ -292,10 +254,7 @@ export const editNode = (req: Request, res: Response) => {
     res.status(200).json(newData);
     return;
   } catch (err: unknown) {
-    logger.error('Unhandled editNode error', {
-      error: (err as Error).message,
-    });
-    res.status(500).end();
+    serverErrorLog(err, res);
     return;
   }
 };

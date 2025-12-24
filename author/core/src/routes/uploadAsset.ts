@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import config from '../config/config';
 import * as fs from 'node:fs';
 import path from 'path';
 import { logger } from '../logger';
+import { parseReqPath, serverErrorLog } from './util';
 
 /**
  * Uploads an asset file (binary or text content).
@@ -10,17 +10,7 @@ import { logger } from '../logger';
  */
 export const uploadAsset = (req: Request, res: Response) => {
   try {
-    const requestPath = req.path.replace(/^\/scr/, '');
-    const contentRoot = config.contentRoot;
-    const fullPath = path.resolve(contentRoot + requestPath);
-
-    logger.debug(`uploadAsset called for path: ${fullPath}`);
-
-    if (!fullPath.startsWith(path.resolve(contentRoot))) {
-      logger.warn('uploadAsset forbidden', { path: req.path, status: 403 });
-      res.status(403).end();
-      return;
-    }
+    const fullPath = parseReqPath(req, res, 'scr', true);
 
     if (!req.body) {
       logger.warn('uploadAsset bad request (no body)');
@@ -50,8 +40,7 @@ export const uploadAsset = (req: Request, res: Response) => {
     res.status(statusCode).send(req.body);
     return;
   } catch (err: unknown) {
-    logger.error('Unhandled uploadAsset error', { error: err });
-    res.status(500).end();
+    serverErrorLog(err, res);
     return;
   }
 };
