@@ -44,6 +44,21 @@ function parseRequestBody<T>(body: unknown): T {
   return typeof body === 'string' ? JSON.parse(body) : (body as T);
 }
 
+/**
+ * Backs up the provided node data to a timestamped JSON file next to the original file.
+ */
+function backupNode(filePath: string, node: unknown): void {
+  const nodeData = node as ScrNode;
+
+  const timestamp = new Date().toISOString();
+
+  const dir = path.dirname(filePath);
+  const backupFileName = `.content-${timestamp}.json`;
+  const backupPath = path.join(dir, backupFileName);
+
+  fs.writeFileSync(backupPath, JSON.stringify(nodeData, null, 2), 'utf8');
+}
+
 function validateNodeSchema(
   jsonData: unknown,
   req: Request,
@@ -58,6 +73,23 @@ function validateNodeSchema(
     return false;
   }
   return true;
+}
+
+/**
+ * Adds id, createdAt, and updatedAt fields if missing.
+ */
+function addIdAndTimestamps(node: ScrNode): ScrNode {
+  const updatedNode = { ...node };
+
+  // Assign a new UUID if not present or blank
+  if (!updatedNode.id || updatedNode.id.trim() === '') {
+    updatedNode.id = randomUUID();
+  }
+
+  updatedNode.createdAt = updatedNode.createdAt || new Date();
+  updatedNode.updatedAt = new Date();
+
+  return updatedNode;
 }
 
 /**
@@ -104,12 +136,9 @@ export const createNode = (req: Request, res: Response) => {
     }
 
     try {
-      const jsonData = parseRequestBody<ScrNode>(req.body);
+      let jsonData = parseRequestBody<ScrNode>(req.body);
 
-      // Assign a new UUID if not present or blank
-      if (!jsonData.id || jsonData.id.trim() === '') {
-        jsonData.id = randomUUID();
-      }
+      jsonData = addIdAndTimestamps(jsonData);
 
       // Validate node schema
       if (!validateNodeSchema(jsonData, req, res)) {
@@ -230,9 +259,13 @@ export const editNode = (req: Request, res: Response) => {
 
       // Write the updated content to the new location (without children field)
       const newContentJsonPath = newPath + '/.content.json';
-      const dataToWrite = removeChildrenField(
-        newData as unknown as HasChildren,
+      const dataToWrite = <ScrNode>(
+        removeChildrenField(newData as unknown as HasChildren)
       );
+
+      backupNode(newContentJsonPath, dataToWrite);
+      dataToWrite.createdAt = dataToWrite.createdAt || new Date();
+      dataToWrite.updatedAt = new Date();
       fs.writeFileSync(
         newContentJsonPath,
         JSON.stringify(dataToWrite, null, 2),
@@ -243,7 +276,13 @@ export const editNode = (req: Request, res: Response) => {
     }
 
     // No rename needed, just update the content (without children field)
-    const dataToWrite = removeChildrenField(newData as unknown as HasChildren);
+    const dataToWrite = <ScrNode>(
+      removeChildrenField(newData as unknown as HasChildren)
+    );
+
+    backupNode(contentJsonPath, dataToWrite);
+    dataToWrite.createdAt = dataToWrite.createdAt || new Date();
+    dataToWrite.updatedAt = new Date();
     fs.writeFileSync(
       contentJsonPath,
       JSON.stringify(dataToWrite, null, 2),

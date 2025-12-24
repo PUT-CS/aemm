@@ -38,10 +38,10 @@ function buildTreeNode(fullPath: string): ScrNode & { children?: ScrNode[] } {
     const contentJsonPath = path.join(fullPath, '.content.json');
     const contentJsonExists = fs.existsSync(contentJsonPath);
 
-    // Get all children (excluding .content.json)
+    // Get all children (excluding .content*.json files)
     const entries = fs.readdirSync(fullPath, { withFileTypes: true });
     const children = entries
-      .filter((entry) => entry.name !== '.content.json')
+      .filter((entry) => !/^\.content.*\.json$/i.test(entry.name))
       .map((entry) => buildTreeNode(path.join(fullPath, entry.name)));
 
     if (!contentJsonExists) {
