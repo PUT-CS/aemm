@@ -25,14 +25,21 @@ export function getBackup(req: Request, res: Response) {
     return;
   }
 
-  const entries = fs.readdirSync(fullPath, { withFileTypes: true });
-  const result = entries
-    .filter(
-      (entry) => entry.isFile() && /^\.content-.*\.json$/i.test(entry.name),
-    )
-    .map((entry) => entry.name);
-
-  const json = { backups: result };
-  res.status(200).json(json);
-  return;
+  try {
+    const entries = fs.readdirSync(fullPath, { withFileTypes: true });
+    const result = entries
+      .filter(
+        (entry) => entry.isFile() && /^\.content-.*\.json$/i.test(entry.name),
+      )
+      .map((entry) => entry.name);
+    const json = { backups: result };
+    res.status(200).json(json);
+    return;
+  } catch (err) {
+    addInfoEvent(req, res, 'getBackup.readDirError', {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    res.status(500).end();
+    return;
+  }
 }

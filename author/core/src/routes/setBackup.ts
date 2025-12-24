@@ -9,7 +9,6 @@ export function setBackup(req: Request, res: Response) {
   const relativePath = req.path.replace(/^\/backup/, '');
   const fullPath = path.join(contentRoot, relativePath);
 
-  console.log(fullPath);
   addInfoEvent(req, res, 'setBackup.pathResolution', {
     exists: fs.existsSync(fullPath),
   });
@@ -26,9 +25,26 @@ export function setBackup(req: Request, res: Response) {
     return;
   }
 
+  if (!/\.content-.*\.json$/i.test(path.basename(fullPath))) {
+    addInfoEvent(req, res, 'setBackup.invalidFile', {
+      reason: 'not a backup file',
+    });
+    res.status(400).end();
+    return;
+  }
+
   const dir = path.dirname(fullPath);
   const targetPath = path.join(dir, '.content.json');
-  fs.renameSync(fullPath, targetPath);
-  res.status(200);
-  return;
+
+  try {
+    fs.renameSync(fullPath, targetPath);
+    res.status(200).end();
+    return;
+  } catch (error) {
+    addInfoEvent(req, res, 'setBackup.renameError', {
+      error: (error as Error).message ?? String(error),
+    });
+    res.status(500).end();
+    return;
+  }
 }

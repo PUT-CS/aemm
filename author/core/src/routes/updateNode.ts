@@ -45,10 +45,10 @@ function parseRequestBody<T>(body: unknown): T {
 }
 
 /**
- * Backs up the existing node data before modification.
+ * Backs up the provided node data to a timestamped JSON file next to the original file.
  */
 function backupNode(filePath: string, node: unknown): void {
-  const backupNode = node as ScrNode;
+  const nodeData = node as ScrNode;
 
   const timestamp = new Date().toISOString();
 
@@ -56,7 +56,7 @@ function backupNode(filePath: string, node: unknown): void {
   const backupFileName = `.content-${timestamp}.json`;
   const backupPath = path.join(dir, backupFileName);
 
-  fs.writeFileSync(backupPath, JSON.stringify(backupNode, null, 2), 'utf8');
+  fs.writeFileSync(backupPath, JSON.stringify(nodeData, null, 2), 'utf8');
 }
 
 function validateNodeSchema(
@@ -259,14 +259,12 @@ export const editNode = (req: Request, res: Response) => {
 
       // Write the updated content to the new location (without children field)
       const newContentJsonPath = newPath + '/.content.json';
-      const dataToWrite = removeChildrenField(
-        newData as unknown as HasChildren,
+      const dataToWrite = <ScrNode>(
+        removeChildrenField(newData as unknown as HasChildren)
       );
 
       backupNode(newContentJsonPath, dataToWrite);
-      // @ts-expect-error - Handles missing timestamp
       dataToWrite.createdAt = dataToWrite.createdAt || new Date();
-      // @ts-expect-error - Update timestamp before writing it to a file
       dataToWrite.updatedAt = new Date();
       fs.writeFileSync(
         newContentJsonPath,
@@ -278,12 +276,12 @@ export const editNode = (req: Request, res: Response) => {
     }
 
     // No rename needed, just update the content (without children field)
-    const dataToWrite = removeChildrenField(newData as unknown as HasChildren);
+    const dataToWrite = <ScrNode>(
+      removeChildrenField(newData as unknown as HasChildren)
+    );
 
     backupNode(contentJsonPath, dataToWrite);
-    // @ts-expect-error - Handles missing timestamp
     dataToWrite.createdAt = dataToWrite.createdAt || new Date();
-    // @ts-expect-error - Update timestamp before writing it to a file
     dataToWrite.updatedAt = new Date();
     fs.writeFileSync(
       contentJsonPath,

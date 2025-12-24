@@ -24,7 +24,7 @@ router.patch('/scr*queryPath', editNode);
 router.post('/scr*queryPath', uploadAsset);
 router.delete('/scr*queryPath', deleteNode);
 router.get('/backup*queryPath', getBackup);
-router.put('/backup*queryPath', setBackup);
+router.post('/backup*queryPath', setBackup);
 
 router.get('/users', listUsers);
 router.post('/users', createUser);
