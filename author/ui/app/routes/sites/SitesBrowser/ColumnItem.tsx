@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -48,6 +49,7 @@ export default function ColumnItem({
   onClick,
   selectedChildPath,
 }: ColumnItemProps) {
+  const navigate = useNavigate();
   const isSelected = selectedChildPath === itemPath;
   const hasChildren = item.children && item.children.length > 0;
 
@@ -64,9 +66,19 @@ export default function ColumnItem({
     setIsEditMode(false);
   };
 
-  const handleEdit = () => {
+  const handleEditProperties = () => {
     setIsEditMode(true);
     setActiveDialog(item.type);
+  };
+
+  const handleEditContent = () => {
+    // Navigate to editor with the item path
+    navigate(`/editor${itemPath}`);
+  };
+
+  const handlePreview = () => {
+    // Open preview in new tab
+    window.open(`/preview${itemPath}`, "_blank");
   };
 
   const handleDelete = () => {
@@ -120,9 +132,12 @@ export default function ColumnItem({
             onNewPage={() => setActiveDialog(NodeType.PAGE)}
             onNewFolder={() => setActiveDialog(NodeType.FOLDER)}
             onNewFileUpload={() => setActiveDialog(NodeType.FILE)}
-            onEdit={handleEdit}
+            onEditProperties={handleEditProperties}
+            onEditContent={handleEditContent}
+            onPreview={handlePreview}
             onDelete={handleDelete}
             canCreateChildren={item.type !== NodeType.FILE}
+            nodeType={item.type}
           />
         </ContextMenuContent>
       </ContextMenu>

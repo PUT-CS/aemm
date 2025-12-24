@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import React, { createContext, useCallback, useContext, useState } from "react";
 import COMPONENT_REGISTRY from "~/components/authoring/registry";
+import { BACKEND_URL } from "~/consts";
+import type { Page } from "@aemm/common";
 
 export interface EditorNode {
   id: string;
@@ -10,7 +12,7 @@ export interface EditorNode {
 }
 
 function generateId() {
-  return `node-${Date.now()}-${Math.random().toString(36).slice(3, 10)}`;
+  return crypto.randomUUID();
 }
 
 function getDefaultProps(type: string): Record<string, any> {
@@ -19,16 +21,97 @@ function getDefaultProps(type: string): Record<string, any> {
 
   try {
     // @ts-ignore
-    const instance = new Component({});
-    return instance.getDefaultProps() || {};
+    return Component.defaultProps || {};
   } catch (e) {
     return {};
   }
 }
 
-export function useEditor() {
+export function useEditor(path: string) {
   const [nodes, setNodes] = useState<EditorNode[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load content from backend
+  const loadContent = useCallback(async () => {
+    if (!path) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${BACKEND_URL}/scr${path}`);
+      if (response.ok) {
+        const pageData: Page = await response.json();
+        // Extract components from the Page node
+        if (pageData.components && Array.isArray(pageData.components)) {
+          setNodes(pageData.components as EditorNode[]);
+        } else {
+          setNodes([]);
+        }
+      } else if (response.status === 404) {
+        // Page doesn't exist yet, start with empty
+        setNodes([]);
+      } else {
+        console.error("Failed to load content:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error loading content:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [path]);
+
+  // Save content to backend
+  const saveContent = useCallback(async () => {
+    if (!path) return;
+
+    try {
+      setIsSaving(true);
+      // First fetch the current page to get all fields
+      const getResponse = await fetch(`${BACKEND_URL}/scr${path}`);
+      if (!getResponse.ok) {
+        throw new Error("Failed to fetch current page data");
+      }
+
+      const currentPage: Page = await getResponse.json();
+
+      // Update only the components field
+      const updatedPage: Page = {
+        ...currentPage,
+        components: nodes,
+      };
+
+      // Use PATCH to update the page
+      const response = await fetch(`${BACKEND_URL}/scr${path}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedPage),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to save content:", response.statusText);
+        alert("Failed to save content");
+      } else {
+        // Success feedback
+        console.log("Content saved successfully");
+      }
+    } catch (error) {
+      console.error("Error saving content:", error);
+      alert("Error saving content");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [path, nodes]);
+
+  // Load content on mount or when path changes
+  React.useEffect(() => {
+    loadContent();
+  }, [loadContent]);
 
   const addNode = useCallback(
     (type: string, parentId: string | null = null) => {
@@ -43,19 +126,27 @@ export function useEditor() {
           ? insertIntoParent(prev, parentId, newNode)
           : [...prev, newNode],
       );
+      setSelectedId(newNode.id);
       return newNode.id;
     },
     [],
   );
 
-  const deleteNode = useCallback((id: string) => {
-    setNodes(removeById(nodes, id));
-    setSelectedId((prev) => (prev === id ? null : prev));
-  }, []);
+  const deleteNode = useCallback(
+    (id: string) => {
+      const parent = findParentById(nodes, id);
+      setNodes(removeById(nodes, id));
+      setSelectedId((prev) => (prev ? (parent ? parent.id : null) : null));
+    },
+    [nodes],
+  );
 
-  const updateNode = useCallback((id: string, props: Record<string, any>) => {
-    setNodes(updateById(nodes, id, props));
-  }, []);
+  const updateNode = useCallback(
+    (id: string, props: Record<string, any>) => {
+      setNodes(updateById(nodes, id, props));
+    },
+    [nodes],
+  );
 
   const moveNode = useCallback(
     (id: string, toParentId: string | null, toIndex: number) => {
@@ -72,7 +163,49 @@ export function useEditor() {
       );
       setNodes(nodesWithInserted);
     },
-    [],
+    [nodes],
+  );
+
+  const getParentNode = useCallback(
+    (nodeId: string): EditorNode | null => {
+      return findParentById(nodes, nodeId);
+    },
+    [nodes],
+  );
+
+  const getNodeIndex = useCallback(
+    (nodeId: string): { parentId: string | null; index: number } | null => {
+      // Check root level
+      const rootIndex = nodes.findIndex((n) => n.id === nodeId);
+      if (rootIndex !== -1) {
+        return { parentId: null, index: rootIndex };
+      }
+
+      // Search in children recursively
+      const findIndex = (
+        children: EditorNode[],
+        parentId: string,
+      ): { parentId: string | null; index: number } | null => {
+        const index = children.findIndex((n) => n.id === nodeId);
+        if (index !== -1) {
+          return { parentId, index };
+        }
+
+        for (const child of children) {
+          const found = findIndex(child.children, child.id);
+          if (found) return found;
+        }
+        return null;
+      };
+
+      for (const node of nodes) {
+        const found = findIndex(node.children, node.id);
+        if (found) return found;
+      }
+
+      return null;
+    },
+    [nodes],
   );
 
   return {
@@ -83,6 +216,11 @@ export function useEditor() {
     deleteNode,
     updateNode,
     moveNode,
+    getParentNode,
+    getNodeIndex,
+    saveContent,
+    isLoading,
+    isSaving,
   };
 }
 
@@ -176,11 +314,28 @@ function insertAt(
   return nodes.map(insertAtInner);
 }
 
+function findParentById(tree: EditorNode[], nodeId: string): EditorNode | null {
+  for (const node of tree) {
+    if (node.children.some((child) => child.id === nodeId)) {
+      return node;
+    }
+    const foundInChildren = findParentById(node.children, nodeId);
+    if (foundInChildren) return foundInChildren;
+  }
+  return null;
+}
+
 export type EditorContextValue = ReturnType<typeof useEditor>;
 const EditorContext = createContext<EditorContextValue | null>(null);
 
-export function EditorContextProvider({ children }: { children: ReactNode }) {
-  const value = useEditor();
+export function EditorContextProvider({
+  children,
+  path,
+}: {
+  children: ReactNode;
+  path: string;
+}) {
+  const value = useEditor(path);
   return (
     <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
   );

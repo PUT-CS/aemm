@@ -39,14 +39,12 @@ const schema = z.object({
 });
 
 class Text extends AEMMComponent<z.infer<typeof schema>> {
+  static defaultProps = {
+    text: "Edit this text",
+  };
+
   getSchema() {
     return schema;
-  }
-
-  getDefaultProps() {
-    return {
-      text: "Edit this text",
-    };
   }
 
   render() {

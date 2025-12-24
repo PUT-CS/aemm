@@ -1,22 +1,26 @@
+import React from "react";
 import type { Route } from "../+types/login";
+import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
+import { useParams } from "react-router";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarProvider,
-  SidebarTrigger,
-} from "~/components/ui/sidebar";
-import COMPONENT_REGISTRY from "~/components/authoring/registry";
-import { DndContext } from "@dnd-kit/core";
+  closestCenter,
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  pointerWithin,
+  rectIntersection,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import {
   EditorContextProvider,
   useEditorContext,
 } from "~/routes/editor/EditorContextProvider";
-import { Draggable } from "~/routes/editor/Draggable";
-import { Droppable } from "~/routes/editor/Droppable";
-import RenderComponent from "~/routes/editor/RenderComponent";
-import { FaPlus } from "react-icons/fa6";
+import { ComponentsSidebar } from "~/routes/editor/ComponentsSidebar";
+import { EditorCanvas } from "~/routes/editor/EditorCanvas";
+import { DragOverlayContent } from "~/routes/editor/DragOverlayContent";
+import { useDragDropHandlers } from "~/routes/editor/useDragDropHandlers";
+import { EditorTopBar } from "~/routes/editor/EditorTopBar";
 
 // Client-only route - prevents SSR hydration mismatch with dnd-kit
 export async function clientLoader() {
@@ -34,59 +38,124 @@ export function meta({}: Route.MetaArgs) {
 }
 
 function EditorInner() {
-  const { nodes, addNode } = useEditorContext();
+  const {
+    nodes,
+    addNode,
+    moveNode,
+    getNodeIndex,
+    saveContent,
+    isLoading,
+    isSaving,
+  } = useEditorContext();
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [pendingMove, setPendingMove] = React.useState<{
+    nodeId: string;
+    parentId: string | null;
+    index: number;
+  } | null>(null);
 
-  const handleDragEnd = ({ active, over }: any) => {
-    if (!over) return;
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3,
+      },
+    }),
+  );
 
-    const activeId = active.id;
-    const overId = over.id;
-
-    // Add from sidebar: component:Type
-    if (activeId.startsWith("component:")) {
-      const type = activeId.split(":")[1];
-      const parentId = overId === "canvas" ? null : overId;
-      console.log("Adding node", type, "to parent", parentId);
-      addNode(type, parentId);
+  // Custom collision detection: prioritize pointerWithin for better edge detection
+  const customCollisionDetection = React.useCallback((args: any) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
     }
+
+    const intersectionCollisions = rectIntersection(args);
+    if (intersectionCollisions.length > 0) {
+      return intersectionCollisions;
+    }
+
+    return closestCenter(args);
+  }, []);
+
+  const { handleDragEnd, findNode } = useDragDropHandlers(
+    nodes,
+    addNode,
+    moveNode,
+    getNodeIndex,
+    setPendingMove,
+  );
+
+  React.useEffect(() => {
+    if (pendingMove) {
+      moveNode(pendingMove.nodeId, pendingMove.parentId, pendingMove.index);
+      setPendingMove(null);
+    }
+  }, [pendingMove, moveNode]);
+
+  const handleDragStart = ({ active }: any) => {
+    setActiveId(active.id);
   };
 
+  const handleDragCancel = () => {
+    setActiveId(null);
+  };
+
+  const onDragEnd = (event: any) => {
+    setActiveId(null);
+    handleDragEnd(event);
+  };
+
+  const getActiveNode = () => {
+    if (!activeId) return null;
+    if (activeId.startsWith("node:")) {
+      const nodeId = activeId.replace("node:", "");
+      return findNode(nodes, nodeId);
+    }
+    return null;
+  };
+
+  const activeNode = getActiveNode();
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        Loading content...
+      </div>
+    );
+  }
+
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <SidebarProvider>
-        <Sidebar variant="sidebar" collapsible="offcanvas">
-          <SidebarHeader>Components</SidebarHeader>
-          <SidebarContent className="p-2">
-            {Object.keys(COMPONENT_REGISTRY).map((component) => (
-              <Draggable key={component} id={`component:${component}`}>
-                <div className="p-2 mb-2 border rounded cursor-grab hover:bg-gray-100">
-                  {component}
-                </div>
-              </Draggable>
-            ))}
-          </SidebarContent>
-          <SidebarFooter />
-        </Sidebar>
-        <SidebarTrigger />
-        <div className="flex-1">
-          {nodes.map((node) => (
-            <RenderComponent node={node} />
-          ))}
-          <Droppable id={"canvas"}>
-            <div className="flex items-center justify-center">
-              <FaPlus />
-            </div>
-          </Droppable>
-          {JSON.stringify(nodes, null, 2)}
-        </div>
-      </SidebarProvider>
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={onDragEnd}
+      onDragCancel={handleDragCancel}
+      sensors={sensors}
+      collisionDetection={customCollisionDetection}
+    >
+      <div className="flex flex-col h-screen">
+        <EditorTopBar />
+        <SidebarProvider className="flex-1">
+          <ComponentsSidebar />
+          <SidebarTrigger />
+          <EditorCanvas isDragging={activeId !== null} />
+        </SidebarProvider>
+      </div>
+      <DragOverlay dropAnimation={null}>
+        <DragOverlayContent activeId={activeId} activeNode={activeNode} />
+      </DragOverlay>
     </DndContext>
   );
 }
 
 export default function Editor() {
+  const params = useParams();
+  // Extract path from wildcard route parameter
+  // /editor/content/my-page -> path = /content/my-page
+  const splat = params["*"] || "";
+  const path = splat ? `/${splat}` : "";
+
   return (
-    <EditorContextProvider>
+    <EditorContextProvider path={path}>
       <EditorInner />
     </EditorContextProvider>
   );

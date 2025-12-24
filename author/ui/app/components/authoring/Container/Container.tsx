@@ -24,11 +24,21 @@ const schema = z.object({
     .boolean()
     .optional()
     .describe("Whether children should wrap to the next line."),
+  horizontal: z
+    .number()
+    .min(0)
+    .optional()
+    .describe("Horizontal margin (left and right) in pixels. Default: 0"),
+  vertical: z
+    .number()
+    .min(0)
+    .optional()
+    .describe("Vertical margin (top and bottom) in pixels. Default: 0"),
   className: z
     .string()
     .optional()
     .describe("Additional Tailwind class names for the container."),
-  children: z.array(1 as any).optional(),
+  children: z.any().optional(),
 });
 
 const ALIGN_CLASSES: Record<
@@ -54,15 +64,13 @@ const JUSTIFY_CLASSES: Record<
 };
 
 class Container extends AEMMContainerComponent<z.infer<typeof schema>> {
+  static defaultProps = {
+    direction: "vertical" as const,
+    gap: 16,
+  };
+
   getSchema() {
     return schema;
-  }
-
-  getDefaultProps() {
-    return {
-      direction: "vertical" as const,
-      gap: 16,
-    };
   }
 
   render() {
@@ -72,6 +80,8 @@ class Container extends AEMMContainerComponent<z.infer<typeof schema>> {
       align,
       justify,
       wrap = false,
+      horizontal = 0,
+      vertical = 0,
       className,
       children,
     } = this.props;
@@ -94,6 +104,10 @@ class Container extends AEMMContainerComponent<z.infer<typeof schema>> {
 
     const style: React.CSSProperties = {
       gap: `${gap}px`,
+      marginLeft: horizontal ? `${horizontal}px` : undefined,
+      marginRight: horizontal ? `${horizontal}px` : undefined,
+      marginTop: vertical ? `${vertical}px` : undefined,
+      marginBottom: vertical ? `${vertical}px` : undefined,
     };
 
     return (
