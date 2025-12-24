@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { addInfoEvent } from '../middlewares/requestLogger';
 import fs from 'node:fs';
-import { reqToScrPath, serverErrorLog } from './util';
+import { parseReqPath, serverErrorLog } from './util';
 
 export const deleteNode = (req: Request, res: Response) => {
   try {
-    const fullPath = reqToScrPath(req, res);
+    const fullPath = parseReqPath(req, res, "scr");
     fs.rmSync(fullPath, { recursive: true, force: true });
     addInfoEvent(req, res, 'deleteNode.success', { path: req.path });
     res.status(200).end();

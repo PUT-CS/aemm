@@ -10,9 +10,9 @@ import { logger } from '../logger';
  * Validates request path and return the full filesystem path for SCR content.
  * @throws {Error} if the path is forbidden or not found. Sends appropriate HTTP response.
  */
-export function reqToScrPath(req: Request, res: Response): string {
+export function parseReqPath(req: Request, res: Response, prefix: string): string {
   const contentRoot = path.resolve(config.contentRoot);
-  const relativePath = req.path.replace(/^\/scr/, '');
+  const relativePath = req.path.replace(new RegExp(`^\\/${prefix}`), '');
   const fullPath = path.join(contentRoot, relativePath);
 
   if (!fullPath.startsWith(contentRoot)) {
