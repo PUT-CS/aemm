@@ -3,8 +3,12 @@ import fs from 'node:fs';
 import { parseReqPath, serverErrorLog } from './util';
 
 export function getBackup(req: Request, res: Response) {
+  const fullPath = parseReqPath(req, res, 'backup');
+  if (!fullPath) {
+    return;
+  }
+
   try {
-    const fullPath = parseReqPath(req, res, 'backup');
     const entries = fs.readdirSync(fullPath, { withFileTypes: true });
     const result = entries
       .filter(

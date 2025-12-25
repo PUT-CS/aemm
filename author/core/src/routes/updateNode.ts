@@ -86,9 +86,12 @@ function removeChildrenField(data: HasChildren): unknown {
  * Creates a new node with metadata (JSON content).
  */
 export const createNode = (req: Request, res: Response) => {
-  try {
-    const fullPath = parseReqPath(req, res, 'scr', true);
+  const fullPath = parseReqPath(req, res, 'scr', true);
+  if (!fullPath) {
+    return;
+  }
 
+  try {
     if (!req.body) {
       addInfoEvent(req, res, 'createNode.badRequest', { reason: 'no body' });
       res.status(400).send('Request body is required');
@@ -154,9 +157,12 @@ export const createNode = (req: Request, res: Response) => {
  * Handles renaming if the name field changes.
  */
 export const editNode = (req: Request, res: Response) => {
-  try {
-    const fullPath = parseReqPath(req, res, 'scr');
+  const fullPath = parseReqPath(req, res, 'scr');
+  if (!fullPath) {
+    return;
+  }
 
+  try {
     if (!req.body) {
       addInfoEvent(req, res, 'editNode.badRequest', { reason: 'no body' });
       res.status(400).send('Request body is required');

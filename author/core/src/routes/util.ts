@@ -14,7 +14,7 @@ export function parseReqPath(
   res: Response,
   prefix: string,
   create: boolean = false,
-): string {
+): string | undefined {
   const contentRoot = path.resolve(config.contentRoot);
   const relativePath = req.path.replace(new RegExp(`^\\/${prefix}`), '');
   const fullPath = path.join(contentRoot, relativePath);
@@ -24,14 +24,15 @@ export function parseReqPath(
       reason: 'path traversal',
     });
     res.status(403).end();
-    throw new Error('Forbidden path traversal');
+    return undefined;
   }
 
+  // Don't check existence if we are creating new content
   if (!create) {
     if (!fs.existsSync(fullPath)) {
       addInfoEvent(req, res, 'notFound', { path: req.path });
       res.status(404).end();
-      throw new Error('not found');
+      return undefined;
     }
   }
 

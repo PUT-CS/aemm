@@ -4,8 +4,12 @@ import fs from 'node:fs';
 import { parseReqPath, serverErrorLog } from './util';
 
 export const deleteNode = (req: Request, res: Response) => {
+  const fullPath = parseReqPath(req, res, 'scr');
+  if (!fullPath) {
+    return;
+  }
+
   try {
-    const fullPath = parseReqPath(req, res, 'scr');
     fs.rmSync(fullPath, { recursive: true, force: true });
     addInfoEvent(req, res, 'deleteNode.success', { path: req.path });
     res.status(200).end();

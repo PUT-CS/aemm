@@ -5,9 +5,12 @@ import fs from 'node:fs';
 import { parseReqPath, serverErrorLog } from './util';
 
 export function setBackup(req: Request, res: Response) {
-  try {
-    const fullPath = parseReqPath(req, res, 'backup');
+  const fullPath = parseReqPath(req, res, 'backup');
+  if (!fullPath) {
+    return;
+  }
 
+  try {
     if (!/\.content-.*\.json$/i.test(path.basename(fullPath))) {
       addInfoEvent(req, res, 'setBackup.invalidFile', {
         reason: 'not a backup file',

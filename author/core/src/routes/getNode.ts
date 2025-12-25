@@ -47,9 +47,12 @@ const handleFile = (
 };
 
 export const getNode = (req: Request, res: Response) => {
-  try {
-    const fullPath = parseReqPath(req, res, 'scr');
+  const fullPath = parseReqPath(req, res, 'scr');
+  if (!fullPath) {
+    return;
+  }
 
+  try {
     const contentJsonFullPath = path.join(fullPath, '.content.json');
     if (handleContentJson(contentJsonFullPath, req.path, req, res)) {
       return;
