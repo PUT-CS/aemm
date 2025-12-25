@@ -2,85 +2,18 @@ import { Request, Response } from 'express';
 import * as fs from 'node:fs';
 import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
-import { randomUUID } from 'node:crypto';
 import { logger } from '../logger';
-import { NodeType, ScrNode } from '@aemm/common';
-import { parseReqPath, serverErrorLog } from './util';
-import { parseRequestBody } from './util';
-import { z } from 'zod';
-
-// eslint-disable-next-line
-const incomingScrNodeSchema: z.ZodType<any> = z.lazy(
-  () =>
-    z
-      .object({
-        type: z.enum(NodeType),
-        id: z.string().uuid().optional(),
-        name: z.string().min(1),
-      })
-      .passthrough(), // Allow additional fields like timestamps, description, components, etc.
-);
-
-/**
- * Backs up the provided node data to a timestamped JSON file next to the original file.
- */
-function backupNode(filePath: string, node: unknown): void {
-  const nodeData = node as ScrNode;
-
-  const timestamp = new Date().toISOString();
-
-  const dir = path.dirname(filePath);
-  const backupFileName = `.content-${timestamp}.json`;
-  const backupPath = path.join(dir, backupFileName);
-
-  fs.writeFileSync(backupPath, JSON.stringify(nodeData, null, 2), 'utf8');
-}
-
-function validateNodeSchema(
-  jsonData: unknown,
-  req: Request,
-  res: Response,
-): boolean {
-  const validationResult = incomingScrNodeSchema.safeParse(jsonData);
-  if (!validationResult.success) {
-    addInfoEvent(req, res, 'invalidScrNode', {
-      errors: validationResult.error.issues,
-    });
-    res.status(400).send('Invalid ScrNode structure');
-    return false;
-  }
-  return true;
-}
-
-/**
- * Adds id, createdAt, and updatedAt fields if missing.
- */
-function addIdAndTimestamps(node: ScrNode): ScrNode {
-  const updatedNode = { ...node };
-
-  // Assign a new UUID if not present or blank
-  if (!updatedNode.id || updatedNode.id.trim() === '') {
-    updatedNode.id = randomUUID();
-  }
-
-  updatedNode.createdAt = updatedNode.createdAt || new Date();
-  updatedNode.updatedAt = new Date();
-
-  return updatedNode;
-}
-
-/**
- * Removes the children field from node data before persisting to disk.
- * Children should be determined at runtime by reading the filesystem.
- */
-interface HasChildren {
-  children?: unknown;
-}
-function removeChildrenField(data: HasChildren): unknown {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { children, ...rest } = data;
-  return rest;
-}
+import { ScrNode } from '@aemm/common';
+import {
+  addIdAndTimestamps,
+  backupNode,
+  HasChildren,
+  parseReqPath,
+  removeChildrenField,
+  serverErrorLog,
+  validateNodeSchema,
+} from './utils';
+import { parseRequestBody } from './utils';
 
 /**
  * Creates a new node with metadata (JSON content).
@@ -226,14 +159,13 @@ export const editNode = (req: Request, res: Response) => {
 
       // Write the updated content to the new location (without children field)
       const newContentJsonPath = newPath + '/.content.json';
-      const dataToWrite = <ScrNode>(
+      let dataToWrite = <ScrNode>(
         removeChildrenField(newData as unknown as HasChildren)
       );
 
       // Backup old content and update timestamps
       backupNode(newContentJsonPath, dataToWrite);
-      dataToWrite.createdAt = dataToWrite.createdAt || new Date();
-      dataToWrite.updatedAt = new Date();
+      dataToWrite = addIdAndTimestamps(dataToWrite);
       fs.writeFileSync(
         newContentJsonPath,
         JSON.stringify(dataToWrite, null, 2),
@@ -244,13 +176,12 @@ export const editNode = (req: Request, res: Response) => {
     }
 
     // No rename needed, just update the content (without children field)
-    const dataToWrite = <ScrNode>(
+    let dataToWrite = <ScrNode>(
       removeChildrenField(newData as unknown as HasChildren)
     );
 
     backupNode(contentJsonPath, dataToWrite);
-    dataToWrite.createdAt = dataToWrite.createdAt || new Date();
-    dataToWrite.updatedAt = new Date();
+    dataToWrite = addIdAndTimestamps(dataToWrite);
     fs.writeFileSync(
       contentJsonPath,
       JSON.stringify(dataToWrite, null, 2),

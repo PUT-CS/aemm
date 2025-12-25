@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import fs from 'node:fs';
-import { parseReqPath, serverErrorLog } from './util';
+import { parseReqPath, serverErrorLog } from './utils';
 
 export function getBackup(req: Request, res: Response) {
   const fullPath = parseReqPath(req, res, 'backup');

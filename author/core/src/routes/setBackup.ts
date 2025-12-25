@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
 import fs from 'node:fs';
-import { parseReqPath, serverErrorLog } from './util';
+import { parseReqPath, serverErrorLog } from './utils';
 
 export function setBackup(req: Request, res: Response) {
   const fullPath = parseReqPath(req, res, 'backup');

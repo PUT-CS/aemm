@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as fs from 'node:fs';
 import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
-import { parseReqPath, serverErrorLog } from './util';
+import { parseReqPath, serverErrorLog } from './utils';
 
 /**
  * Uploads an asset file (binary or text content).

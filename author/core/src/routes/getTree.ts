@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import config from '../config/config';
 import { Request, Response } from 'express';
-import { serverErrorLog } from './util';
+import { serverErrorLog } from './utils';
 
 export function getTree(req: Request, res: Response) {
   try {

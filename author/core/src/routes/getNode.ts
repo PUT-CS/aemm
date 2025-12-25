@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import { ScrNode } from '@aemm/common/scr';
 import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
-import { parseReqPath, serverErrorLog } from './util';
+import { parseReqPath, serverErrorLog } from './utils';
 
 const handleContentJson = (
   contentJsonFullPath: string,
