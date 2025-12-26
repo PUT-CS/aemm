@@ -74,7 +74,7 @@ const incomingScrNodeSchema: z.ZodType<any> = z.lazy(
 export function backupNode(filePath: string, node: unknown): void {
   const nodeData = node as ScrNode;
 
-  const timestamp = new Date().toISOString();
+  const timestamp = nodeData.updatedAt;
 
   const dir = path.dirname(filePath);
   const backupFileName = `.content-${timestamp}.json`;
@@ -110,8 +110,8 @@ export function addIdAndTimestamps(node: ScrNode): ScrNode {
     updatedNode.id = randomUUID();
   }
 
-  updatedNode.createdAt = updatedNode.createdAt || new Date();
-  updatedNode.updatedAt = new Date();
+  updatedNode.createdAt = updatedNode.createdAt || new Date().getTime();
+  updatedNode.updatedAt = new Date().getTime();
 
   return updatedNode;
 }

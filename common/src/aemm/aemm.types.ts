@@ -3,8 +3,8 @@ import { NodeType, ScrNode } from "../scr";
 export type UserRole = "admin" | "editor";
 
 export interface Timestamps {
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | number;
+  updatedAt: Date | number;
 }
 
 export interface UserCreationPayload extends Timestamps {
