@@ -2,9 +2,8 @@ import { Request, Response } from 'express';
 import * as fs from 'node:fs';
 import { ScrNode } from '@aemm/common/scr';
 import path from 'path';
-import { logger } from '../logger';
-import config from '../config/config';
 import { addInfoEvent } from '../middlewares/requestLogger';
+import { parseReqPath, serverErrorLog } from './utils';
 
 const handleContentJson = (
   contentJsonFullPath: string,
@@ -48,27 +47,12 @@ const handleFile = (
 };
 
 export const getNode = (req: Request, res: Response) => {
+  const fullPath = parseReqPath(req, res, 'scr');
+  if (!fullPath) {
+    return;
+  }
+
   try {
-    const contentRoot = path.resolve(config.contentRoot);
-    const relativePath = req.path.replace(/^\/scr/, '');
-    const fullPath = path.join(contentRoot, relativePath);
-
-    addInfoEvent(req, res, 'getNode.pathResolution', {
-      exists: fs.existsSync(fullPath),
-    });
-
-    if (!fullPath.startsWith(contentRoot)) {
-      addInfoEvent(req, res, 'getNode.forbidden', { reason: 'path traversal' });
-      res.status(403).end();
-      return;
-    }
-
-    if (!fs.existsSync(fullPath)) {
-      addInfoEvent(req, res, 'getNode.notFound');
-      res.status(404).end();
-      return;
-    }
-
     const contentJsonFullPath = path.join(fullPath, '.content.json');
     if (handleContentJson(contentJsonFullPath, req.path, req, res)) {
       return;
@@ -84,10 +68,7 @@ export const getNode = (req: Request, res: Response) => {
       return;
     }
   } catch (err: unknown) {
-    logger.error('Unhandled getNode error', {
-      error: (err as Error).message,
-    });
-    res.status(500).end();
+    serverErrorLog(err, res);
     return;
   }
 };

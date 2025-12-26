@@ -1,119 +1,30 @@
 import { Request, Response } from 'express';
-import config from '../config/config';
 import * as fs from 'node:fs';
 import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
-import { randomUUID } from 'node:crypto';
 import { logger } from '../logger';
-import { z } from 'zod';
-import { NodeType, ScrNode } from '@aemm/common';
-
-// eslint-disable-next-line
-const incomingScrNodeSchema: z.ZodType<any> = z.lazy(
-  () =>
-    z
-      .object({
-        type: z.enum(NodeType),
-        id: z.string().uuid().optional(),
-        name: z.string().min(1),
-      })
-      .passthrough(), // Allow additional fields like timestamps, description, components, etc.
-);
-
-/**
- * Helper functions
- */
-function validateRequestPath(
-  req: Request,
-  res: Response,
-  contentRoot: string,
-): string | null {
-  const requestPath = req.path.replace(/^\/scr/, '');
-  const fullPath = path.resolve(contentRoot + requestPath);
-
-  if (!fullPath.startsWith(path.resolve(contentRoot))) {
-    addInfoEvent(req, res, 'forbidden');
-    res.status(403).end();
-    return null;
-  }
-
-  return fullPath;
-}
-
-function parseRequestBody<T>(body: unknown): T {
-  return typeof body === 'string' ? JSON.parse(body) : (body as T);
-}
-
-/**
- * Backs up the provided node data to a timestamped JSON file next to the original file.
- */
-function backupNode(filePath: string, node: unknown): void {
-  const nodeData = node as ScrNode;
-
-  const timestamp = new Date().toISOString();
-
-  const dir = path.dirname(filePath);
-  const backupFileName = `.content-${timestamp}.json`;
-  const backupPath = path.join(dir, backupFileName);
-
-  fs.writeFileSync(backupPath, JSON.stringify(nodeData, null, 2), 'utf8');
-}
-
-function validateNodeSchema(
-  jsonData: unknown,
-  req: Request,
-  res: Response,
-): boolean {
-  const validationResult = incomingScrNodeSchema.safeParse(jsonData);
-  if (!validationResult.success) {
-    addInfoEvent(req, res, 'invalidScrNode', {
-      errors: validationResult.error.issues,
-    });
-    res.status(400).send('Invalid ScrNode structure');
-    return false;
-  }
-  return true;
-}
-
-/**
- * Adds id, createdAt, and updatedAt fields if missing.
- */
-function addIdAndTimestamps(node: ScrNode): ScrNode {
-  const updatedNode = { ...node };
-
-  // Assign a new UUID if not present or blank
-  if (!updatedNode.id || updatedNode.id.trim() === '') {
-    updatedNode.id = randomUUID();
-  }
-
-  updatedNode.createdAt = updatedNode.createdAt || new Date();
-  updatedNode.updatedAt = new Date();
-
-  return updatedNode;
-}
-
-/**
- * Removes the children field from node data before persisting to disk.
- * Children should be determined at runtime by reading the filesystem.
- */
-interface HasChildren {
-  children?: unknown;
-}
-function removeChildrenField(data: HasChildren): unknown {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { children, ...rest } = data;
-  return rest;
-}
+import { ScrNode } from '@aemm/common';
+import {
+  addIdAndTimestamps,
+  backupNode,
+  HasChildren,
+  parseReqPath,
+  removeChildrenField,
+  serverErrorLog,
+  validateNodeSchema,
+  parseRequestBody,
+} from './utils';
 
 /**
  * Creates a new node with metadata (JSON content).
  */
 export const createNode = (req: Request, res: Response) => {
-  try {
-    const contentRoot = config.contentRoot;
-    const fullPath = validateRequestPath(req, res, contentRoot);
-    if (!fullPath) return;
+  const fullPath = parseReqPath(req, res, 'scr', true);
+  if (!fullPath) {
+    return;
+  }
 
+  try {
     if (!req.body) {
       addInfoEvent(req, res, 'createNode.badRequest', { reason: 'no body' });
       res.status(400).send('Request body is required');
@@ -169,10 +80,7 @@ export const createNode = (req: Request, res: Response) => {
       return;
     }
   } catch (err: unknown) {
-    logger.error('Unhandled createNode error', {
-      error: (err as Error).message,
-    });
-    res.status(500).end();
+    serverErrorLog(err, res);
     return;
   }
 };
@@ -182,23 +90,15 @@ export const createNode = (req: Request, res: Response) => {
  * Handles renaming if the name field changes.
  */
 export const editNode = (req: Request, res: Response) => {
-  try {
-    const contentRoot = config.contentRoot;
-    const fullPath = validateRequestPath(req, res, contentRoot);
-    if (!fullPath) return;
+  const fullPath = parseReqPath(req, res, 'scr');
+  if (!fullPath) {
+    return;
+  }
 
+  try {
     if (!req.body) {
       addInfoEvent(req, res, 'editNode.badRequest', { reason: 'no body' });
       res.status(400).send('Request body is required');
-      return;
-    }
-
-    const exists = fs.existsSync(fullPath);
-    addInfoEvent(req, res, 'editNode.nodeExists', { exists });
-
-    if (!exists) {
-      addInfoEvent(req, res, 'editNode.notFound');
-      res.status(404).send('Node does not exist');
       return;
     }
 
@@ -259,13 +159,13 @@ export const editNode = (req: Request, res: Response) => {
 
       // Write the updated content to the new location (without children field)
       const newContentJsonPath = newPath + '/.content.json';
-      const dataToWrite = <ScrNode>(
+      let dataToWrite = <ScrNode>(
         removeChildrenField(newData as unknown as HasChildren)
       );
 
+      // Backup old content and update timestamps
       backupNode(newContentJsonPath, dataToWrite);
-      dataToWrite.createdAt = dataToWrite.createdAt || new Date();
-      dataToWrite.updatedAt = new Date();
+      dataToWrite = addIdAndTimestamps(dataToWrite);
       fs.writeFileSync(
         newContentJsonPath,
         JSON.stringify(dataToWrite, null, 2),
@@ -276,13 +176,12 @@ export const editNode = (req: Request, res: Response) => {
     }
 
     // No rename needed, just update the content (without children field)
-    const dataToWrite = <ScrNode>(
+    let dataToWrite = <ScrNode>(
       removeChildrenField(newData as unknown as HasChildren)
     );
 
     backupNode(contentJsonPath, dataToWrite);
-    dataToWrite.createdAt = dataToWrite.createdAt || new Date();
-    dataToWrite.updatedAt = new Date();
+    dataToWrite = addIdAndTimestamps(dataToWrite);
     fs.writeFileSync(
       contentJsonPath,
       JSON.stringify(dataToWrite, null, 2),
@@ -292,10 +191,7 @@ export const editNode = (req: Request, res: Response) => {
     res.status(200).json(newData);
     return;
   } catch (err: unknown) {
-    logger.error('Unhandled editNode error', {
-      error: (err as Error).message,
-    });
-    res.status(500).end();
+    serverErrorLog(err, res);
     return;
   }
 };

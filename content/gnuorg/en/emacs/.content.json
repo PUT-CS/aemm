@@ -1,0 +1,10 @@
+{
+  "type": "aemm:page",
+  "title": "Emacs",
+  "description": "GNU Emacs is an extensible, customizable, free/libre text editor — and more.",
+  "components": [],
+  "createdAt": 1766784087584,
+  "updatedAt": 1766784087584,
+  "id": "a62328cb-9dac-43d0-8e2a-b4e27e72a81b",
+  "name": "emacs"
+}

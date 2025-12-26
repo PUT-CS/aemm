@@ -1,0 +1,10 @@
+{
+  "type": "aemm:page",
+  "title": "Home",
+  "description": "Main page about AEMM",
+  "components": [],
+  "createdAt": 1766784153300,
+  "updatedAt": 1766784153300,
+  "id": "8329665f-9367-4cd8-bad4-ada411bfb866",
+  "name": "home"
+}

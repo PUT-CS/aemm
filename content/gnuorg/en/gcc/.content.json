@@ -1,0 +1,21 @@
+{
+  "type": "aemm:page",
+  "title": "GCC",
+  "description": "The GNU Compiler Collection (GCC) is a compiler system produced by the GNU Project.",
+  "page": [
+    {
+      "type": "aemm:container",
+      "children": [
+        {
+          "type": "aemm:anchor",
+          "href": "/en/us/gnuorg",
+          "text": "GNU.org"
+        }
+      ]
+    }
+  ],
+  "createdAt": 1766784083784,
+  "updatedAt": 1766784083784,
+  "id": "fc9906ad-6ea6-4a57-b5ee-48888dff34f5",
+  "name": "gcc"
+}
