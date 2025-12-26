@@ -9,8 +9,10 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Validates request path and return the full filesystem path for SCR content.
- * @throws {Error} if the path is forbidden or not found. Sends appropriate HTTP response.
+ * Validates the request path and returns the full filesystem path for SCR content.
+ *
+ *  If the path is forbidden (path traversal) or not found, logs an info event,
+ *  sends the appropriate HTTP response (403 or 404), and returns undefined.
  */
 export function parseReqPath(
   req: Request,
@@ -43,7 +45,7 @@ export function parseReqPath(
 }
 
 /**
- * Utility function for highest level throw in routes function
+ * Utility function for handling unhandled errors in route handlers
  */
 export function serverErrorLog(err: unknown, res: Response): void {
   logger.error('Unhandled error', {
