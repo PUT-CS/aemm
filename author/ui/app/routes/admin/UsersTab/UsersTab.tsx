@@ -29,7 +29,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "~/routes/admin/DataTable";
 import { FaCheck, FaPlus, FaXmark } from "react-icons/fa6";
-import { columns, fetchUsers } from "~/routes/admin/UsersTab/usersTabUtils";
+import { columns } from "~/routes/admin/UsersTab/usersTabUtils";
+import { fetchUsers } from "~/routes/admin/UsersTab/fetchUsers"
 
 const formSchema = z.object({
   username: z

@@ -3,7 +3,7 @@ import { Db, userSchema } from '../db/db';
 import { AppError } from '../middlewares/errorHandler';
 import { addInfoEvent } from '../middlewares/requestLogger';
 
-export async function listUsers(
+export async function fetchUsers(
   _req: Request,
   res: Response,
   next: NextFunction,
@@ -11,7 +11,7 @@ export async function listUsers(
   try {
     const users = await Db.getAllUsers();
     addInfoEvent(_req, res, 'users.listed', { count: users.length });
-    res.json(users);
+    res.json(users).status(200);
   } catch (err) {
     const error: AppError =
       err instanceof Error ? err : new Error('Unknown error');
@@ -72,13 +72,13 @@ export async function createUser(
     try {
       const created = await Db.createUser(user);
       addInfoEvent(req, res, 'user.created', {
-        name: created.name,
+        name: created.username,
         role: created.role,
       });
       res.status(201).json(created);
     } catch (e) {
       if (e instanceof Error && /SQLITE_CONSTRAINT/.test(e.message)) {
-        addInfoEvent(req, res, 'user.create.duplicate', { name: user.name });
+        addInfoEvent(req, res, 'user.create.duplicate', { name: user.username });
         res.status(409).json({ message: 'User with this name already exists' });
         return;
       }

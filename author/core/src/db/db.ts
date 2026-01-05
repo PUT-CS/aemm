@@ -7,7 +7,7 @@ import { logger } from '../logger';
 import { z } from 'zod';
 
 export const userSchema = z.object({
-  name: z.string().min(1),
+  username: z.string().min(1),
   passwordHash: z.string().min(1),
   role: z.string().min(1),
 });
@@ -54,7 +54,7 @@ export class Database {
     await this.db.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
+        username TEXT NOT NULL UNIQUE,
         passwordHash TEXT NOT NULL,
         role TEXT NOT NULL
       );
@@ -91,16 +91,16 @@ export class Database {
     if (!this.db) throw new Error('Database not initialized');
 
     return this.db.all(
-      'SELECT id, name, passwordHash, role FROM users ORDER BY id ASC;',
+      'SELECT id, username, passwordHash, role FROM users ORDER BY id ASC;',
     );
   }
 
-  public async getUser(name: string): Promise<User | undefined> {
+  public async getUser(username: string): Promise<User | undefined> {
     if (!this.db) throw new Error('Database not initialized');
 
     return this.db.get(
-      'SELECT id, name, passwordHash, role FROM users WHERE name = ?;',
-      name,
+      'SELECT id, username, passwordHash, role FROM users WHERE username = ?;',
+      username,
     );
   }
 
@@ -110,14 +110,14 @@ export class Database {
     user = userSchema.parse(user);
 
     const result = await this.db.run(
-      'INSERT INTO users (name, passwordHash, role) VALUES (?, ?, ?);',
-      user.name,
+      'INSERT INTO users (username, passwordHash, role) VALUES (?, ?, ?);',
+      user.username,
       user.passwordHash,
       user.role,
     );
 
     const createdUser = await this.db.get(
-      'SELECT id, name, passwordHash, role FROM users WHERE id = ?;',
+      'SELECT id, username, passwordHash, role FROM users WHERE id = ?;',
       result.lastID,
     );
 
@@ -125,7 +125,7 @@ export class Database {
   }
 
   public async updateUser(
-    name: string,
+    username: string,
     updates: { passwordHash?: string; role?: string },
   ): Promise<{ lastID: number; changes: number }> {
     if (!this.db) throw new Error('Database not initialized');
@@ -146,19 +146,19 @@ export class Database {
       return { lastID: 0, changes: 0 };
     }
 
-    const sql = `UPDATE users SET ${sets.join(', ')} WHERE name = ?;`;
-    params.push(name);
+    const sql = `UPDATE users SET ${sets.join(', ')} WHERE username = ?;`;
+    params.push(username);
 
     const result = await this.db.run(sql, ...params);
     return { lastID: result.lastID, changes: result.changes };
   }
 
   public async deleteUser(
-    name: string,
+    username: string,
   ): Promise<{ lastID: number; changes: number }> {
     if (!this.db) throw new Error('Database not initialized');
 
-    const result = await this.db.run('DELETE FROM users WHERE name = ?;', name);
+    const result = await this.db.run('DELETE FROM users WHERE username = ?;', username);
     return { lastID: result.lastID, changes: result.changes };
   }
 }
