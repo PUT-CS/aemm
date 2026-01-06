@@ -78,7 +78,9 @@ export async function createUser(
       res.status(201).json(created);
     } catch (e) {
       if (e instanceof Error && /SQLITE_CONSTRAINT/.test(e.message)) {
-        addInfoEvent(req, res, 'user.create.duplicate', { name: user.username });
+        addInfoEvent(req, res, 'user.create.duplicate', {
+          name: user.username,
+        });
         res.status(409).json({ message: 'User with this name already exists' });
         return;
       }
