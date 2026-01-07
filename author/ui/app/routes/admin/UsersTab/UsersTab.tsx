@@ -26,11 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import { DataTable } from "~/routes/admin/DataTable";
 import { FaCheck, FaPlus, FaXmark } from "react-icons/fa6";
 import { columns } from "~/routes/admin/UsersTab/usersTabUtils";
 import { fetchUsers } from "~/routes/admin/UsersTab/fetchUsers"
+import {createUser} from "~/routes/admin/UsersTab/mutations";
 
 const formSchema = z.object({
   username: z
@@ -42,7 +43,7 @@ const formSchema = z.object({
   role: z.string(),
 });
 
-type FormSchema = z.infer<typeof formSchema>;
+export type FormSchema = z.infer<typeof formSchema>;
 
 function AddUserDialog() {
   const form = useForm<FormSchema>({
@@ -51,6 +52,19 @@ function AddUserDialog() {
       username: "",
       password: "",
       role: "editor",
+    },
+  });
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: createUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      // onCLose()?.();
+    },
+    onError: (error: Error) => {
+      console.error("Failed to add a user:", error);
+      alert(`Failed to add a user: ${error.message}`);
     },
   });
 
