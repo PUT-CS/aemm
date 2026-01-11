@@ -19,3 +19,20 @@ export async function createUser(user: FormSchema) {
   console.log(user);
   return response;
 }
+
+/**
+ * Delete an existing user by username.
+ */
+export async function deleteUser(username: string) {
+  console.log("Deleting user", username);
+  const response = await fetch(
+    `${BACKEND_URL}/users/${encodeURIComponent(username)}`,
+    {
+      method: "DELETE",
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to delete user: ${response.statusText}`);
+  }
+  return response;
+}

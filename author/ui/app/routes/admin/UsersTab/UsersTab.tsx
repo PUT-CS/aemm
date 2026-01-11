@@ -41,7 +41,9 @@ const formSchema = z.object({
   passwordHash: z
     .string()
     .min(6, { message: "Password must be at least 6 characters." }),
-  role: z.string(),
+  role: z.enum(["editor", "admin"], {
+    message: "Role must be either 'editor' or 'admin'.",
+  }),
 });
 
 export type FormSchema = z.infer<typeof formSchema>;

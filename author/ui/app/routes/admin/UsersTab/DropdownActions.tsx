@@ -12,13 +12,35 @@ import {
 import { Button } from "~/components/ui/button";
 import { FaPen, FaXmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { Row } from "@tanstack/react-table";
+import type { User } from "@aemm/common";
+import { deleteUser } from "~/routes/admin/UsersTab/mutations";
 
-export function DropdownActions() {
+interface DropdownActionsProps {
+  row: Row<User>;
+}
+
+export function DropdownActions({ row }: DropdownActionsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const username = row.original.username;
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      setIsDeleteDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      console.error("User deletion failed:", error);
+      alert(`User deletion failed: ${error.message}`);
+    },
+  });
 
   const handleDelete = () => {
-    console.log("User deleted");
-    setIsDeleteDialogOpen(false);
+    deleteMutation.mutate(username);
   };
 
   return (
@@ -47,8 +69,8 @@ export function DropdownActions() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete User</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this user? This action cannot be
-              undone.
+              Are you sure you want to delete user <strong>{username}</strong>?
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
