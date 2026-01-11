@@ -13,7 +13,7 @@ export const userSchema = z.object({
   passwordHash: z.string().min(1),
   role: z.string().min(1),
   createdAt: z.number().int().optional(),
-  updatedAt: z.number().int().optional()
+  updatedAt: z.number().int().optional(),
 });
 
 export type User = z.infer<typeof userSchema>;

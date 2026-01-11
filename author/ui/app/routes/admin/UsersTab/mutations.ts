@@ -1,12 +1,11 @@
-import {BACKEND_URL} from "~/consts";
-import type {FormSchema} from "~/routes/admin/UsersTab/UsersTab";
-
+import { BACKEND_URL } from "~/consts";
+import type { FormSchema } from "~/routes/admin/UsersTab/UsersTab";
 
 /**
  * Create a new user in the database.
  */
 export async function createUser(user: FormSchema) {
-  console.log("Creating user...")
+  console.log("Creating user...");
   const response = await fetch(`${BACKEND_URL}/users`, {
     method: "POST",
     headers: {
@@ -17,5 +16,6 @@ export async function createUser(user: FormSchema) {
   if (!response.ok) {
     throw new Error(`Failed to create user: ${response.statusText}`);
   }
+  console.log(user);
   return response;
 }

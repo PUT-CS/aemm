@@ -26,18 +26,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataTable } from "~/routes/admin/DataTable";
 import { FaCheck, FaPlus, FaXmark } from "react-icons/fa6";
 import { columns } from "~/routes/admin/UsersTab/usersTabUtils";
-import { fetchUsers } from "~/routes/admin/UsersTab/fetchUsers"
-import {createUser} from "~/routes/admin/UsersTab/mutations";
+import { fetchUsers } from "~/routes/admin/UsersTab/fetchUsers";
+import { createUser } from "~/routes/admin/UsersTab/mutations";
+import { useState } from "react";
 
 const formSchema = z.object({
   username: z
     .string()
     .min(2, { message: "Username must be at least 2 characters." }),
-  password: z
+  passwordHash: z
     .string()
     .min(6, { message: "Password must be at least 6 characters." }),
   role: z.string(),
@@ -45,12 +46,12 @@ const formSchema = z.object({
 
 export type FormSchema = z.infer<typeof formSchema>;
 
-function AddUserDialog() {
+function AddUserDialog({ onClose }: { onClose: () => void }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      password: "",
+      passwordHash: "",
       role: "editor",
     },
   });
@@ -59,8 +60,10 @@ function AddUserDialog() {
   const createMutation = useMutation({
     mutationFn: createUser,
     onSuccess: () => {
+      // Refetch users list and close dialog
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      // onCLose()?.();
+      form.reset({ username: "", passwordHash: "", role: "editor" });
+      onClose();
     },
     onError: (error: Error) => {
       console.error("Failed to add a user:", error);
@@ -69,7 +72,7 @@ function AddUserDialog() {
   });
 
   const onSubmit = (data: FormSchema) => {
-    console.log(data);
+    createMutation.mutate(data);
   };
 
   const formItemClasses = "px-0 py-0 mb-2";
@@ -77,6 +80,7 @@ function AddUserDialog() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+        {/* Username */}
         <FormField
           name="username"
           control={form.control}
@@ -93,14 +97,15 @@ function AddUserDialog() {
           )}
         />
 
+        {/* Password */}
         <FormField
-          name="password"
+          name="passwordHash"
           control={form.control}
           render={({ field }) => (
             <FormItem className={formItemClasses}>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="text" {...field} className="h-10" />
+                <Input type="password" {...field} className="h-10" />
               </FormControl>
               <div className="h-6">
                 <FormMessage />
@@ -109,6 +114,7 @@ function AddUserDialog() {
           )}
         />
 
+        {/* Role */}
         <FormField
           name="role"
           control={form.control}
@@ -138,14 +144,23 @@ function AddUserDialog() {
 
         <div className="flex justify-end gap-2 mt-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" className="h-10 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 gap-2"
+              disabled={createMutation.isPending}
+            >
               <FaXmark />
               Cancel
             </Button>
           </DialogClose>
-          <Button type="submit" className="h-10 gap-2">
+          <Button
+            type="submit"
+            className="h-10 gap-2"
+            disabled={createMutation.isPending}
+          >
             <FaCheck />
-            Confirm
+            {createMutation.isPending ? "Creating..." : "Confirm"}
           </Button>
         </div>
       </form>
@@ -159,10 +174,15 @@ export default function UsersTab() {
     queryFn: fetchUsers,
   });
 
-  console.log(data);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      <Dialog>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <div className="flex justify-end">
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -175,7 +195,7 @@ export default function UsersTab() {
           <DialogHeader>
             <DialogTitle>Create User</DialogTitle>
           </DialogHeader>
-          <AddUserDialog />
+          <AddUserDialog onClose={handleCloseDialog} />
         </DialogContent>
       </Dialog>
 
