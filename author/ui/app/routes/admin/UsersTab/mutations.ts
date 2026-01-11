@@ -1,5 +1,5 @@
-import { BACKEND_URL } from "~/consts";
-import type { FormSchema } from "~/routes/admin/UsersTab/UsersTab";
+import {BACKEND_URL} from "~/consts";
+import type {FormSchema} from "~/routes/admin/UsersTab/UsersTab";
 
 /**
  * Create a new user in the database.
@@ -16,7 +16,6 @@ export async function createUser(user: FormSchema) {
   if (!response.ok) {
     throw new Error(`Failed to create user: ${response.statusText}`);
   }
-  console.log(user);
   return response;
 }
 
@@ -38,9 +37,9 @@ export async function deleteUser(username: string) {
 }
 
 /**
- * Update an existing user. Only passwordHash and role can be changed.
- * Username is used as the identifier in the URL path.
- */
+ * Update an existing user. Only the password (via the `passwordHash` field) and role can be changed.
+ * The `passwordHash` field here contains the plaintext password, which will be sent to the backend and must be hashed there.
+ **/
 export async function editUser(
   username: string,
   updates: Partial<Pick<FormSchema, "passwordHash" | "role">>,
