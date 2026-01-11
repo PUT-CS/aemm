@@ -1,5 +1,5 @@
-import {BACKEND_URL} from "~/consts";
-import type {FormSchema} from "~/routes/admin/UsersTab/UsersTab";
+import { BACKEND_URL } from "~/consts";
+import type { FormSchema } from "~/routes/admin/UsersTab/UsersTab";
 
 /**
  * Create a new user in the database.
