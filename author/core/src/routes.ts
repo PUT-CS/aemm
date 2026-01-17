@@ -3,7 +3,7 @@ import {
   createUser,
   deleteUser,
   getUser,
-  listUsers,
+  fetchUsers,
   updateUser,
 } from './routes/users';
 import { uploadAsset } from './routes/uploadAsset';
@@ -26,7 +26,7 @@ router.delete('/scr*queryPath', deleteNode);
 router.get('/backup*queryPath', getBackup);
 router.post('/backup*queryPath', setBackup);
 
-router.get('/users', listUsers);
+router.get('/users', fetchUsers);
 router.post('/users', createUser);
 router.get('/users/:name', getUser);
 router.patch('/users/:name', updateUser);

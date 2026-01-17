@@ -7,9 +7,12 @@ import { logger } from '../logger';
 import { z } from 'zod';
 
 export const userSchema = z.object({
-  name: z.string().min(1),
+  id: z.number().int().optional(),
+  username: z.string().min(1),
   passwordHash: z.string().min(1),
   role: z.string().min(1),
+  createdAt: z.number().int().optional(),
+  updatedAt: z.number().int().optional(),
 });
 
 export type User = z.infer<typeof userSchema>;
@@ -53,10 +56,12 @@ export class Database {
 
     await this.db.exec(`
       CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        passwordHash TEXT NOT NULL,
-        role TEXT NOT NULL
+                                         id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                         username TEXT NOT NULL UNIQUE,
+                                         passwordHash TEXT NOT NULL,
+                                         role TEXT NOT NULL,
+                                         createdAt INTEGER NOT NULL,
+                                         updatedAt INTEGER NOT NULL
       );
     `);
 
@@ -79,45 +84,46 @@ export class Database {
     logger.info('Database connection closed');
   }
 
-  public async clearDatabase(): Promise<void> {
-    if (!this.db) throw new Error('Database not initialized');
-
-    logger.warn('Clearing the database...');
-    await this.db.exec('DELETE FROM users;');
-    logger.info('Cleared the database');
-  }
-
   public async getAllUsers(): Promise<Array<User>> {
     if (!this.db) throw new Error('Database not initialized');
 
-    return this.db.all(
-      'SELECT id, name, passwordHash, role FROM users ORDER BY id ASC;',
+    const rows = await this.db.all(
+      'SELECT id, username, passwordHash, role, createdAt, updatedAt FROM users ORDER BY id;',
     );
+    return rows.map((row: unknown) => userSchema.parse(row));
   }
 
-  public async getUser(name: string): Promise<User | undefined> {
+  public async getUser(username: string): Promise<User | undefined> {
     if (!this.db) throw new Error('Database not initialized');
 
-    return this.db.get(
-      'SELECT id, name, passwordHash, role FROM users WHERE name = ?;',
-      name,
+    const row = await this.db.get(
+      'SELECT id, username, passwordHash, role, createdAt, updatedAt FROM users WHERE username = ?;',
+      username,
     );
+    return row ? userSchema.parse(row) : undefined;
   }
 
   public async createUser(user: User): Promise<User> {
     if (!this.db) throw new Error('Database not initialized');
 
-    user = userSchema.parse(user);
+    // validate input fields (id/createdAt/updatedAt are not required here)
+    const { username, passwordHash, role } = userSchema
+      .pick({ username: true, passwordHash: true, role: true })
+      .parse(user);
+
+    const now = Date.now();
 
     const result = await this.db.run(
-      'INSERT INTO users (name, passwordHash, role) VALUES (?, ?, ?);',
-      user.name,
-      user.passwordHash,
-      user.role,
+      'INSERT INTO users (username, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?);',
+      username,
+      passwordHash,
+      role,
+      now,
+      now,
     );
 
     const createdUser = await this.db.get(
-      'SELECT id, name, passwordHash, role FROM users WHERE id = ?;',
+      'SELECT id, username, passwordHash, role, createdAt, updatedAt FROM users WHERE id = ?;',
       result.lastID,
     );
 
@@ -125,7 +131,7 @@ export class Database {
   }
 
   public async updateUser(
-    name: string,
+    username: string,
     updates: { passwordHash?: string; role?: string },
   ): Promise<{ lastID: number; changes: number }> {
     if (!this.db) throw new Error('Database not initialized');
@@ -146,19 +152,26 @@ export class Database {
       return { lastID: 0, changes: 0 };
     }
 
-    const sql = `UPDATE users SET ${sets.join(', ')} WHERE name = ?;`;
-    params.push(name);
+    // always update updatedAt
+    sets.push('updatedAt = ?');
+    params.push(Date.now());
+
+    const sql = `UPDATE users SET ${sets.join(', ')} WHERE username = ?;`;
+    params.push(username);
 
     const result = await this.db.run(sql, ...params);
     return { lastID: result.lastID, changes: result.changes };
   }
 
   public async deleteUser(
-    name: string,
+    username: string,
   ): Promise<{ lastID: number; changes: number }> {
     if (!this.db) throw new Error('Database not initialized');
 
-    const result = await this.db.run('DELETE FROM users WHERE name = ?;', name);
+    const result = await this.db.run(
+      'DELETE FROM users WHERE username = ?;',
+      username,
+    );
     return { lastID: result.lastID, changes: result.changes };
   }
 }
