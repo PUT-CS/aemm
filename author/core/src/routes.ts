@@ -13,8 +13,11 @@ import { createNode, editNode } from './routes/updateNode';
 import { deleteNode } from './routes/deleteNode';
 import { getBackup } from './routes/getBackup';
 import { setBackup } from './routes/setBackup';
+import { login } from './routes/login';
 
 const router = Router();
+
+router.post('/login', login);
 
 router.get('/scrtree', getTree);
 

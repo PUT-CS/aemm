@@ -38,7 +38,7 @@ const formSchema = z.object({
   username: z
     .string()
     .min(2, { message: "Username must be at least 2 characters." }),
-  passwordHash: z
+  password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters." }),
   role: z.enum(["editor", "admin"], {
@@ -53,7 +53,7 @@ function AddUserDialog({ onClose }: { onClose: () => void }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      passwordHash: "",
+      password: "",
       role: "editor",
     },
   });
@@ -64,7 +64,7 @@ function AddUserDialog({ onClose }: { onClose: () => void }) {
     onSuccess: () => {
       // Refetch users list and close dialog
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      form.reset({ username: "", passwordHash: "", role: "editor" });
+      form.reset({ username: "", password: "", role: "editor" });
       onClose();
     },
     onError: (error: Error) => {
@@ -101,7 +101,7 @@ function AddUserDialog({ onClose }: { onClose: () => void }) {
 
         {/* Password */}
         <FormField
-          name="passwordHash"
+          name="password"
           control={form.control}
           render={({ field }) => (
             <FormItem className={formItemClasses}>

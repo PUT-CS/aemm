@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { Db, userSchema } from '../db/db';
+import { Db } from '../db/db';
 import { AppError } from '../middlewares/errorHandler';
 import { addInfoEvent } from '../middlewares/requestLogger';
+import { z } from 'zod';
+import { hashPassword } from '../auth/authService';
 
 export async function fetchUsers(
   _req: Request,
@@ -52,36 +54,63 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+// Public API schema: client sends plain password
+const createUserBodySchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+  role: z.string().min(1),
+});
+
 export async function createUser(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const parsed = userSchema.safeParse(req.body);
-    if (!parsed.success) {
+    const parseResult = createUserBodySchema.safeParse(req.body ?? {});
+
+    if (!parseResult.success) {
       addInfoEvent(req, res, 'user.create.validationFailed', {
-        errors: parsed.error.issues,
+        errors: parseResult.error.issues,
       });
       res
         .status(400)
-        .json({ message: 'Invalid user', errors: parsed.error.issues });
+        .json({ message: 'Invalid user', errors: parseResult.error.issues });
       return;
     }
-    const user = parsed.data;
+
+    const { username, password, role } = parseResult.data;
+
+    // Hash the plain-text password before storing
+    const passwordHash = await hashPassword(password);
+
+    // This object must match Db.createUser expectations (userSchema: username, passwordHash, role)
+    const userInput = {
+      username,
+      passwordHash,
+      role,
+    };
+
     try {
-      const created = await Db.createUser(user);
+      const created = await Db.createUser(userInput as any);
+
       addInfoEvent(req, res, 'user.created', {
         name: created.username,
         role: created.role,
       });
-      res.status(201).json(created);
+
+      // Do not expose passwordHash in the response
+      const { passwordHash: _ignored, ...safeUser } = created;
+
+      res.status(201).json(safeUser);
     } catch (e) {
       if (e instanceof Error && /SQLITE_CONSTRAINT/.test(e.message)) {
         addInfoEvent(req, res, 'user.create.duplicate', {
-          name: user.username,
+          name: username,
         });
-        res.status(409).json({ message: 'User with this name already exists' });
+        res
+          .status(409)
+          .json({ message: 'User with this name already exists' });
         return;
       }
       throw e;
@@ -91,7 +120,7 @@ export async function createUser(
       err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
     addInfoEvent(req, res, 'user.create.failed', {
-      name: req.body?.name,
+      name: req.body?.username,
       message: error.message,
     });
     next(error);

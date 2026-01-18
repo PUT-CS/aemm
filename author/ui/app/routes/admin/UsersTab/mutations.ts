@@ -37,17 +37,17 @@ export async function deleteUser(username: string) {
 }
 
 /**
- * Update an existing user. Only the password (via the `passwordHash` field) and role can be changed.
- * The `passwordHash` field here contains the plaintext password, which will be sent to the backend and must be hashed there.
+ * Update an existing user. Only the password (via the `password` field) and role can be changed.
+ * The `password` field here contains the plaintext password, which will be sent to the backend and must be hashed there.
  **/
 export async function editUser(
   username: string,
-  updates: Partial<Pick<FormSchema, "passwordHash" | "role">>,
+  updates: Partial<Pick<FormSchema, "password" | "role">>,
 ) {
-  const payload: { passwordHash?: string; role?: string } = {};
+  const payload: { password?: string; role?: string } = {};
 
-  if (typeof updates.passwordHash === "string") {
-    payload.passwordHash = updates.passwordHash;
+  if (typeof updates.password === "string") {
+    payload.password = updates.password;
   }
   if (typeof updates.role === "string") {
     payload.role = updates.role;
