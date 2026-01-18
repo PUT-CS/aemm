@@ -12,19 +12,24 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { redirect, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { loginRequest } from "~/routes/admin/UsersTab/mutations";
+
+export const formSchema = z.object({
+  username: z
+    .string()
+    .min(2, { message: "Username must be at least 2 characters." }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters." }),
+});
+
+export type LoginFormData = z.infer<typeof formSchema>;
 
 export default function Login() {
-  const formSchema = z.object({
-    username: z
-      .string()
-      .min(2, { message: "Username must be at least 2 characters." }),
-    password: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters." }),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<LoginFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
@@ -33,10 +38,26 @@ export default function Login() {
   });
 
   const navigate = useNavigate();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-    navigate("/");
+  const loginMutation = useMutation({
+    mutationFn: loginRequest,
+    onSuccess: () => {
+      // Refetch users list and close dialog
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      form.reset({ username: "", password: "" });
+      navigate("/");
+    },
+    onError: (error: Error) => {
+      console.error("Failed to add a user:", error);
+      alert(`Failed to add a user: ${error.message}`);
+    },
+  });
+
+  const onSubmit = (data: LoginFormData) => {
+    setServerError(null);
+    loginMutation.mutate(data);
   };
 
   return (
@@ -77,8 +98,17 @@ export default function Login() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="mt-4 h-10">
-            Log In
+
+          {serverError ? (
+            <p className="text-sm text-red-500 mt-2">{serverError}</p>
+          ) : null}
+
+          <Button
+            type="submit"
+            className="mt-4 h-10"
+            disabled={loginMutation.isPending}
+          >
+            {loginMutation.isPending ? "Logging in..." : "Log In"}
           </Button>
         </form>
       </Form>

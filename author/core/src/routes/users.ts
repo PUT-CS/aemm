@@ -108,9 +108,7 @@ export async function createUser(
         addInfoEvent(req, res, 'user.create.duplicate', {
           name: username,
         });
-        res
-          .status(409)
-          .json({ message: 'User with this name already exists' });
+        res.status(409).json({ message: 'User with this name already exists' });
         return;
       }
       throw e;
@@ -141,15 +139,19 @@ export async function updateUser(
       res.status(400).json({ message: 'Invalid name' });
       return;
     }
-    const { passwordHash, role } = req.body || {};
-    if (passwordHash && typeof passwordHash !== 'string') {
+
+    // Only accept plain-text password and role in the request body
+    const { password, role } = req.body || {};
+
+    if (password !== undefined && typeof password !== 'string') {
       addInfoEvent(req, res, 'user.update.validationFailed', {
-        reason: 'passwordHash not string',
+        reason: 'password not string',
       });
-      res.status(400).json({ message: 'passwordHash must be string' });
+      res.status(400).json({ message: 'password must be string' });
       return;
     }
-    if (role && typeof role !== 'string') {
+
+    if (role !== undefined && typeof role !== 'string') {
       addInfoEvent(req, res, 'user.update.validationFailed', {
         reason: 'role not string',
         role,
@@ -161,10 +163,12 @@ export async function updateUser(
     const fieldsToUpdate: string[] = [];
     const updates: { passwordHash?: string; role?: string } = {};
 
-    if (passwordHash !== undefined) {
-      updates.passwordHash = passwordHash;
+    // Preferred path: client sends plain password; we hash it here
+    if (typeof password === 'string' && password.length > 0) {
+      updates.passwordHash = await hashPassword(password);
       fieldsToUpdate.push('passwordHash');
     }
+
     if (role !== undefined) {
       updates.role = role;
       fieldsToUpdate.push('role');
