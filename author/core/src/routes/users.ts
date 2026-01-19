@@ -140,7 +140,6 @@ export async function updateUser(
       return;
     }
 
-    // Only accept plain-text password and role in the request body
     const { password, role } = req.body || {};
 
     if (password !== undefined && typeof password !== 'string') {

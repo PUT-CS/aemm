@@ -13,9 +13,9 @@ export default [
     route("sites/*", "routes/sites/sites.tsx"),
     route("editor/*", "routes/editor/editor.tsx"),
     route("demo", "routes/demo/demo.tsx"),
+    route("login", "routes/login.tsx"),
   ]),
   layout("components/aemm/CenteredLayout.tsx", [
-    route("login", "routes/login.tsx"),
     route("*", "routes/notFound.tsx"),
   ]),
 ] satisfies RouteConfig;
