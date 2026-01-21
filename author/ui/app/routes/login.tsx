@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { loginRequest } from "~/routes/admin/UsersTab/mutations";
@@ -39,6 +39,8 @@ export default function Login() {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from ?? "/";
   const [serverError, setServerError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -48,9 +50,9 @@ export default function Login() {
       // Persist JWT token for subsequent authenticated requests
       setAuthToken(data.token);
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      // Reset form and navigate to the main page
+      // Reset form and navigate to the originally requested page or home
       form.reset({ username: "", password: "" });
-      navigate("/");
+      navigate(from, { replace: true });
     },
     onError: (error: Error) => {
       console.error("Failed to log in:", error);
