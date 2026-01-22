@@ -5,6 +5,7 @@ import path from 'node:path';
 import config from '../config/config';
 import { logger } from '../logger';
 import { z } from 'zod';
+import { hashPassword } from '../auth/authService';
 
 export const userSchema = z.object({
   id: z.number().int().optional(),
@@ -72,6 +73,36 @@ export class Database {
     logger.info('Found entries in users table', {
       count: result?.count || 0,
     });
+
+    await this.ensureDefaultAdminUser();
+  }
+
+  private async ensureDefaultAdminUser(): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const existingAdmin = await this.db.get(
+      'SELECT id FROM users WHERE username = ?;',
+      'admin',
+    );
+
+    if (existingAdmin) {
+      logger.info('Default admin user already exists');
+      return;
+    }
+
+    const now = Date.now();
+    const passwordHash = await hashPassword('admin123');
+
+    await this.db.run(
+      'INSERT INTO users (username, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?);',
+      'admin',
+      passwordHash,
+      'admin',
+      now,
+      now,
+    );
+
+    logger.info('Default admin user created', { username: 'admin' });
   }
 
   public async close(): Promise<void> {
