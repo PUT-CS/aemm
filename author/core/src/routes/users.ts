@@ -92,7 +92,7 @@ export async function createUser(
     };
 
     try {
-      const created = await Db.createUser(userInput as any);
+      const created = await Db.createUser(userInput as never);
 
       addInfoEvent(req, res, 'user.created', {
         name: created.username,
@@ -100,6 +100,7 @@ export async function createUser(
       });
 
       // Do not expose passwordHash in the response
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { passwordHash: _ignored, ...safeUser } = created;
 
       res.status(201).json(safeUser);
@@ -161,12 +162,6 @@ export async function updateUser(
 
     const fieldsToUpdate: string[] = [];
     const updates: { passwordHash?: string; role?: string } = {};
-
-    // Preferred path: client sends plain password; we hash it here
-    if (typeof password === 'string' && password.length > 0) {
-      updates.passwordHash = await hashPassword(password);
-      fieldsToUpdate.push('passwordHash');
-    }
 
     if (role !== undefined) {
       updates.role = role;
