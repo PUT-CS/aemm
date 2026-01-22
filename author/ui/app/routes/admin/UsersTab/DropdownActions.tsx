@@ -39,7 +39,7 @@ interface DropdownActionsProps {
 export function DropdownActions({ row }: DropdownActionsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [passwordHash, setPasswordHash] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState<User["role"]>(row.original.role);
 
   const queryClient = useQueryClient();
@@ -61,17 +61,17 @@ export function DropdownActions({ row }: DropdownActionsProps) {
   const editMutation = useMutation({
     mutationFn: ({
       username,
-      passwordHash,
+      password,
       role,
     }: {
       username: string;
-      passwordHash?: string;
+      password?: string;
       role?: User["role"];
-    }) => editUser(username, { passwordHash, role }),
+    }) => editUser(username, { password, role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setIsEditDialogOpen(false);
-      setPasswordHash("");
+      setPassword("");
     },
     onError: (error: Error) => {
       console.error("User update failed:", error);
@@ -86,7 +86,7 @@ export function DropdownActions({ row }: DropdownActionsProps) {
   const handleEditSave = () => {
     editMutation.mutate({
       username,
-      passwordHash: passwordHash || undefined,
+      password: password || undefined,
       role,
     });
   };
@@ -155,8 +155,8 @@ export function DropdownActions({ row }: DropdownActionsProps) {
               <label className="text-sm font-medium">New Password</label>
               <Input
                 type="password"
-                value={passwordHash}
-                onChange={(e) => setPasswordHash(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Leave blank to keep current password"
               />
             </div>

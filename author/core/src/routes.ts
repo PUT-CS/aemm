@@ -13,23 +13,31 @@ import { createNode, editNode } from './routes/updateNode';
 import { deleteNode } from './routes/deleteNode';
 import { getBackup } from './routes/getBackup';
 import { setBackup } from './routes/setBackup';
+import { login } from './routes/login';
+import { requireAuth } from './middlewares/requireAuth';
 
 const router = Router();
 
+// Public routes
+router.post('/login', login);
 router.get('/scrtree', getTree);
-
 router.get('/scr*queryPath', getNode);
-router.put('/scr*queryPath', createNode);
-router.patch('/scr*queryPath', editNode);
-router.post('/scr*queryPath', uploadAsset);
-router.delete('/scr*queryPath', deleteNode);
-router.get('/backup*queryPath', getBackup);
-router.post('/backup*queryPath', setBackup);
 
-router.get('/users', fetchUsers);
-router.post('/users', createUser);
-router.get('/users/:name', getUser);
-router.patch('/users/:name', updateUser);
-router.delete('/users/:name', deleteUser);
+// Protected SCR/content modification routes
+router.put('/scr*queryPath', requireAuth, createNode);
+router.patch('/scr*queryPath', requireAuth, editNode);
+router.post('/scr*queryPath', requireAuth, uploadAsset);
+router.delete('/scr*queryPath', requireAuth, deleteNode);
+
+// Protected backup routes
+router.get('/backup*queryPath', requireAuth, getBackup);
+router.post('/backup*queryPath', requireAuth, setBackup);
+
+// Protected user management routes
+router.get('/users', requireAuth, fetchUsers);
+router.post('/users', requireAuth, createUser);
+router.get('/users/:name', requireAuth, getUser);
+router.patch('/users/:name', requireAuth, updateUser);
+router.delete('/users/:name', requireAuth, deleteUser);
 
 export default router;

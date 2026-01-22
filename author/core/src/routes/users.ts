@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { Db, userSchema } from '../db/db';
+import { Db } from '../db/db';
 import { AppError } from '../middlewares/errorHandler';
 import { addInfoEvent } from '../middlewares/requestLogger';
+import { z } from 'zod';
+import { hashPassword } from '../auth/authService';
 
 export async function fetchUsers(
   _req: Request,
@@ -52,34 +54,60 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+// Public API schema: client sends plain password
+const createUserBodySchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+  role: z.string().min(1),
+});
+
 export async function createUser(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const parsed = userSchema.safeParse(req.body);
-    if (!parsed.success) {
+    const parseResult = createUserBodySchema.safeParse(req.body ?? {});
+
+    if (!parseResult.success) {
       addInfoEvent(req, res, 'user.create.validationFailed', {
-        errors: parsed.error.issues,
+        errors: parseResult.error.issues,
       });
       res
         .status(400)
-        .json({ message: 'Invalid user', errors: parsed.error.issues });
+        .json({ message: 'Invalid user', errors: parseResult.error.issues });
       return;
     }
-    const user = parsed.data;
+
+    const { username, password, role } = parseResult.data;
+
+    // Hash the plain-text password before storing
+    const passwordHash = await hashPassword(password);
+
+    // This object must match Db.createUser expectations (userSchema: username, passwordHash, role)
+    const userInput = {
+      username,
+      passwordHash,
+      role,
+    };
+
     try {
-      const created = await Db.createUser(user);
+      const created = await Db.createUser(userInput as never);
+
       addInfoEvent(req, res, 'user.created', {
         name: created.username,
         role: created.role,
       });
-      res.status(201).json(created);
+
+      // Do not expose passwordHash in the response
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { passwordHash: _ignored, ...safeUser } = created;
+
+      res.status(201).json(safeUser);
     } catch (e) {
       if (e instanceof Error && /SQLITE_CONSTRAINT/.test(e.message)) {
         addInfoEvent(req, res, 'user.create.duplicate', {
-          name: user.username,
+          name: username,
         });
         res.status(409).json({ message: 'User with this name already exists' });
         return;
@@ -91,7 +119,7 @@ export async function createUser(
       err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
     addInfoEvent(req, res, 'user.create.failed', {
-      name: req.body?.name,
+      name: req.body?.username,
       message: error.message,
     });
     next(error);
@@ -112,15 +140,18 @@ export async function updateUser(
       res.status(400).json({ message: 'Invalid name' });
       return;
     }
-    const { passwordHash, role } = req.body || {};
-    if (passwordHash && typeof passwordHash !== 'string') {
+
+    const { password, role } = req.body || {};
+
+    if (password !== undefined && typeof password !== 'string') {
       addInfoEvent(req, res, 'user.update.validationFailed', {
-        reason: 'passwordHash not string',
+        reason: 'password not string',
       });
-      res.status(400).json({ message: 'passwordHash must be string' });
+      res.status(400).json({ message: 'password must be string' });
       return;
     }
-    if (role && typeof role !== 'string') {
+
+    if (role !== undefined && typeof role !== 'string') {
       addInfoEvent(req, res, 'user.update.validationFailed', {
         reason: 'role not string',
         role,
@@ -132,10 +163,6 @@ export async function updateUser(
     const fieldsToUpdate: string[] = [];
     const updates: { passwordHash?: string; role?: string } = {};
 
-    if (passwordHash !== undefined) {
-      updates.passwordHash = passwordHash;
-      fieldsToUpdate.push('passwordHash');
-    }
     if (role !== undefined) {
       updates.role = role;
       fieldsToUpdate.push('role');
