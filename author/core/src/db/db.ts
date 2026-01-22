@@ -91,7 +91,7 @@ export class Database {
     }
 
     const now = Date.now();
-    const passwordHash = await hashPassword('admin');
+    const passwordHash = await hashPassword('admin123');
 
     await this.db.run(
       'INSERT INTO users (username, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?);',
