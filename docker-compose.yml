@@ -7,6 +7,14 @@ services:
     container_name: aemm-author-core
     ports:
       - "4501:4501"
+    volumes:
+      - ./content:/app/content:rw
+      - ./author/core/data:/app/data:rw
+    environment:
+      DATABASE_PATH: "/app/data/core.sqlite"
+      CONTENT_ROOT: "/app/content"
+    env_file:
+      - ./author/core/.env
 
   author-ui:
     build:
