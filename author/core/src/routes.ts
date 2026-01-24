@@ -18,22 +18,18 @@ import { requireAuth } from './middlewares/requireAuth';
 
 const router = Router();
 
-// Public routes
 router.post('/login', login);
 router.get('/scrtree', getTree);
 router.get('/scr*queryPath', getNode);
 
-// Protected SCR/content modification routes
 router.put('/scr*queryPath', requireAuth, createNode);
 router.patch('/scr*queryPath', requireAuth, editNode);
 router.post('/scr*queryPath', requireAuth, uploadAsset);
 router.delete('/scr*queryPath', requireAuth, deleteNode);
 
-// Protected backup routes
 router.get('/backup*queryPath', requireAuth, getBackup);
 router.post('/backup*queryPath', requireAuth, setBackup);
 
-// Protected user management routes
 router.get('/users', requireAuth, fetchUsers);
 router.post('/users', requireAuth, createUser);
 router.get('/users/:name', requireAuth, getUser);

@@ -30,10 +30,8 @@ export async function login(
 
     const { username, password } = parseResult.data;
 
-    // 2. Fetch user
     const user = await Db.getUser(username);
     if (!user) {
-      // Do not leak whether the user exists; just say invalid credentials
       addInfoEvent(req, res, 'auth.login.invalidCredentials', {
         username,
       });
@@ -42,7 +40,6 @@ export async function login(
       return;
     }
 
-    // 3. Verify password
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
       addInfoEvent(req, res, 'auth.login.invalidCredentials', {
@@ -53,7 +50,6 @@ export async function login(
       return;
     }
 
-    // 4. Issue JWT
     const token = signAccessToken({
       id: user.id!,
       username: user.username,
@@ -66,7 +62,6 @@ export async function login(
       role: user.role,
     });
 
-    // 5. Success response
     res.status(200).json({
       token,
       user: {
@@ -79,7 +74,6 @@ export async function login(
     const error: AppError =
       err instanceof Error ? (err as AppError) : new Error('Unknown error');
 
-    // Mark as internal error; centralized errorHandler will format the response
     error.status = 500;
 
     addInfoEvent(req, res, 'auth.login.failed', {

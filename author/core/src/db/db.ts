@@ -137,7 +137,6 @@ export class Database {
   public async createUser(user: User): Promise<User> {
     if (!this.db) throw new Error('Database not initialized');
 
-    // validate input fields (id/createdAt/updatedAt are not required here)
     const { username, passwordHash, role } = userSchema
       .pick({ username: true, passwordHash: true, role: true })
       .parse(user);
@@ -183,7 +182,6 @@ export class Database {
       return { lastID: 0, changes: 0 };
     }
 
-    // always update updatedAt
     sets.push('updatedAt = ?');
     params.push(Date.now());
 

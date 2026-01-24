@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import { addInfoEvent } from './requestLogger';
 import { getJwtSecret, type AuthPayload } from '../auth/authService';
 
-// Extend Express Request type to include `user` when authenticated
 export interface AuthenticatedRequest extends Request {
   user?: AuthPayload;
 }
@@ -66,7 +65,6 @@ export function requireAuth(
       return;
     }
 
-    // Unexpected error - delegate to global error handler
     addInfoEvent(req, res, 'auth.verifyFailed', {
       message: err instanceof Error ? err.message : 'Unknown error',
     });

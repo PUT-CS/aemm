@@ -14,7 +14,6 @@ export const errorHandler = (
 ) => {
   const status = err.status || 500;
 
-  // Attach error event for unified logging in requestLogger
   addInfoEvent(req, res, 'request.error', {
     message: err.message || 'Internal Server Error',
     errorName: err.name,

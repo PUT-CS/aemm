@@ -18,7 +18,6 @@ export async function fetchUsers(
     const error: AppError =
       err instanceof Error ? err : new Error('Unknown error');
     error.status = 500;
-    // Attach context event instead of direct error log
     addInfoEvent(_req, res, 'users.list.failed', { message: error.message });
     next(error);
   }
@@ -54,7 +53,6 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-// Public API schema: client sends plain password
 const createUserBodySchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),
@@ -81,10 +79,8 @@ export async function createUser(
 
     const { username, password, role } = parseResult.data;
 
-    // Hash the plain-text password before storing
     const passwordHash = await hashPassword(password);
 
-    // This object must match Db.createUser expectations (userSchema: username, passwordHash, role)
     const userInput = {
       username,
       passwordHash,
