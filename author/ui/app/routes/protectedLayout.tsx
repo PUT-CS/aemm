@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
-import RootLayout from "./rootLayout";
 import { getAuthToken } from "~/lib/auth";
 
 export default function ProtectedLayout() {
@@ -31,5 +30,5 @@ export default function ProtectedLayout() {
     setChecked(true);
   }, [location.pathname, location.search, navigate]);
 
-  return <RootLayout>{checked && authed ? <Outlet /> : null}</RootLayout>;
+  return <>{checked && authed ? <Outlet /> : null}</>;
 }

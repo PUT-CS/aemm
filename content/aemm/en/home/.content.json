@@ -2,9 +2,132 @@
   "type": "aemm:page",
   "title": "Home",
   "description": "Main page about AEMM",
-  "components": [],
+  "components": [
+    {
+      "id": "08d38ff7-ed0c-498b-a955-96643b926bbb",
+      "type": "Container",
+      "props": {
+        "direction": "vertical",
+        "gap": 16,
+        "horizontal": 196,
+        "vertical": 16
+      },
+      "children": [
+        {
+          "id": "fc5a11b2-6540-4ba7-bd66-16295ee59ee5",
+          "type": "Container",
+          "props": {
+            "direction": "vertical",
+            "gap": 16,
+            "align": "center",
+            "justify": "center",
+            "horizontal": 16,
+            "vertical": 16
+          },
+          "children": [
+            {
+              "id": "2bafd8af-ec06-4138-a9a1-f947ec02b7d3",
+              "type": "Heading",
+              "props": {
+                "text": "AEMM",
+                "level": "1"
+              },
+              "children": []
+            },
+            {
+              "id": "f5a55267-04e8-4730-9a9a-0557c1a4ceb7",
+              "type": "Heading",
+              "props": {
+                "text": "A simple CMS for all your non-critical needs",
+                "level": "4"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "872a5381-ecb7-4a78-b108-06d5550e63bf",
+          "type": "Text",
+          "props": {
+            "text": "Transform Your Digital Experience with All Encompassing Marketing Manager\n\nManage, create, and deliver exceptional content across every channel with AEMM—the enterprise CMS that puts you in control. Built for scalability and flexibility, AEMM combines powerful content management with integrated digital asset management, empowering your team to craft personalized customer experiences without the technical headaches.\n\nFrom web to mobile, from creation to delivery—AEMM's component-based architecture lets you build once and publish everywhere. Streamline workflows, maintain brand consistency, and scale effortlessly as your business grows."
+          },
+          "children": []
+        },
+        {
+          "id": "d5c9c111-778e-4f40-81d1-728e760a2a99",
+          "type": "Heading",
+          "props": {
+            "text": "Features",
+            "level": "4"
+          },
+          "children": []
+        },
+        {
+          "id": "1a62c5df-45f6-45e8-a458-27c519fda773",
+          "type": "Text",
+          "props": {
+            "text": "AEMM supports a variety of features\n* Content tree structure\n* DAM with easy file upload\n* Component-based authoring\n* Configurable styling with Tailwind classes\n* Secure login"
+          },
+          "children": []
+        },
+        {
+          "id": "0726a333-2079-4096-baf5-7855f7f4f258",
+          "type": "Link",
+          "props": {
+            "text": "See the documentation",
+            "href": "https://github.com/PUT-CS/aemm/wiki",
+            "openInNewTab": true
+          },
+          "children": []
+        },
+        {
+          "id": "1102531c-5d0b-4dbc-9251-40bcbd930009",
+          "type": "Heading",
+          "props": {
+            "text": "Contact Us",
+            "level": "4"
+          },
+          "children": []
+        },
+        {
+          "id": "cc5902f1-aafa-4209-b3da-84b34a864f80",
+          "type": "Container",
+          "props": {
+            "direction": "vertical",
+            "gap": 16,
+            "horizontal": 56,
+            "vertical": 16
+          },
+          "children": [
+            {
+              "id": "ebedafb6-1784-4089-a175-7b5539a0a804",
+              "type": "Embed",
+              "props": {
+                "src": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d751.395970615026!2d16.839402034635626!3d52.32963099053481!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47044fc377af45d5%3A0xe86d4c329587d64!2sCzere%C5%9Bniowa%2010%2C%2062-051%20Wiry!5e1!3m2!1spl!2spl!4v1765704413253!5m2!1spl!2spl",
+                "aspectRatio": "16:9",
+                "width": "200",
+                "allowFullscreen": true,
+                "title": "Embedded content"
+              },
+              "children": []
+            },
+            {
+              "id": "c1508032-80e8-4474-9204-641a3d2cfaa2",
+              "type": "YouTube",
+              "props": {
+                "videoId": "fwtcGUvCM0Q",
+                "aspectRatio": "16:9",
+                "title": "YouTube video"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "createdAt": 1766784153300,
-  "updatedAt": 1766784153300,
+  "updatedAt": 1769327857638,
   "id": "8329665f-9367-4cd8-bad4-ada411bfb866",
   "name": "home"
 }
