@@ -3,6 +3,7 @@ import React, { createContext, useCallback, useContext, useState } from "react";
 import COMPONENT_REGISTRY from "~/components/authoring/registry";
 import { BACKEND_URL } from "~/consts";
 import type { Page } from "@aemm/common";
+import { getAuthToken } from "~/lib/auth";
 
 export interface EditorNode {
   id: string;
@@ -70,8 +71,14 @@ export function useEditor(path: string) {
 
     try {
       setIsSaving(true);
-      // First fetch the current page to get all fields
-      const getResponse = await fetch(`${BACKEND_URL}/scr${path}`);
+      const getResponse = await fetch(`${BACKEND_URL}/scr${path}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(getAuthToken()
+            ? { Authorization: `Bearer ${getAuthToken()}` }
+            : {}),
+        },
+      });
       if (!getResponse.ok) {
         throw new Error("Failed to fetch current page data");
       }
@@ -89,6 +96,9 @@ export function useEditor(path: string) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          ...(getAuthToken()
+            ? { Authorization: `Bearer ${getAuthToken()}` }
+            : {}),
         },
         body: JSON.stringify(updatedPage),
       });

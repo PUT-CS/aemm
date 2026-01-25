@@ -1,9 +1,18 @@
 {
   "type": "aemm:page",
-  "components": [],
+  "components": [
+    {
+      "id": "a1c120bf-0d9b-41b5-a50c-af2fe0803402",
+      "type": "Text",
+      "props": {
+        "text": "Edit this text"
+      },
+      "children": []
+    }
+  ],
   "title": "Emacs Lisp",
   "id": "4e715348-1eae-4fd8-9f2f-8a626d6abcd7",
   "createdAt": 1766784097697,
-  "updatedAt": 1766784097697,
+  "updatedAt": 1769326142760,
   "name": "emacs-lisp"
 }
