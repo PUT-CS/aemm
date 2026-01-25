@@ -3,6 +3,7 @@ import sanitize from "sanitize-html";
 import React from "react";
 import AEMMComponent from "~/components/authoring/AEMMComponent";
 import { buildTextDescription } from "~/components/authoring/utils";
+import { marked } from "marked";
 
 export type TextKind = "richText" | "plainText";
 
@@ -49,7 +50,16 @@ class Text extends AEMMComponent<z.infer<typeof schema>> {
 
   render() {
     const { text, mainClassName } = this.props;
-    const sanitizedHtml = sanitize(text ?? "", {
+
+    let htmlContent = text ?? "";
+
+    // Convert markdown to HTML
+    if (htmlContent) {
+      htmlContent = marked.parse(htmlContent, { async: false }) as string;
+    }
+
+    // Sanitize the HTML
+    const sanitizedHtml = sanitize(htmlContent, {
       allowedTags: ALLOWED_TAGS,
       allowedAttributes: ALLOWED_ATTRIBUTES,
     });

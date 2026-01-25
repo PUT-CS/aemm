@@ -1,0 +1,16 @@
+{
+  "type": "aemm:page",
+  "title": "Home",
+  "languageCode": "en",
+  "page": {},
+  "components": [
+    {
+      "id": "fa344dbe-5c35-44f7-ba7f-12b7c8af3f77",
+      "type": "Text",
+      "props": {
+        "text": "Edit this text"
+      },
+      "children": []
+    }
+  ]
+}
