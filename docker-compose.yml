@@ -23,4 +23,6 @@ services:
     image: aemm-author-ui:dev
     container_name: aemm-author-ui
     ports:
-      - "4502:3000"
+      - "4502:4502"
+    environment:
+      PORT: 4502
