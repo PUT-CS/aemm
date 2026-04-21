@@ -1,0 +1,267 @@
+{
+  "type": "aemm:page",
+  "title": "Hippos",
+  "components": [
+    {
+      "id": "d6d95680-c35d-4513-9d7b-79bfe432ce37",
+      "type": "Container",
+      "props": {
+        "direction": "column",
+        "gap": 16,
+        "align": "center",
+        "justify": "center",
+        "paddingX": 120,
+        "paddingY": 32,
+        "className": ""
+      },
+      "children": [
+        {
+          "id": "d9bec3e1-dead-4a22-a618-cb3407f66748",
+          "type": "Container",
+          "props": {
+            "direction": "vertical",
+            "gap": 16,
+            "align": "center",
+            "justify": "center",
+            "horizontal": 16,
+            "vertical": 16,
+            "className": ""
+          },
+          "children": [
+            {
+              "id": "3cf724b7-af56-46af-92e3-5e40bb8fc5bb",
+              "type": "Heading",
+              "props": {
+                "text": "Hipopotam Nilowy",
+                "level": "1"
+              },
+              "children": []
+            },
+            {
+              "id": "e9bc8fcc-d9e9-4288-a8c4-a5bb08a13b0d",
+              "type": "Image",
+              "props": {
+                "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Portrait_Hippopotamus_in_the_water.jpg/2560px-Portrait_Hippopotamus_in_the_water.jpg",
+                "alt": "Placeholder image",
+                "width": 500,
+                "className": "rounded-lg"
+              },
+              "children": []
+            },
+            {
+              "id": "8c17e20a-3694-4f44-a002-5fc31051688e",
+              "type": "Text",
+              "props": {
+                "text": "Hipopotam nilowy (Hippopotamus amphibius) – gatunek dużego, przeważnie roślinożernego ssaka, należącego do rodziny hipopotamowatych (Hippopotamidae), w obrębie której wyróżnia się dwa współcześnie żyjące gatunki (drugim jest dużo mniejszy hipopotam karłowaty). Hipopotam nilowy jest jedynym żyjącym przedstawicielem rodzaju Hippopotamus. Nazwa gatunku pochodzi z języka starogreckiego i oznacza „koń rzeczny” (ἱπποπόταμος).\n\nZasiedlają rzeki i jeziora w Afryce na południe od Sahary do 2000 m n.p.m. Hipopotamowate to jedyna rodzina rzędu parzystokopytnych prowadząca ziemnowodny tryb życia. W ciągu dnia najczęściej pozostają w wodzie; aktywne dopiero o zmierzchu i nocą, skubią wtedy trawę na łąkach w pobliżu wody, zjadają także rośliny wodne. W poszukiwaniu pożywienia potrafią zapuszczać się do 8 km w głąb lądu. Przebywają w stadach składających się z dominującego samca i podlegających mu samic w liczbie od 10 do 40 osobników. Samce bronią i przewodzą terytorium obejmujące pewien odcinek rzeki i na nim gromadzą swój harem. Na lądzie hipopotamy są raczej indywidualistami i nie przejawiają instynktu terytorialnego. Rozmnażanie i poród odbywa się w wodzie. Samica po ośmiomiesięcznej ciąży rodzi jedno młode. Młode ssie matkę przez okres 1 roku, również pod wodą.",
+                "as": "article"
+              },
+              "children": []
+            },
+            {
+              "id": "704dbd27-5c59-41da-ad76-50be6e0059ba",
+              "type": "CTA",
+              "props": {
+                "text": "Dowiedz się więcej o hipopotamach",
+                "href": "https://pl.wikipedia.org/wiki/Hipopotam_nilowy",
+                "variant": "primary",
+                "size": "md",
+                "openInNewTab": true,
+                "disabled": false
+              },
+              "children": []
+            },
+            {
+              "id": "5d936729-e7aa-43a8-921b-6a408e656efa",
+              "type": "Container",
+              "props": {
+                "direction": "row",
+                "align": "center",
+                "justify": "around",
+                "className": "min-w-full"
+              },
+              "children": [
+                {
+                  "id": "497171ee-0722-4b4b-8063-4f4944fa21ca",
+                  "type": "Card",
+                  "props": {
+                    "padding": 16,
+                    "gap": 16,
+                    "align": "center",
+                    "justify": "center",
+                    "shadow": "md",
+                    "rounded": "lg",
+                    "border": true,
+                    "backgroundColor": "bg-white"
+                  },
+                  "children": [
+                    {
+                      "id": "fd6513fd-c497-44dc-9b0a-e8152aa775b9",
+                      "type": "Image",
+                      "props": {
+                        "src": "https://upload.wikimedia.org/wikipedia/commons/7/71/Hippo_skull_dark.jpg",
+                        "alt": "Placeholder image",
+                        "width": 300,
+                        "height": 200
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "b3f2a213-7992-483f-9cdc-f03faa1fe6c6",
+                      "type": "Text",
+                      "props": {
+                        "text": "Czaszka hipopotama"
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "b470da65-3812-4d94-bb36-ee86eb0cc2c8",
+                      "type": "CTA",
+                      "props": {
+                        "text": "Dowiedz się więcej",
+                        "href": "https://gnu.org",
+                        "variant": "primary",
+                        "size": "md",
+                        "openInNewTab": false,
+                        "disabled": false
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "bc3fd792-e951-45e3-b949-7ee3d4eecdb6",
+                  "type": "Card",
+                  "props": {
+                    "padding": 16,
+                    "gap": 16,
+                    "align": "center",
+                    "justify": "center",
+                    "shadow": "md",
+                    "rounded": "lg",
+                    "border": true,
+                    "backgroundColor": "bg-white"
+                  },
+                  "children": [
+                    {
+                      "id": "729cc20f-d0ce-4300-a7cf-3765d842d9dd",
+                      "type": "Image",
+                      "props": {
+                        "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Portrait_Hippopotamus_in_the_water.jpg/2560px-Portrait_Hippopotamus_in_the_water.jpg",
+                        "alt": "Placeholder image",
+                        "width": 300,
+                        "height": 200
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "d098fd87-5b25-458e-8545-2c0eb9c269fd",
+                      "type": "Text",
+                      "props": {
+                        "text": "Inne hipopotamy"
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "e8846664-5af9-4465-8e63-3342a0fa0286",
+                      "type": "CTA",
+                      "props": {
+                        "text": "Sprawdź",
+                        "href": "https://google.com",
+                        "variant": "primary",
+                        "size": "md",
+                        "openInNewTab": false,
+                        "disabled": false
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "00107ca9-334a-4e51-bb5b-eb572a7a9bf5",
+                  "type": "Card",
+                  "props": {
+                    "padding": 16,
+                    "gap": 16,
+                    "align": "center",
+                    "justify": "center",
+                    "shadow": "md",
+                    "rounded": "lg",
+                    "border": true,
+                    "backgroundColor": "bg-white"
+                  },
+                  "children": [
+                    {
+                      "id": "d562860a-a733-4890-9ea8-d16832edb1b8",
+                      "type": "Image",
+                      "props": {
+                        "src": "https://upload.wikimedia.org/wikipedia/commons/1/13/HippoSkelLyd2.png",
+                        "alt": "Placeholder image",
+                        "width": 300,
+                        "height": 200
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "fe3922ae-58da-489f-b59b-951cc843a1b7",
+                      "type": "Text",
+                      "props": {
+                        "text": "Reszta szkieletu hipopotama"
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "b56febd4-bc3a-44fb-ae2a-5fa0f1b2b9c3",
+                      "type": "CTA",
+                      "props": {
+                        "text": "Zobacz Ciekawostki",
+                        "href": "https://pl.wikipedia.org/wiki/Hipopotam_nilowy#/media/Plik:Hippo_walking.jpg",
+                        "variant": "primary",
+                        "size": "md",
+                        "openInNewTab": false,
+                        "disabled": false
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "67ae111a-3346-444d-9d80-b6ae03633853",
+              "type": "Container",
+              "props": {
+                "direction": "column",
+                "gap": 32,
+                "padding": 120
+              },
+              "children": [
+                {
+                  "id": "14faa127-f3a9-4a98-b1ad-e1eb063ce74a",
+                  "type": "YouTube",
+                  "props": {
+                    "videoId": "4Ggw9HRvAK4",
+                    "aspectRatio": "16:9",
+                    "title": "YouTube video"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "a12d702d-5788-49b4-8b62-24de7e62fec0",
+                  "type": "Embed",
+                  "props": {
+                    "src": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d751.395970615026!2d16.839402034635626!3d52.32963099053481!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47044fc377af45d5%3A0xe86d4c329587d64!2sCzere%C5%9Bniowa%2010%2C%2062-051%20Wiry!5e1!3m2!1spl!2spl!4v1765704413253!5m2!1spl!2spl",
+                    "aspectRatio": "16:9",
+                    "allowFullscreen": true,
+                    "title": "Embedded content"
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "name": "hippos"
+}

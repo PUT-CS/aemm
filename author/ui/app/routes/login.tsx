@@ -15,7 +15,7 @@ import { Button } from "~/components/ui/button";
 import { useNavigate, useLocation } from "react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { loginRequest } from "~/routes/admin/UsersTab/mutations";
+import { loginRequest, registerRequest } from "~/routes/admin/UsersTab/mutations";
 import { setAuthToken } from "~/lib/auth";
 
 export const formSchema = z.object({
@@ -42,6 +42,8 @@ export default function Login() {
   const location = useLocation();
   const from = (location.state as any)?.from ?? "/";
   const [serverError, setServerError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
   const queryClient = useQueryClient();
 
   const loginMutation = useMutation({
@@ -60,15 +62,35 @@ export default function Login() {
     },
   });
 
+  const registerMutation = useMutation({
+    mutationFn: registerRequest,
+    onSuccess: () => {
+      setSuccessMsg("Account created successfully. You can now log in.");
+      setIsRegistering(false);
+      form.reset({ username: "", password: "" });
+    },
+    onError: (error: Error) => {
+      console.error("Failed to register:", error);
+      setServerError(error.message);
+    },
+  });
+
   const onSubmit = (data: LoginFormData) => {
     setServerError(null);
-    loginMutation.mutate(data);
+    setSuccessMsg(null);
+    if (isRegistering) {
+      registerMutation.mutate(data);
+    } else {
+      loginMutation.mutate(data);
+    }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center">
       <Card className="w-full max-w-md p-10">
-        <h1 className="mb-6 text-center text-2xl font-bold">Welcome to AEMM</h1>
+        <h1 className="mb-6 text-center text-2xl font-bold">
+          {isRegistering ? "Create Account" : "Welcome to AEMM"}
+        </h1>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -105,6 +127,10 @@ export default function Login() {
               )}
             />
 
+            {successMsg ? (
+              <p className="mt-2 text-sm text-green-500">{successMsg}</p>
+            ) : null}
+
             {serverError ? (
               <p className="mt-2 text-sm text-red-500">{serverError}</p>
             ) : null}
@@ -112,10 +138,32 @@ export default function Login() {
             <Button
               type="submit"
               className="mt-4 h-10"
-              disabled={loginMutation.isPending}
+              disabled={loginMutation.isPending || registerMutation.isPending}
             >
-              {loginMutation.isPending ? "Logging in..." : "Log In"}
+              {isRegistering
+                ? registerMutation.isPending
+                  ? "Creating Account..."
+                  : "Create Account"
+                : loginMutation.isPending
+                  ? "Logging in..."
+                  : "Log In"}
             </Button>
+
+            <div className="mt-4 text-center text-sm">
+              <button
+                type="button"
+                className="text-blue-500 hover:underline"
+                onClick={() => {
+                  setIsRegistering(!isRegistering);
+                  setServerError(null);
+                  setSuccessMsg(null);
+                }}
+              >
+                {isRegistering
+                  ? "Already have an account? Log in"
+                  : "Don't have an account? Create one"}
+              </button>
+            </div>
           </form>
         </Form>
       </Card>

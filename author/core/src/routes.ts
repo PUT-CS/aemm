@@ -19,6 +19,7 @@ import { requireAuth } from './middlewares/requireAuth';
 const router = Router();
 
 router.post('/login', login);
+router.post('/register', createUser);
 router.get('/scrtree', getTree);
 router.get('/scr*queryPath', getNode);
 
