@@ -10,6 +10,7 @@ import {
   HasChildren,
   isInsideContentRoot,
   isValidNodeName,
+  parentNodeExists,
   parseReqPath,
   removeChildrenField,
   serverErrorLog,
@@ -42,10 +43,10 @@ export const createNode = (req: Request, res: Response) => {
       return;
     }
 
-    // Ensure parent directory exists
-    const dirPath = path.dirname(fullPath);
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
+    if (!parentNodeExists(fullPath)) {
+      addInfoEvent(req, res, 'createNode.parentNotFound');
+      res.status(404).send('Parent node not found');
+      return;
     }
 
     try {

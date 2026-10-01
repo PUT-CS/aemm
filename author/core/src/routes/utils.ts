@@ -21,6 +21,10 @@ export function isInsideContentRoot(fullPath: string): boolean {
   );
 }
 
+export function parentNodeExists(fullPath: string): boolean {
+  return fs.existsSync(path.join(path.dirname(fullPath), '.content.json'));
+}
+
 export function isContentRoot(fullPath: string): boolean {
   return path.resolve(fullPath) === path.resolve(config.contentRoot);
 }

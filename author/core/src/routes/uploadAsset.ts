@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import * as fs from 'node:fs';
-import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
-import { parseReqPath, serverErrorLog } from './utils';
+import { parentNodeExists, parseReqPath, serverErrorLog } from './utils';
 
 /**
  * Uploads an asset file (binary or text content).
@@ -24,10 +23,10 @@ export const uploadAsset = (req: Request, res: Response) => {
     const exists = fs.existsSync(fullPath);
     addInfoEvent(req, res, 'uploadAsset.fileExists', { exists });
 
-    // Handle file creation or update
-    const dirPath = path.dirname(fullPath);
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
+    if (!parentNodeExists(fullPath)) {
+      addInfoEvent(req, res, 'uploadAsset.parentNotFound');
+      res.status(404).send('Parent node not found');
+      return;
     }
 
     // Handle binary/text content
