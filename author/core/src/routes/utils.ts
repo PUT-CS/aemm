@@ -9,6 +9,36 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 
 /**
+ * Checks whether the given path is inside the content root (or is the root itself).
+ */
+export function isInsideContentRoot(fullPath: string): boolean {
+  const contentRoot = path.resolve(config.contentRoot);
+  const relative = path.relative(contentRoot, fullPath);
+  return (
+    relative !== '..' &&
+    !relative.startsWith('..' + path.sep) &&
+    !path.isAbsolute(relative)
+  );
+}
+
+export function isContentRoot(fullPath: string): boolean {
+  return path.resolve(fullPath) === path.resolve(config.contentRoot);
+}
+
+/**
+ * Node names become directory names, so they can't contain path separators.
+ */
+export function isValidNodeName(name: unknown): name is string {
+  return (
+    typeof name === 'string' &&
+    name.length > 0 &&
+    name !== '.' &&
+    name !== '..' &&
+    !/[/\\\0]/.test(name)
+  );
+}
+
+/**
  * Validates the request path and returns the full filesystem path for SCR content.
  *
  *  If the path is forbidden (path traversal) or not found, logs an info event,
@@ -24,7 +54,7 @@ export function parseReqPath(
   const relativePath = req.path.replace(new RegExp(`^\\/${prefix}`), '');
   const fullPath = path.join(contentRoot, relativePath);
 
-  if (!fullPath.startsWith(contentRoot)) {
+  if (!isInsideContentRoot(fullPath)) {
     addInfoEvent(req, res, 'forbidden', {
       reason: 'path traversal',
     });
