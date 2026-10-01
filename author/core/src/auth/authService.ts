@@ -7,6 +7,10 @@ export interface AuthPayload {
   role: string;
 }
 
+export interface TokenPayload extends AuthPayload {
+  tokenVersion: number;
+}
+
 export function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
@@ -15,7 +19,7 @@ export function getJwtSecret(): string {
   return secret;
 }
 
-export function signAccessToken(payload: AuthPayload): string {
+export function signAccessToken(payload: TokenPayload): string {
   const secret = getJwtSecret();
   const expiresInEnv = process.env.JWT_EXPIRES_IN || '1h';
   const options = { expiresIn: expiresInEnv } as SignOptions;
