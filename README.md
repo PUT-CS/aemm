@@ -70,6 +70,8 @@ import { ScrNode, NodeType } from "@aemm/common/scr";
 
 ## Available Scripts
 
+The same commands are available through [Task](https://taskfile.dev) (`task --list`), together with `task install`, `task lint`, `task typecheck` and `task ci`, which runs the same checks as CI.
+
 ### Build Commands
 
 - `npm run build` - Build all projects (common → core → ui)
