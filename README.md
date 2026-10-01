@@ -37,6 +37,7 @@ npm run dev:ui         # Terminal 3: Run frontend (port 4502)
 - **common/** - Shared TypeScript types (`@aemm/common`)
 - **author/core/** - Express.js REST API backend
 - **author/ui/** - React Router frontend application
+- **e2e/** - Playwright API tests for the backend
 
 Each project is independent with its own `package.json` and `node_modules`.
 
@@ -89,3 +90,13 @@ See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed documentation.
 - **Backend:** Express.js, TypeScript, Node.js
 - **Frontend:** React Router v7, Vite, TailwindCSS, TypeScript
 - **Shared:** npm file: dependencies
+
+### E2E Tests
+
+```bash
+cd e2e && npm install
+npm run dev:core
+npm run test:e2e
+```
+
+Run `npm run test:e2e` from the root directory while the backend is running. Tests use `http://localhost:4501` by default, set `E2E_BASE_URL` to use a different address.
