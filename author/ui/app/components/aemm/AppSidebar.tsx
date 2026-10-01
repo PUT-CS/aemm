@@ -4,6 +4,7 @@ import {
   SidebarContent,
   SidebarFooter,
 } from "~/components/ui/sidebar";
+import { isAdmin } from "~/lib/auth";
 
 export default function AppSidebar() {
   return (
@@ -13,12 +14,14 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <nav className="px-2 py-4 space-y-2">
-          <a
-            href="/admin"
-            className="block text-sm text-sidebar-foreground/90 hover:underline"
-          >
-            Admin
-          </a>
+          {isAdmin() && (
+            <a
+              href="/admin"
+              className="block text-sm text-sidebar-foreground/90 hover:underline"
+            >
+              Admin
+            </a>
+          )}
           <a
             href="/sites"
             className="block text-sm text-sidebar-foreground/90 hover:underline"
