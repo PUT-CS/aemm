@@ -102,11 +102,13 @@ const incomingScrNodeSchema: z.ZodType<any> = z.lazy(
 
 /**
  * Backs up the provided node data to a timestamped JSON file next to the original file.
+ * The file is named after the node's updatedAt, so it should be called with the content
+ * that is currently on disk, before it gets overwritten.
  */
 export function backupNode(filePath: string, node: unknown): void {
   const nodeData = node as ScrNode;
 
-  const timestamp = nodeData.updatedAt;
+  const timestamp = nodeData.updatedAt ?? Date.now();
 
   const dir = path.dirname(filePath);
   const backupFileName = `.content-${timestamp}.json`;

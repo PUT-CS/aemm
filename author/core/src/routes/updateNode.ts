@@ -174,7 +174,9 @@ export const editNode = (req: Request, res: Response) => {
       );
 
       // Backup old content and update timestamps
-      backupNode(newContentJsonPath, dataToWrite);
+      if (existingData) {
+        backupNode(newContentJsonPath, existingData);
+      }
       dataToWrite = addIdAndTimestamps(dataToWrite);
       fs.writeFileSync(
         newContentJsonPath,
@@ -190,7 +192,9 @@ export const editNode = (req: Request, res: Response) => {
       removeChildrenField(newData as unknown as HasChildren)
     );
 
-    backupNode(contentJsonPath, dataToWrite);
+    if (existingData) {
+      backupNode(contentJsonPath, existingData);
+    }
     dataToWrite = addIdAndTimestamps(dataToWrite);
     fs.writeFileSync(
       contentJsonPath,
