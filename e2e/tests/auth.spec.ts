@@ -1,18 +1,18 @@
-import { ADMIN, expect, test } from '../fixtures';
-import { UsersApi } from '../api/UsersApi';
+import { ADMIN, expect, test, type Api } from '../fixtures';
 import { newUser } from '../data/factory';
 
+async function sessionToken(session: Api) {
+  const { cookies } = await session.context.storageState();
+  return cookies.find((cookie) => cookie.name === 'aemm_session')!.value;
+}
+
 test.describe('POST /login', () => {
-  test('returns token and user for valid credentials', async ({ request }) => {
+  test('returns user without token', async ({ request }) => {
     const response = await request.post('/login', { data: ADMIN });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
-    expect(body.token).toEqual(expect.any(String));
-    expect(body.user).toEqual({
-      id: expect.any(Number),
-      username: 'admin',
-      role: 'admin',
+    expect(await response.json()).toEqual({
+      user: { id: expect.any(Number), username: 'admin', role: 'admin' },
     });
   });
 
@@ -97,46 +97,44 @@ test.describe('failed logins', () => {
 });
 
 test.describe('protected endpoints', () => {
-  test('reject request without token', async ({ request }) => {
-    const response = await request.delete('/scr/testsite/missing');
+  test('reject request without session', async ({ anonymous }) => {
+    const response = await anonymous.content.remove('/testsite/missing');
 
     expect(response.status()).toBe(401);
-    expect(await response.json()).toEqual({
-      message: 'Missing Authorization header',
-    });
+    expect(await response.json()).toEqual({ message: 'Not logged in' });
   });
 
-  test('reject non bearer authorization', async ({ request }) => {
-    const response = await request.get('/users', {
-      headers: { Authorization: 'Basic YWRtaW46YWRtaW4xMjM=' },
+  test('ignore bearer token', async ({ admin, anonymous }) => {
+    const response = await anonymous.users.list({
+      headers: { Authorization: `Bearer ${await sessionToken(admin)}` },
     });
 
     expect(response.status()).toBe(401);
   });
 
-  test('reject invalid token', async ({ request }) => {
-    const response = await request.get('/users', {
-      headers: { Authorization: 'Bearer not.a.token' },
+  test('reject invalid session', async ({ anonymous }) => {
+    const response = await anonymous.users.list({
+      headers: { Cookie: 'aemm_session=not.a.token' },
     });
 
     expect(response.status()).toBe(401);
     expect(await response.json()).toEqual({ message: 'Invalid token' });
   });
 
-  test('reject tampered token', async ({ request, admin }) => {
-    const [header, , signature] = admin.token!.split('.');
+  test('reject tampered session', async ({ admin, anonymous }) => {
+    const [header, , signature] = (await sessionToken(admin)).split('.');
     const payload = Buffer.from(
       JSON.stringify({ id: 999, username: 'hacker', role: 'admin' }),
     ).toString('base64url');
 
-    const response = await request.get('/users', {
-      headers: { Authorization: `Bearer ${header}.${payload}.${signature}` },
+    const response = await anonymous.users.list({
+      headers: { Cookie: `aemm_session=${header}.${payload}.${signature}` },
     });
 
     expect(response.status()).toBe(401);
   });
 
-  test('accept valid token', async ({ admin }) => {
+  test('accept valid session', async ({ admin }) => {
     const response = await admin.users.list();
 
     expect(response.status()).toBe(200);
@@ -164,66 +162,58 @@ test.describe('admin only endpoints', () => {
   });
 });
 
-test.describe('token of changed user', () => {
-  test('is rejected after the user is deleted', async ({ admin, request }) => {
+test.describe('session of changed user', () => {
+  test('is rejected after the user is deleted', async ({ admin, loginAs }) => {
     const user = newUser();
     await admin.users.create(user);
-    const login = await request.post('/login', { data: user });
-    const deleted = new UsersApi(request, (await login.json()).token);
+    const deleted = await loginAs(user);
 
     await admin.users.remove(user.username);
 
-    expect((await deleted.list()).status()).toBe(401);
+    expect((await deleted.users.list()).status()).toBe(401);
   });
 
-  test('loses admin access after demotion', async ({ admin, request }) => {
+  test('loses admin access after demotion', async ({ admin, loginAs }) => {
     const user = newUser({ role: 'admin' });
     await admin.users.create(user);
-    const login = await request.post('/login', { data: user });
-    const demoted = new UsersApi(request, (await login.json()).token);
-    expect((await demoted.list()).status()).toBe(200);
+    const demoted = await loginAs(user);
+    expect((await demoted.users.list()).status()).toBe(200);
 
     await admin.users.update(user.username, { role: 'editor' });
 
-    expect((await demoted.list()).status()).toBe(403);
+    expect((await demoted.users.list()).status()).toBe(403);
   });
 
-  test('is rejected after a password change', async ({ admin, request }) => {
+  test('is rejected after a password change', async ({ admin, loginAs }) => {
     const user = newUser({ role: 'admin' });
     await admin.users.create(user);
-    const login = await request.post('/login', { data: user });
-    const old = new UsersApi(request, (await login.json()).token);
+    const old = await loginAs(user);
 
     await admin.users.update(user.username, { password: 'new-secret' });
 
-    expect((await old.list()).status()).toBe(401);
-    const relogin = await request.post('/login', {
-      data: { username: user.username, password: 'new-secret' },
-    });
-    const fresh = new UsersApi(request, (await relogin.json()).token);
-    expect((await fresh.list()).status()).toBe(200);
+    expect((await old.users.list()).status()).toBe(401);
+    const fresh = await loginAs({ ...user, password: 'new-secret' });
+    expect((await fresh.users.list()).status()).toBe(200);
   });
 
-  test('keeps working after a role change', async ({ admin, request }) => {
+  test('keeps working after a role change', async ({ admin, loginAs }) => {
     const user = newUser();
     await admin.users.create(user);
-    const login = await request.post('/login', { data: user });
-    const promoted = new UsersApi(request, (await login.json()).token);
+    const promoted = await loginAs(user);
 
     await admin.users.update(user.username, { role: 'admin' });
 
-    expect((await promoted.list()).status()).toBe(200);
+    expect((await promoted.users.list()).status()).toBe(200);
   });
 
-  test('is rejected when the user is recreated', async ({ admin, request }) => {
+  test('is rejected when the user is recreated', async ({ admin, loginAs }) => {
     const user = newUser({ role: 'admin' });
     await admin.users.create(user);
-    const login = await request.post('/login', { data: user });
-    const old = new UsersApi(request, (await login.json()).token);
+    const old = await loginAs(user);
 
     await admin.users.remove(user.username);
     await admin.users.create(user);
 
-    expect((await old.list()).status()).toBe(401);
+    expect((await old.users.list()).status()).toBe(401);
   });
 });

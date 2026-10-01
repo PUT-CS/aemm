@@ -1,9 +1,4 @@
-import {
-  expect,
-  request as playwrightRequest,
-  test as base,
-  type APIRequestContext,
-} from '@playwright/test';
+import { expect, test as base, type APIRequestContext } from '@playwright/test';
 import { AuthApi } from './api/AuthApi';
 import { BackupApi } from './api/BackupApi';
 import { ContentApi } from './api/ContentApi';
@@ -13,44 +8,57 @@ import { newUser } from './data/factory';
 export const ADMIN = { username: 'admin', password: 'admin123' };
 
 export interface Api {
-  token?: string;
+  context: APIRequestContext;
   backups: BackupApi;
   content: ContentApi;
   users: UsersApi;
 }
 
-function api(request: APIRequestContext, token?: string): Api {
+type Credentials = { username: string; password: string };
+
+function api(context: APIRequestContext): Api {
   return {
-    token,
-    backups: new BackupApi(request, token),
-    content: new ContentApi(request, token),
-    users: new UsersApi(request, token),
+    context,
+    backups: new BackupApi(context),
+    content: new ContentApi(context),
+    users: new UsersApi(context),
   };
 }
 
-async function login(
-  baseURL: string | undefined,
-  credentials: { username: string; password: string },
-) {
-  const context = await playwrightRequest.newContext({ baseURL });
-  const response = await new AuthApi(context).login(credentials);
-  expect(response.status()).toBe(200);
-  const token = (await response.json()).token as string;
-  await context.dispose();
-  return token;
-}
-
-export const test = base.extend<{ anonymous: Api; admin: Api; editor: Api }>({
-  anonymous: async ({ request }, use) => {
-    await use(api(request));
+export const test = base.extend<{
+  newSession: () => Promise<Api>;
+  loginAs: (credentials: Credentials) => Promise<Api>;
+  anonymous: Api;
+  admin: Api;
+  editor: Api;
+}>({
+  newSession: async ({ playwright, baseURL }, use) => {
+    const contexts: APIRequestContext[] = [];
+    await use(async () => {
+      const context = await playwright.request.newContext({ baseURL });
+      contexts.push(context);
+      return api(context);
+    });
+    await Promise.all(contexts.map((context) => context.dispose()));
   },
-  admin: async ({ request, baseURL }, use) => {
-    await use(api(request, await login(baseURL, ADMIN)));
+  loginAs: async ({ newSession }, use) => {
+    await use(async (credentials) => {
+      const session = await newSession();
+      const response = await new AuthApi(session.context).login(credentials);
+      expect(response.status()).toBe(200);
+      return session;
+    });
   },
-  editor: async ({ request, admin, baseURL }, use) => {
+  anonymous: async ({ newSession }, use) => {
+    await use(await newSession());
+  },
+  admin: async ({ loginAs }, use) => {
+    await use(await loginAs(ADMIN));
+  },
+  editor: async ({ admin, loginAs }, use) => {
     const user = newUser({ role: 'editor' });
     expect((await admin.users.create(user)).status()).toBe(201);
-    await use(api(request, await login(baseURL, user)));
+    await use(await loginAs(user));
   },
 });
 
