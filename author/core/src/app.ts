@@ -10,12 +10,6 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(
-  express.raw({
-    type: (req) => !req.headers['content-type']?.includes('application/json'),
-    limit: '1024mb',
-  }),
-);
 
 app.use(requestLogger);
 

@@ -181,6 +181,28 @@ test.describe('missing parent', () => {
   });
 });
 
+test.describe('upload size', () => {
+  const tooLarge = Buffer.alloc(1024 * 1024 + 1);
+
+  test('POST rejects file over the limit', async ({ admin }) => {
+    const filePath = `${parent}/large-${Date.now()}.bin`;
+
+    const response = await admin.content.upload(filePath, tooLarge);
+
+    expect(response.status()).toBe(413);
+    expect((await admin.content.get(filePath)).status()).toBe(404);
+  });
+
+  test('POST checks token before reading the body', async ({ anonymous }) => {
+    const response = await anonymous.content.upload(
+      `${parent}/large.bin`,
+      tooLarge,
+    );
+
+    expect(response.status()).toBe(401);
+  });
+});
+
 test('DELETE content root is forbidden', async ({ admin }) => {
   const response = await admin.content.remove('/');
 

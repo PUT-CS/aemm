@@ -26,7 +26,7 @@ JWT_SECRET=change-me
 CONTENT_ROOT=../../content
 ```
 
-Optional: `PORT` (default `4501`), `DATABASE_PATH` (default `data/core.sqlite`), `JWT_EXPIRES_IN` (default `1h`).
+Optional: `PORT` (default `4501`), `DATABASE_PATH` (default `data/core.sqlite`), `JWT_EXPIRES_IN` (default `1h`), `MAX_UPLOAD_SIZE` (default `25mb`).
 
 On first start core creates the default user `admin` with password `admin123`.
 

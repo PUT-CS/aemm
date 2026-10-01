@@ -13,6 +13,7 @@ services:
       DATABASE_PATH: /app/data/core.sqlite
       JWT_SECRET: e2e-secret
       BCRYPT_SALT_ROUNDS: '4'
+      MAX_UPLOAD_SIZE: 1mb
     volumes:
       - ./data/content:/seed:ro
     command: sh -c "cp -R /seed /app/content && exec node dist/server.js"
