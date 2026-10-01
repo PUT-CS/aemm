@@ -29,8 +29,11 @@ export function isContentRoot(fullPath: string): boolean {
   return path.resolve(fullPath) === path.resolve(config.contentRoot);
 }
 
+const METADATA_FILE_NAME = /^\.content.*\.json$/i;
+
 /**
- * Node names become directory names, so they can't contain path separators.
+ * Node names become file and directory names, so they can't contain path
+ * separators or clash with .content.json and its backups.
  */
 export function isValidNodeName(name: unknown): name is string {
   return (
@@ -38,7 +41,8 @@ export function isValidNodeName(name: unknown): name is string {
     name.length > 0 &&
     name !== '.' &&
     name !== '..' &&
-    !/[/\\\0]/.test(name)
+    !/[/\\\0]/.test(name) &&
+    !METADATA_FILE_NAME.test(name)
   );
 }
 

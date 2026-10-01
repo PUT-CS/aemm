@@ -27,6 +27,12 @@ export const createNode = (req: Request, res: Response) => {
     return;
   }
 
+  if (!isValidNodeName(path.basename(fullPath))) {
+    addInfoEvent(req, res, 'createNode.invalidName');
+    res.status(400).send('Invalid node name');
+    return;
+  }
+
   try {
     if (!req.body) {
       addInfoEvent(req, res, 'createNode.badRequest', { reason: 'no body' });

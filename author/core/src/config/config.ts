@@ -8,6 +8,7 @@ interface Config {
   nodeEnv: string;
   contentRoot: string;
   databasePath: string;
+  maxUploadSize: string;
 }
 
 const defaultDatabasePath = path.resolve(
@@ -19,6 +20,7 @@ const config: Config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   contentRoot: process.env.CONTENT_ROOT || './content',
   databasePath: defaultDatabasePath,
+  maxUploadSize: process.env.MAX_UPLOAD_SIZE || '25mb',
 };
 
 export default config;

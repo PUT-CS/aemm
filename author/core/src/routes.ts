@@ -1,4 +1,5 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
+import config from './config/config';
 import {
   createUser,
   deleteUser,
@@ -26,7 +27,12 @@ router.get('/scr*queryPath', getNode);
 
 router.put('/scr*queryPath', requireAuth, createNode);
 router.patch('/scr*queryPath', requireAuth, editNode);
-router.post('/scr*queryPath', requireAuth, uploadAsset);
+router.post(
+  '/scr*queryPath',
+  requireAuth,
+  express.raw({ type: () => true, limit: config.maxUploadSize }),
+  uploadAsset,
+);
 router.delete('/scr*queryPath', requireAuth, deleteNode);
 
 router.get('/backup*queryPath', requireAuth, getBackup);
