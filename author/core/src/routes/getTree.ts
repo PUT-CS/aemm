@@ -16,6 +16,11 @@ export function getTree(req: Request, res: Response) {
   }
 }
 
+function contentPath(fullPath: string): string {
+  const relative = path.relative(path.resolve(config.contentRoot), fullPath);
+  return '/' + relative.split(path.sep).join('/');
+}
+
 function buildTreeNode(fullPath: string): ScrNode & { children?: ScrNode[] } {
   const stats = fs.statSync(fullPath);
   const nodeName = path.basename(fullPath);
@@ -23,7 +28,7 @@ function buildTreeNode(fullPath: string): ScrNode & { children?: ScrNode[] } {
   // Handle files
   if (stats.isFile()) {
     return {
-      id: fullPath,
+      id: contentPath(fullPath),
       type: NodeType.FILE,
       name: nodeName,
       createdAt: stats.birthtime,
