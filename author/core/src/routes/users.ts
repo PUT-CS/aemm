@@ -1,9 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import { Db } from '../db/db';
+import { Db, type User } from '../db/db';
 import { AppError } from '../middlewares/errorHandler';
 import { addInfoEvent } from '../middlewares/requestLogger';
 import { z } from 'zod';
 import { hashPassword } from '../auth/authService';
+
+function toPublicUser(user: User): Omit<User, 'passwordHash'> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { passwordHash: _ignored, ...publicUser } = user;
+  return publicUser;
+}
 
 export async function fetchUsers(
   _req: Request,
@@ -13,7 +19,7 @@ export async function fetchUsers(
   try {
     const users = await Db.getAllUsers();
     addInfoEvent(_req, res, 'users.listed', { count: users.length });
-    res.json(users).status(200);
+    res.status(200).json(users.map(toPublicUser));
   } catch (err) {
     const error: AppError =
       err instanceof Error ? err : new Error('Unknown error');
@@ -40,7 +46,7 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
       return;
     }
     addInfoEvent(req, res, 'user.retrieved', { name });
-    res.json(user);
+    res.json(toPublicUser(user));
   } catch (err) {
     const error: AppError =
       err instanceof Error ? err : new Error('Unknown error');
@@ -95,11 +101,7 @@ export async function createUser(
         role: created.role,
       });
 
-      // Do not expose passwordHash in the response
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { passwordHash: _ignored, ...safeUser } = created;
-
-      res.status(201).json(safeUser);
+      res.status(201).json(toPublicUser(created));
     } catch (e) {
       if (e instanceof Error && /SQLITE_CONSTRAINT/.test(e.message)) {
         addInfoEvent(req, res, 'user.create.duplicate', {
@@ -189,7 +191,7 @@ export async function updateUser(
       name,
       fieldsUpdated: fieldsToUpdate,
     });
-    res.json(user);
+    res.json(toPublicUser(user));
   } catch (err) {
     const error: AppError =
       err instanceof Error ? err : new Error('Unknown error');
