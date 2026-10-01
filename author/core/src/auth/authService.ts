@@ -39,3 +39,18 @@ export async function verifyPassword(
 ): Promise<boolean> {
   return bcrypt.compare(plain, passwordHash);
 }
+
+let dummyHash: Promise<string> | undefined;
+
+export async function verifyPasswordOrDummy(
+  plain: string,
+  passwordHash: string | undefined,
+): Promise<boolean> {
+  if (passwordHash) {
+    return verifyPassword(plain, passwordHash);
+  }
+
+  dummyHash ??= hashPassword('dummy-password');
+  await verifyPassword(plain, await dummyHash);
+  return false;
+}

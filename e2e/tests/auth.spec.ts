@@ -1,4 +1,6 @@
 import { ADMIN, expect, test } from '../fixtures';
+import { UsersApi } from '../api/UsersApi';
+import { newUser } from '../data/factory';
 
 test.describe('POST /login', () => {
   test('returns token and user for valid credentials', async ({ request }) => {
@@ -39,6 +41,49 @@ test.describe('POST /login', () => {
       expect(response.status()).toBe(400);
     });
   }
+});
+
+test.describe('failed logins', () => {
+  test('lock out after 5 wrong passwords', async ({ admin, request }) => {
+    const user = newUser();
+    await admin.users.create(user);
+    const wrong = { username: user.username, password: 'wrong' };
+
+    for (let i = 0; i < 5; i++) {
+      expect((await request.post('/login', { data: wrong })).status()).toBe(
+        401,
+      );
+    }
+    const response = await request.post('/login', { data: user });
+
+    expect(response.status()).toBe(429);
+    expect(Number(response.headers()['retry-after'])).toBeGreaterThan(0);
+  });
+
+  test('do not lock out other users', async ({ request }) => {
+    const wrong = { username: `nobody-${Date.now()}`, password: 'wrong' };
+    for (let i = 0; i < 5; i++) {
+      await request.post('/login', { data: wrong });
+    }
+
+    expect((await request.post('/login', { data: ADMIN })).status()).toBe(200);
+  });
+
+  test('reset after a successful login', async ({ admin, request }) => {
+    const user = newUser();
+    await admin.users.create(user);
+    const wrong = { username: user.username, password: 'wrong' };
+
+    for (let i = 0; i < 4; i++) {
+      await request.post('/login', { data: wrong });
+    }
+    expect((await request.post('/login', { data: user })).status()).toBe(200);
+    for (let i = 0; i < 4; i++) {
+      await request.post('/login', { data: wrong });
+    }
+
+    expect((await request.post('/login', { data: user })).status()).toBe(200);
+  });
 });
 
 test.describe('protected endpoints', () => {
@@ -106,5 +151,42 @@ test.describe('admin only endpoints', () => {
     });
 
     expect(response.status()).toBe(404);
+  });
+});
+
+test.describe('token of changed user', () => {
+  test('is rejected after the user is deleted', async ({ admin, request }) => {
+    const user = newUser();
+    await admin.users.create(user);
+    const login = await request.post('/login', { data: user });
+    const deleted = new UsersApi(request, (await login.json()).token);
+
+    await admin.users.remove(user.username);
+
+    expect((await deleted.list()).status()).toBe(401);
+  });
+
+  test('loses admin access after demotion', async ({ admin, request }) => {
+    const user = newUser({ role: 'admin' });
+    await admin.users.create(user);
+    const login = await request.post('/login', { data: user });
+    const demoted = new UsersApi(request, (await login.json()).token);
+    expect((await demoted.list()).status()).toBe(200);
+
+    await admin.users.update(user.username, { role: 'editor' });
+
+    expect((await demoted.list()).status()).toBe(403);
+  });
+
+  test('is rejected when the user is recreated', async ({ admin, request }) => {
+    const user = newUser({ role: 'admin' });
+    await admin.users.create(user);
+    const login = await request.post('/login', { data: user });
+    const old = new UsersApi(request, (await login.json()).token);
+
+    await admin.users.remove(user.username);
+    await admin.users.create(user);
+
+    expect((await old.list()).status()).toBe(401);
   });
 });

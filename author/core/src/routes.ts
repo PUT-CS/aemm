@@ -16,10 +16,11 @@ import { setBackup } from './routes/setBackup';
 import { login } from './routes/login';
 import { requireAuth } from './middlewares/requireAuth';
 import { requireAdmin } from './middlewares/requireAdmin';
+import { loginRateLimit } from './middlewares/loginRateLimit';
 
 const router = Router();
 
-router.post('/login', login);
+router.post('/login', loginRateLimit, login);
 router.get('/scrtree', getTree);
 router.get('/scr*queryPath', getNode);
 

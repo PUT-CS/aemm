@@ -90,8 +90,13 @@ export class Database {
       return;
     }
 
+    const password = process.env.ADMIN_PASSWORD;
+    if (!password) {
+      throw new Error('ADMIN_PASSWORD is required to create the admin user');
+    }
+
     const now = Date.now();
-    const passwordHash = await hashPassword('admin123');
+    const passwordHash = await hashPassword(password);
 
     await this.db.run(
       'INSERT INTO users (username, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?);',

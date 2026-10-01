@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { addInfoEvent } from './requestLogger';
 import { getJwtSecret, type AuthPayload } from '../auth/authService';
+import { Db } from '../db/db';
 
 export interface AuthenticatedRequest extends Request {
   user?: AuthPayload;
@@ -9,9 +10,9 @@ export interface AuthenticatedRequest extends Request {
 
 /**
  * Middleware that requires a valid Bearer token in the Authorization header.
- * On success, attaches the decoded AuthPayload to req.user.
+ * On success, attaches the user as currently stored in the database to req.user.
  */
-export function requireAuth(
+export async function requireAuth(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
@@ -40,18 +41,9 @@ export function requireAuth(
     return;
   }
 
+  let decoded: AuthPayload;
   try {
-    const secret = getJwtSecret();
-    const decoded = jwt.verify(token, secret) as AuthPayload;
-
-    req.user = decoded;
-
-    addInfoEvent(req, res, 'auth.authenticated', {
-      username: decoded.username,
-      role: decoded.role,
-    });
-
-    next();
+    decoded = jwt.verify(token, getJwtSecret()) as AuthPayload;
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       addInfoEvent(req, res, 'auth.tokenExpired', { message: err.message });
@@ -69,5 +61,22 @@ export function requireAuth(
       message: err instanceof Error ? err.message : 'Unknown error',
     });
     next(err);
+    return;
   }
+
+  const user = await Db.getUser(decoded.username);
+  if (!user || user.id !== decoded.id) {
+    addInfoEvent(req, res, 'auth.userGone', { username: decoded.username });
+    res.status(401).json({ message: 'Invalid token' });
+    return;
+  }
+
+  req.user = { id: user.id!, username: user.username, role: user.role };
+
+  addInfoEvent(req, res, 'auth.authenticated', {
+    username: user.username,
+    role: user.role,
+  });
+
+  next();
 }

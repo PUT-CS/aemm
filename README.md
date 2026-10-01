@@ -23,12 +23,13 @@ Core reads its settings from `author/core/.env`:
 
 ```bash
 JWT_SECRET=change-me
+ADMIN_PASSWORD=change-me-too
 CONTENT_ROOT=../../content
 ```
 
 Optional: `PORT` (default `4501`), `DATABASE_PATH` (default `data/core.sqlite`), `JWT_EXPIRES_IN` (default `1h`).
 
-On first start core creates the default user `admin` with password `admin123`.
+On first start core creates the user `admin` with the password from `ADMIN_PASSWORD`. It's only read when that user doesn't exist yet, change the password from the admin panel afterwards.
 
 ### Build & Run
 
