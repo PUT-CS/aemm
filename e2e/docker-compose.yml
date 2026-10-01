@@ -14,8 +14,8 @@ services:
       JWT_SECRET: e2e-secret
       BCRYPT_SALT_ROUNDS: '4'
     volumes:
-      - ./fixtures/content:/fixtures:ro
-    command: sh -c "cp -R /fixtures /app/content && exec node dist/server.js"
+      - ./data/content:/seed:ro
+    command: sh -c "cp -R /seed /app/content && exec node dist/server.js"
     healthcheck:
       test: wget -qO- http://localhost:4501/scrtree > /dev/null || exit 1
       interval: 1s

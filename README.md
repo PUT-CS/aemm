@@ -98,4 +98,4 @@ cd e2e && npm install
 cd .. && npm run test:e2e
 ```
 
-Requires Docker. Playwright builds the author core image and starts it on port 4599 with a copy of `e2e/fixtures/content` and a fresh database, and removes the container after the run. Set `E2E_BASE_URL` to run against an already running backend instead.
+Requires Docker. Playwright builds the author core image and starts it on port 4599 with a copy of `e2e/data/content` and a fresh database, and removes the container after the run. Set `E2E_BASE_URL` to run against an already running backend instead.
