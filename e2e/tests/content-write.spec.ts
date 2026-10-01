@@ -104,7 +104,7 @@ test.describe('existing page', () => {
     expect(response.status()).toBe(409);
   });
 
-  for (const name of ['../escaped', 'a/b', '..']) {
+  for (const name of ['../escaped', 'a/b', '..', '.content-1.json']) {
     test(`PATCH rejects name ${name}`, async ({ admin }) => {
       const current = await (await admin.content.get(path)).json();
 
@@ -133,6 +133,28 @@ test.describe('existing page', () => {
     expect(await (await admin.content.get(filePath)).text()).toBe('two');
   });
 
+  for (const name of ['.content.json', '.content-1.json']) {
+    test(`POST rejects ${name}`, async ({ admin }) => {
+      const before = await (await admin.content.get(path)).json();
+
+      const response = await admin.content.upload(
+        `${path}/${name}`,
+        Buffer.from('junk'),
+      );
+
+      expect(response.status()).toBe(400);
+      expect(await (await admin.content.get(path)).json()).toEqual(before);
+      expect((await admin.content.tree()).status()).toBe(200);
+    });
+  }
+
+  test('POST rejects upload over a page', async ({ admin }) => {
+    const response = await admin.content.upload(path, Buffer.from('junk'));
+
+    expect(response.status()).toBe(409);
+    expect((await admin.content.get(path)).status()).toBe(200);
+  });
+
   test('PATCH rejects file', async ({ admin }) => {
     const filePath = `${path}/notes.txt`;
     await admin.content.upload(filePath, Buffer.from('one'));
@@ -141,6 +163,15 @@ test.describe('existing page', () => {
 
     expect(response.status()).toBe(400);
   });
+});
+
+test('PUT rejects backup file name', async ({ admin }) => {
+  const response = await admin.content.create(
+    `${parent}/.content-1.json`,
+    newPage({ name: '.content-1.json' }),
+  );
+
+  expect(response.status()).toBe(400);
 });
 
 test.describe('missing node', () => {

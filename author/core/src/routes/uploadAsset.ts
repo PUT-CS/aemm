@@ -1,7 +1,13 @@
 import { Request, Response } from 'express';
 import * as fs from 'node:fs';
+import path from 'node:path';
 import { addInfoEvent } from '../middlewares/requestLogger';
-import { parentNodeExists, parseReqPath, serverErrorLog } from './utils';
+import {
+  isValidNodeName,
+  parentNodeExists,
+  parseReqPath,
+  serverErrorLog,
+} from './utils';
 
 /**
  * Uploads an asset file (binary or text content).
@@ -10,6 +16,12 @@ import { parentNodeExists, parseReqPath, serverErrorLog } from './utils';
 export const uploadAsset = (req: Request, res: Response) => {
   const fullPath = parseReqPath(req, res, 'scr', true);
   if (!fullPath) {
+    return;
+  }
+
+  if (!isValidNodeName(path.basename(fullPath))) {
+    addInfoEvent(req, res, 'uploadAsset.invalidName');
+    res.status(400).send('Invalid file name');
     return;
   }
 
@@ -22,6 +34,12 @@ export const uploadAsset = (req: Request, res: Response) => {
 
     const exists = fs.existsSync(fullPath);
     addInfoEvent(req, res, 'uploadAsset.fileExists', { exists });
+
+    if (exists && fs.statSync(fullPath).isDirectory()) {
+      addInfoEvent(req, res, 'uploadAsset.isDirectory');
+      res.status(409).send('A node already exists at this path');
+      return;
+    }
 
     if (!parentNodeExists(fullPath)) {
       addInfoEvent(req, res, 'uploadAsset.parentNotFound');
