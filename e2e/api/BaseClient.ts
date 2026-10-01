@@ -13,18 +13,18 @@ export class BaseClient {
     readonly token?: string,
   ) {}
 
+  protected authHeaders(): Record<string, string> {
+    return this.token ? { Authorization: `Bearer ${this.token}` } : {};
+  }
+
   protected send(
     method: Method,
     url: string,
     options: RequestOptions = {},
   ): Promise<APIResponse> {
-    const auth: Record<string, string> = this.token
-      ? { Authorization: `Bearer ${this.token}` }
-      : {};
-
     return this.request.fetch(url, {
       method,
-      headers: options.headers ?? auth,
+      headers: options.headers ?? this.authHeaders(),
       data: options.data,
     });
   }
