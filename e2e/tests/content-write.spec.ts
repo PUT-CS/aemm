@@ -157,6 +157,30 @@ test.describe('missing node', () => {
   });
 });
 
+test.describe('missing parent', () => {
+  test('PUT returns 404 and keeps tree working', async ({ admin }) => {
+    const page = newPage();
+
+    const response = await admin.content.create(
+      `/testsite/missing/${page.name}`,
+      page,
+    );
+
+    expect(response.status()).toBe(404);
+    expect((await admin.content.tree()).status()).toBe(200);
+  });
+
+  test('POST returns 404 and keeps tree working', async ({ admin }) => {
+    const response = await admin.content.upload(
+      '/testsite/missing/notes.txt',
+      Buffer.from('one'),
+    );
+
+    expect(response.status()).toBe(404);
+    expect((await admin.content.tree()).status()).toBe(200);
+  });
+});
+
 test('DELETE content root is forbidden', async ({ admin }) => {
   const response = await admin.content.remove('/');
 
