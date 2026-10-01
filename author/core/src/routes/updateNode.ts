@@ -8,6 +8,8 @@ import {
   addIdAndTimestamps,
   backupNode,
   HasChildren,
+  isInsideContentRoot,
+  isValidNodeName,
   parseReqPath,
   removeChildrenField,
   serverErrorLog,
@@ -137,6 +139,14 @@ export const editNode = (req: Request, res: Response) => {
     ) {
       const parentDir = path.dirname(fullPath);
       const newPath = path.join(parentDir, newData.name);
+
+      if (!isValidNodeName(newData.name) || !isInsideContentRoot(newPath)) {
+        addInfoEvent(req, res, 'editNode.invalidName', {
+          newName: newData.name,
+        });
+        res.status(400).send('Invalid node name');
+        return;
+      }
 
       // Check if target path already exists
       if (fs.existsSync(newPath)) {

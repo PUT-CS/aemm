@@ -1,11 +1,19 @@
 import { Request, Response } from 'express';
 import { addInfoEvent } from '../middlewares/requestLogger';
 import fs from 'node:fs';
-import { parseReqPath, serverErrorLog } from './utils';
+import { isContentRoot, parseReqPath, serverErrorLog } from './utils';
 
 export const deleteNode = (req: Request, res: Response) => {
   const fullPath = parseReqPath(req, res, 'scr');
   if (!fullPath) {
+    return;
+  }
+
+  if (isContentRoot(fullPath)) {
+    addInfoEvent(req, res, 'deleteNode.forbidden', {
+      reason: 'cannot delete content root',
+    });
+    res.status(403).end();
     return;
   }
 
