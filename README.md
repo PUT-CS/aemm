@@ -95,8 +95,7 @@ See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed documentation.
 
 ```bash
 cd e2e && npm install
-npm run dev:core
-npm run test:e2e
+cd .. && npm run test:e2e
 ```
 
-Run `npm run test:e2e` from the root directory while the backend is running. Tests use `http://localhost:4501` by default, set `E2E_BASE_URL` to use a different address.
+Playwright builds author core and starts it on port 4599 with a copy of `e2e/fixtures/content` and a fresh database, so real content is never touched. Set `E2E_BASE_URL` to run against an already running backend instead.

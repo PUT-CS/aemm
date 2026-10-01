@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 
-test('content tree is available', async ({ request }) => {
+test('serves fixture content', async ({ request }) => {
   const response = await request.get('/scrtree');
 
   expect(response.status()).toBe(200);
-  expect(await response.json()).toHaveProperty('children');
+  const tree = await response.json();
+  expect(tree.children.map((node: { name: string }) => node.name)).toEqual([
+    'testsite',
+  ]);
 });
