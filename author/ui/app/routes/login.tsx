@@ -15,7 +15,10 @@ import { Button } from "~/components/ui/button";
 import { useNavigate, useLocation } from "react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { loginRequest, registerRequest } from "~/routes/admin/UsersTab/mutations";
+import {
+  loginRequest,
+  registerRequest,
+} from "~/routes/admin/UsersTab/mutations";
 import { setAuthToken } from "~/lib/auth";
 
 export const formSchema = z.object({
