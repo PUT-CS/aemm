@@ -63,6 +63,21 @@ test.describe('backups', () => {
     });
   });
 
+  test('restore keeps current version as backup', async ({ admin }) => {
+    const v1 = await editTitle(admin, path, 'v2');
+    const v2 = await (await admin.content.get(path)).json();
+
+    await admin.backups.restore(path, `.content-${v1.updatedAt}.json`);
+
+    expect(await backups(admin, path)).toEqual([
+      `.content-${v2.updatedAt}.json`,
+    ]);
+    const backup = await admin.content.get(
+      `${path}/.content-${v2.updatedAt}.json`,
+    );
+    expect(JSON.parse(await backup.text())).toMatchObject({ title: 'v2' });
+  });
+
   test('restore rejects file that is not a backup', async ({ admin }) => {
     const response = await admin.backups.restore(path, '.content.json');
 

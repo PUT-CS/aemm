@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import path from 'path';
 import { addInfoEvent } from '../middlewares/requestLogger';
 import fs from 'node:fs';
-import { parseReqPath, serverErrorLog } from './utils';
+import { backupNode, parseReqPath, serverErrorLog } from './utils';
 
 export function setBackup(req: Request, res: Response) {
   const fullPath = parseReqPath(req, res, 'backup');
@@ -21,6 +21,9 @@ export function setBackup(req: Request, res: Response) {
 
     const dir = path.dirname(fullPath);
     const targetPath = path.join(dir, '.content.json');
+    if (fs.existsSync(targetPath)) {
+      backupNode(targetPath, JSON.parse(fs.readFileSync(targetPath, 'utf8')));
+    }
     fs.renameSync(fullPath, targetPath);
     res.status(200).end();
     return;
