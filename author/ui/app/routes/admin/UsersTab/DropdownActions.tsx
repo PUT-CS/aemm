@@ -45,6 +45,7 @@ export function DropdownActions({ row }: DropdownActionsProps) {
   const queryClient = useQueryClient();
 
   const username = row.original.username;
+  const passwordTooShort = password.length > 0 && password.length < 6;
 
   const deleteMutation = useMutation({
     mutationFn: deleteUser,
@@ -159,6 +160,11 @@ export function DropdownActions({ row }: DropdownActionsProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Leave blank to keep current password"
               />
+              {passwordTooShort && (
+                <p className="text-sm text-destructive">
+                  Password must be at least 6 characters.
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1">
@@ -194,7 +200,7 @@ export function DropdownActions({ row }: DropdownActionsProps) {
               type="button"
               className="h-10 gap-2"
               onClick={handleEditSave}
-              disabled={editMutation.isPending}
+              disabled={editMutation.isPending || passwordTooShort}
             >
               {editMutation.isPending ? "Saving..." : "Save"}
             </Button>

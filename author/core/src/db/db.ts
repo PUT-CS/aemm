@@ -5,7 +5,7 @@ import path from 'node:path';
 import config from '../config/config';
 import { logger } from '../logger';
 import { z } from 'zod';
-import { hashPassword } from '../auth/authService';
+import { hashPassword, MIN_PASSWORD_LENGTH } from '../auth/authService';
 
 export const userSchema = z.object({
   id: z.number().int().optional(),
@@ -109,8 +109,10 @@ export class Database {
     }
 
     const password = process.env.ADMIN_PASSWORD;
-    if (!password) {
-      throw new Error('ADMIN_PASSWORD is required to create the admin user');
+    if (!password || password.length < MIN_PASSWORD_LENGTH) {
+      throw new Error(
+        `ADMIN_PASSWORD with at least ${MIN_PASSWORD_LENGTH} characters is required to create the admin user`,
+      );
     }
 
     const now = Date.now();

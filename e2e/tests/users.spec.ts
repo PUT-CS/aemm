@@ -58,6 +58,12 @@ test.describe('POST /users', () => {
   }
 });
 
+test('POST rejects password shorter than 6 characters', async ({ admin }) => {
+  const response = await admin.users.create(newUser({ password: '12345' }));
+
+  expect(response.status()).toBe(400);
+});
+
 test.describe('existing user', () => {
   let user: NewUser;
 
@@ -103,7 +109,12 @@ test.describe('existing user', () => {
     expect(newLogin.status()).toBe(200);
   });
 
-  for (const changes of [{}, { password: '' }, { role: 42 }]) {
+  for (const changes of [
+    {},
+    { password: '' },
+    { password: '12345' },
+    { role: 42 },
+  ]) {
     test(`PATCH rejects ${JSON.stringify(changes)}`, async ({ admin }) => {
       const response = await admin.users.update(user.username, changes);
 

@@ -1,6 +1,8 @@
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
+export const MIN_PASSWORD_LENGTH = 6;
+
 export interface AuthPayload {
   id: number;
   username: string;
