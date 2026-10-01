@@ -4,10 +4,11 @@ import { errorHandler } from './middlewares/errorHandler';
 import cors from 'cors';
 import helmet from 'helmet';
 import { requestLogger } from './middlewares/requestLogger';
+import config from './config/config';
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: config.corsOrigins }));
 app.use(helmet());
 app.use(express.json());
 
