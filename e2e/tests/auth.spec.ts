@@ -34,6 +34,16 @@ test.describe('POST /login', () => {
     expect(await response.json()).toEqual({ message: 'Invalid credentials' });
   });
 
+  test('rejects malformed JSON with a message', async ({ request }) => {
+    const response = await request.post('/login', {
+      headers: { 'Content-Type': 'application/json' },
+      data: '{"username":',
+    });
+
+    expect(response.status()).toBe(400);
+    expect((await response.json()).message).toEqual(expect.any(String));
+  });
+
   for (const data of [{}, { username: 'admin' }, { password: 'admin123' }]) {
     test(`rejects body ${JSON.stringify(data)}`, async ({ request }) => {
       const response = await request.post('/login', { data });
