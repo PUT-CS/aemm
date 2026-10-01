@@ -103,22 +103,3 @@ export async function loginRequest(data: LoginFormData) {
 
   return (await response.json()) as { token: string };
 }
-
-export async function registerRequest(data: LoginFormData) {
-  const response = await fetch(`${BACKEND_URL}/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ ...data, role: "admin" }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.json().catch(() => null);
-    const message =
-      (errorBody && (errorBody.message as string)) || "Failed to register";
-    throw new Error(message);
-  }
-
-  return response.json();
-}
