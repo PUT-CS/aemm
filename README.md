@@ -102,3 +102,7 @@ cd .. && npm run test:e2e
 ```
 
 Playwright builds the author core Docker image and starts it on port 4599 with a copy of `e2e/data/content` and a fresh database. Set `E2E_BASE_URL` to run against an already running backend instead.
+
+Tests get API clients from `e2e/fixtures.ts`: `anonymous`, `admin` and `editor` (a new editor user for each test). Clients return the raw response, pass `headers` or `data` to override what is sent.
+
+Seed content and the `admin` user are shared by all tests, don't modify them. Tests that change data create their own in `beforeEach` with helpers from `e2e/data/factory.ts`.
