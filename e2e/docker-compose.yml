@@ -15,6 +15,7 @@ services:
       ADMIN_PASSWORD: admin123
       BCRYPT_SALT_ROUNDS: '4'
       MAX_UPLOAD_SIZE: 1mb
+      CORS_ORIGINS: http://ui.test, http://other-ui.test
     volumes:
       - ./data/content:/seed:ro
     command: sh -c "cp -R /seed /app/content && exec node dist/server.js"

@@ -9,6 +9,7 @@ interface Config {
   contentRoot: string;
   databasePath: string;
   maxUploadSize: string;
+  corsOrigins: string[];
 }
 
 const defaultDatabasePath = path.resolve(
@@ -21,6 +22,10 @@ const config: Config = {
   contentRoot: process.env.CONTENT_ROOT || './content',
   databasePath: defaultDatabasePath,
   maxUploadSize: process.env.MAX_UPLOAD_SIZE || '25mb',
+  corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:4502')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
 };
 
 export default config;
