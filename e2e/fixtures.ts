@@ -1,5 +1,6 @@
 import { expect, test as base, type APIRequestContext } from '@playwright/test';
 import { AuthApi } from './api/AuthApi';
+import { BackupApi } from './api/BackupApi';
 import { ContentApi } from './api/ContentApi';
 import { UsersApi } from './api/UsersApi';
 import { newUser } from './data/factory';
@@ -8,6 +9,7 @@ export const ADMIN = { username: 'admin', password: 'admin123' };
 
 export interface Api {
   token?: string;
+  backups: BackupApi;
   content: ContentApi;
   users: UsersApi;
 }
@@ -15,6 +17,7 @@ export interface Api {
 function api(request: APIRequestContext, token?: string): Api {
   return {
     token,
+    backups: new BackupApi(request, token),
     content: new ContentApi(request, token),
     users: new UsersApi(request, token),
   };
