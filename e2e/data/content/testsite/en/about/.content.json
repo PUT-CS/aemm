@@ -1,0 +1,18 @@
+{
+  "type": "aemm:page",
+  "title": "About",
+  "components": [
+    {
+      "id": "7f6e5d4c-3b2a-4190-8f7e-6d5c4b3a2903",
+      "type": "Heading",
+      "props": {
+        "text": "About us"
+      },
+      "children": []
+    }
+  ],
+  "createdAt": 1767225600000,
+  "updatedAt": 1767225600000,
+  "id": "9e8d7c6b-5a49-4382-a1b0-c9d8e7f6a504",
+  "name": "about"
+}

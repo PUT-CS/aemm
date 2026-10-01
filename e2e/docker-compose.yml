@@ -1,0 +1,22 @@
+name: aemm-e2e
+
+services:
+  author-core:
+    build:
+      context: ..
+      dockerfile: author/core/Dockerfile
+    image: aemm-author-core:e2e
+    ports:
+      - '4599:4501'
+    environment:
+      CONTENT_ROOT: /app/content
+      DATABASE_PATH: /app/data/core.sqlite
+      JWT_SECRET: e2e-secret
+      BCRYPT_SALT_ROUNDS: '4'
+    volumes:
+      - ./data/content:/seed:ro
+    command: sh -c "cp -R /seed /app/content && exec node dist/server.js"
+    healthcheck:
+      test: wget -qO- http://localhost:4501/scrtree > /dev/null || exit 1
+      interval: 1s
+      retries: 30
