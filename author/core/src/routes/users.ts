@@ -141,11 +141,14 @@ export async function updateUser(
 
     const { password, role } = req.body || {};
 
-    if (password !== undefined && typeof password !== 'string') {
+    if (
+      password !== undefined &&
+      (typeof password !== 'string' || password.length === 0)
+    ) {
       addInfoEvent(req, res, 'user.update.validationFailed', {
-        reason: 'password not string',
+        reason: 'password not a non-empty string',
       });
-      res.status(400).json({ message: 'password must be string' });
+      res.status(400).json({ message: 'password must be a non-empty string' });
       return;
     }
 
@@ -160,6 +163,11 @@ export async function updateUser(
 
     const fieldsToUpdate: string[] = [];
     const updates: { passwordHash?: string; role?: string } = {};
+
+    if (password !== undefined) {
+      updates.passwordHash = await hashPassword(password);
+      fieldsToUpdate.push('password');
+    }
 
     if (role !== undefined) {
       updates.role = role;
