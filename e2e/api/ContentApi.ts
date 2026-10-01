@@ -24,10 +24,7 @@ export class ContentApi extends BaseClient {
   upload(path: string, body: Buffer, options?: RequestOptions) {
     return this.send('POST', `/scr${path}`, {
       data: body,
-      headers: {
-        ...this.authHeaders(),
-        'Content-Type': 'application/octet-stream',
-      },
+      headers: { 'Content-Type': 'application/octet-stream' },
       ...options,
     });
   }

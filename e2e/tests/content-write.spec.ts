@@ -224,7 +224,7 @@ test.describe('upload size', () => {
     expect((await admin.content.get(filePath)).status()).toBe(404);
   });
 
-  test('POST checks token before reading the body', async ({ anonymous }) => {
+  test('POST checks session before reading the body', async ({ anonymous }) => {
     const response = await anonymous.content.upload(
       `${parent}/large.bin`,
       tooLarge,

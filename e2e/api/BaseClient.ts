@@ -8,14 +8,7 @@ export interface RequestOptions {
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export class BaseClient {
-  constructor(
-    protected readonly request: APIRequestContext,
-    readonly token?: string,
-  ) {}
-
-  protected authHeaders(): Record<string, string> {
-    return this.token ? { Authorization: `Bearer ${this.token}` } : {};
-  }
+  constructor(protected readonly request: APIRequestContext) {}
 
   protected send(
     method: Method,
@@ -24,7 +17,7 @@ export class BaseClient {
   ): Promise<APIResponse> {
     return this.request.fetch(url, {
       method,
-      headers: options.headers ?? this.authHeaders(),
+      headers: { 'X-AEMM-Request': '1', ...options.headers },
       data: options.data,
     });
   }

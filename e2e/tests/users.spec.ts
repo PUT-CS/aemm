@@ -165,8 +165,10 @@ test.describe('access', () => {
     expect((await anonymous.users.create(newUser())).status()).toBe(401);
   });
 
-  test('admin request without token is rejected', async ({ admin }) => {
-    const response = await admin.users.list({ headers: {} });
+  test('admin is rejected after logout', async ({ admin }) => {
+    await admin.context.post('/logout');
+
+    const response = await admin.users.list();
 
     expect(response.status()).toBe(401);
   });
