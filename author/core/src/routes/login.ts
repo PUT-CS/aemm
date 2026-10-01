@@ -2,7 +2,11 @@ import type { NextFunction, Request, Response } from 'express';
 import { Db } from '../db/db';
 import type { AppError } from '../middlewares/errorHandler';
 import { addInfoEvent } from '../middlewares/requestLogger';
-import { signAccessToken, verifyPassword } from '../auth/authService';
+import { signAccessToken, verifyPasswordOrDummy } from '../auth/authService';
+import {
+  clearFailedLogins,
+  recordFailedLogin,
+} from '../middlewares/loginRateLimit';
 import { z } from 'zod';
 
 const loginBodySchema = z.object({
@@ -31,7 +35,9 @@ export async function login(
     const { username, password } = parseResult.data;
 
     const user = await Db.getUser(username);
-    if (!user) {
+    const valid = await verifyPasswordOrDummy(password, user?.passwordHash);
+    if (!user || !valid) {
+      recordFailedLogin(req);
       addInfoEvent(req, res, 'auth.login.invalidCredentials', {
         username,
       });
@@ -40,15 +46,7 @@ export async function login(
       return;
     }
 
-    const valid = await verifyPassword(password, user.passwordHash);
-    if (!valid) {
-      addInfoEvent(req, res, 'auth.login.invalidCredentials', {
-        username,
-      });
-
-      res.status(401).json({ message: 'Invalid credentials' });
-      return;
-    }
+    clearFailedLogins(req);
 
     const token = signAccessToken({
       id: user.id!,
