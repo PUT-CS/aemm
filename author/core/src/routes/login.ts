@@ -64,7 +64,6 @@ export async function login(
 
     setSessionCookie(res, token);
     res.status(200).json({
-      token,
       user: {
         id: user.id,
         username: user.username,
