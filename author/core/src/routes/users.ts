@@ -3,7 +3,7 @@ import { Db, type User } from '../db/db';
 import { AppError } from '../middlewares/errorHandler';
 import { addInfoEvent } from '../middlewares/requestLogger';
 import { z } from 'zod';
-import { hashPassword } from '../auth/authService';
+import { hashPassword, MIN_PASSWORD_LENGTH } from '../auth/authService';
 
 function toPublicUser(user: User): Omit<User, 'passwordHash' | 'tokenVersion'> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -61,7 +61,7 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
 
 const createUserBodySchema = z.object({
   username: z.string().min(1),
-  password: z.string().min(1),
+  password: z.string().min(MIN_PASSWORD_LENGTH),
   role: z.string().min(1),
 });
 
@@ -143,12 +143,14 @@ export async function updateUser(
 
     if (
       password !== undefined &&
-      (typeof password !== 'string' || password.length === 0)
+      (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH)
     ) {
       addInfoEvent(req, res, 'user.update.validationFailed', {
-        reason: 'password not a non-empty string',
+        reason: 'password too short or not a string',
       });
-      res.status(400).json({ message: 'password must be a non-empty string' });
+      res.status(400).json({
+        message: `password must be a string of at least ${MIN_PASSWORD_LENGTH} characters`,
+      });
       return;
     }
 
