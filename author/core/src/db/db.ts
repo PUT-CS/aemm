@@ -12,6 +12,7 @@ export const userSchema = z.object({
   username: z.string().min(1),
   passwordHash: z.string().min(1),
   role: z.string().min(1),
+  tokenVersion: z.number().int().optional(),
   createdAt: z.number().int().optional(),
   updatedAt: z.number().int().optional(),
 });
@@ -61,10 +62,13 @@ export class Database {
                                          username TEXT NOT NULL UNIQUE,
                                          passwordHash TEXT NOT NULL,
                                          role TEXT NOT NULL,
+                                         tokenVersion INTEGER NOT NULL DEFAULT 0,
                                          createdAt INTEGER NOT NULL,
                                          updatedAt INTEGER NOT NULL
       );
     `);
+
+    await this.addTokenVersionColumn();
 
     const result = await this.db.get(`
       SELECT COUNT(*) AS count
@@ -75,6 +79,20 @@ export class Database {
     });
 
     await this.ensureDefaultAdminUser();
+  }
+
+  private async addTokenVersionColumn(): Promise<void> {
+    const columns: Array<{ name: string }> = await this.db.all(
+      'PRAGMA table_info(users);',
+    );
+    if (columns.some((column) => column.name === 'tokenVersion')) {
+      return;
+    }
+
+    await this.db.exec(
+      'ALTER TABLE users ADD COLUMN tokenVersion INTEGER NOT NULL DEFAULT 0;',
+    );
+    logger.info('Added tokenVersion column to users table');
   }
 
   private async ensureDefaultAdminUser(): Promise<void> {
@@ -124,7 +142,7 @@ export class Database {
     if (!this.db) throw new Error('Database not initialized');
 
     const rows = await this.db.all(
-      'SELECT id, username, passwordHash, role, createdAt, updatedAt FROM users ORDER BY id;',
+      'SELECT id, username, passwordHash, role, tokenVersion, createdAt, updatedAt FROM users ORDER BY id;',
     );
     return rows.map((row: unknown) => userSchema.parse(row));
   }
@@ -133,7 +151,7 @@ export class Database {
     if (!this.db) throw new Error('Database not initialized');
 
     const row = await this.db.get(
-      'SELECT id, username, passwordHash, role, createdAt, updatedAt FROM users WHERE username = ?;',
+      'SELECT id, username, passwordHash, role, tokenVersion, createdAt, updatedAt FROM users WHERE username = ?;',
       username,
     );
     return row ? userSchema.parse(row) : undefined;
@@ -158,7 +176,7 @@ export class Database {
     );
 
     const createdUser = await this.db.get(
-      'SELECT id, username, passwordHash, role, createdAt, updatedAt FROM users WHERE id = ?;',
+      'SELECT id, username, passwordHash, role, tokenVersion, createdAt, updatedAt FROM users WHERE id = ?;',
       result.lastID,
     );
 
@@ -176,6 +194,7 @@ export class Database {
 
     if (updates.passwordHash !== undefined) {
       sets.push('passwordHash = COALESCE(?, passwordHash)');
+      sets.push('tokenVersion = tokenVersion + 1');
       params.push(updates.passwordHash ?? null);
     }
     if (updates.role !== undefined) {
