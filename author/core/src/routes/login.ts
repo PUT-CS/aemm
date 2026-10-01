@@ -8,6 +8,7 @@ import {
   recordFailedLogin,
 } from '../middlewares/loginRateLimit';
 import { z } from 'zod';
+import { setSessionCookie } from '../auth/sessionCookie';
 
 const loginBodySchema = z.object({
   username: z.string().min(1),
@@ -61,6 +62,7 @@ export async function login(
       role: user.role,
     });
 
+    setSessionCookie(res, token);
     res.status(200).json({
       token,
       user: {

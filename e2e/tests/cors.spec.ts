@@ -18,6 +18,9 @@ test.describe('CORS', () => {
 
       expect(response.status()).toBe(204);
       expect(response.headers()['access-control-allow-origin']).toBe(origin);
+      expect(response.headers()['access-control-allow-credentials']).toBe(
+        'true',
+      );
     });
   }
 
