@@ -7,7 +7,7 @@ services:
       dockerfile: author/core/Dockerfile
     image: aemm-author-core:e2e
     ports:
-      - '${E2E_PORT:-4599}:4501'
+      - '4599:4501'
     environment:
       CONTENT_ROOT: /app/content
       DATABASE_PATH: /app/data/core.sqlite

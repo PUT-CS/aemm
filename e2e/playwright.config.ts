@@ -1,7 +1,5 @@
 import { defineConfig } from '@playwright/test';
 
-const port = process.env.E2E_PORT ?? '4599';
-
 export default defineConfig({
   testDir: './tests',
   globalSetup: './global-setup.ts',
@@ -10,7 +8,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? `http://localhost:${port}`,
+    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:4599',
     extraHTTPHeaders: {
       Accept: 'application/json',
     },
