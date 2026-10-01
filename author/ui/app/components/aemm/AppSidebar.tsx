@@ -4,9 +4,11 @@ import {
   SidebarContent,
   SidebarFooter,
 } from "~/components/ui/sidebar";
-import { isAdmin } from "~/lib/auth";
+import { useCurrentUser } from "~/lib/auth";
 
 export default function AppSidebar() {
+  const { data: user } = useCurrentUser();
+
   return (
     <SidebarRoot>
       <SidebarHeader>
@@ -14,7 +16,7 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <nav className="px-2 py-4 space-y-2">
-          {isAdmin() && (
+          {user?.role === "admin" && (
             <a
               href="/admin"
               className="block text-sm text-sidebar-foreground/90 hover:underline"

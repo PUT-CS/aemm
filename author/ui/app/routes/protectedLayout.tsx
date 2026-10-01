@@ -1,34 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
-import { getAuthToken } from "~/lib/auth";
+import { useCurrentUser } from "~/lib/auth";
 
 export default function ProtectedLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const [checked, setChecked] = useState(false);
-  const [authed, setAuthed] = useState(false);
+  const { data: user, isPending } = useCurrentUser();
 
   useEffect(() => {
-    const token = getAuthToken();
-    console.log(
-      "[ProtectedLayout] token:",
-      token,
-      "location:",
-      location.pathname,
-    );
-
-    if (!token) {
+    if (!isPending && !user) {
       navigate("/login", {
         replace: true,
         state: { from: location.pathname + location.search },
       });
-    } else {
-      setAuthed(true);
     }
+  }, [isPending, user, location.pathname, location.search, navigate]);
 
-    setChecked(true);
-  }, [location.pathname, location.search, navigate]);
-
-  return <>{checked && authed ? <Outlet /> : null}</>;
+  return <>{user ? <Outlet /> : null}</>;
 }

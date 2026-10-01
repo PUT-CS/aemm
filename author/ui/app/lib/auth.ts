@@ -1,33 +1,42 @@
-export function getAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem("aemm_auth_token");
+import { useQuery } from "@tanstack/react-query";
+import { BACKEND_URL } from "~/consts";
+
+export interface CurrentUser {
+  id: number;
+  username: string;
+  role: string;
 }
 
-export function setAuthToken(token: string): void {
-  if (typeof window === "undefined") return;
-
-  if (token) {
-    window.localStorage.setItem("aemm_auth_token", token);
-  }
+export function authFetch(url: string, init: RequestInit = {}) {
+  return fetch(url, {
+    ...init,
+    credentials: "include",
+    headers: {
+      ...(init.headers as Record<string, string>),
+      "X-AEMM-Request": "1",
+    },
+  });
 }
 
-/**
- * Reads the role from the stored JWT payload. Only used to adjust the UI,
- * the backend verifies the token and the role on every request.
- */
-export function getUserRole(): string | null {
-  const token = getAuthToken();
-  if (!token) return null;
-
-  try {
-    const payload = token.split(".")[1];
-    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
-    return JSON.parse(json).role ?? null;
-  } catch {
+async function fetchCurrentUser(): Promise<CurrentUser | null> {
+  const response = await authFetch(`${BACKEND_URL}/me`);
+  if (response.status === 401) {
     return null;
   }
+  if (!response.ok) {
+    throw new Error(`Failed to fetch current user: ${response.statusText}`);
+  }
+  return response.json();
 }
 
-export function isAdmin(): boolean {
-  return getUserRole() === "admin";
+export function useCurrentUser() {
+  return useQuery({
+    queryKey: ["me"],
+    queryFn: fetchCurrentUser,
+    retry: false,
+  });
+}
+
+export async function logout() {
+  await authFetch(`${BACKEND_URL}/logout`, { method: "POST" });
 }

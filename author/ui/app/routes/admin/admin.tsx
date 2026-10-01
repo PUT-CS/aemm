@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate } from "react-router";
 import UsersTab from "~/routes/admin/UsersTab/UsersTab";
 import { NavTabs, type TabItem } from "~/components/aemm/NavTabs";
-import { isAdmin } from "~/lib/auth";
+import { useCurrentUser } from "~/lib/auth";
 
 export function meta() {
   return [{ title: "Administration | AEMM" }];
@@ -12,13 +12,14 @@ type AdminSection = "users" | "system";
 
 export default function Admin() {
   const [activeSection, setActiveSection] = useState<AdminSection>("users");
+  const { data: user } = useCurrentUser();
 
   const adminTabs: TabItem<AdminSection>[] = [
     { id: "users", label: "Users" },
     { id: "system", label: "System" },
   ];
 
-  if (!isAdmin()) {
+  if (user?.role !== "admin") {
     return <Navigate to="/" replace />;
   }
 

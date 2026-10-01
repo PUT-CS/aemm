@@ -1,29 +1,18 @@
 import { BACKEND_URL } from "~/consts";
 import type { FormSchema } from "~/routes/admin/UsersTab/UsersTab";
-import { getAuthToken } from "~/lib/auth";
+import { authFetch, type CurrentUser } from "~/lib/auth";
 import type { LoginFormData } from "~/routes/login";
 
-export function getAuthHeaders() {
-  const token = getAuthToken();
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  return headers;
-}
+const JSON_HEADERS = { "Content-Type": "application/json" };
 
 /**
  * Create a new user in the database.
  */
 export async function createUser(user: FormSchema) {
   console.log("Creating user...");
-  const response = await fetch(`${BACKEND_URL}/users`, {
+  const response = await authFetch(`${BACKEND_URL}/users`, {
     method: "POST",
-    headers: getAuthHeaders(),
+    headers: JSON_HEADERS,
     body: JSON.stringify(user),
   });
   if (!response.ok) {
@@ -37,13 +26,9 @@ export async function createUser(user: FormSchema) {
  */
 export async function deleteUser(username: string) {
   console.log("Deleting user", username);
-  const headers = getAuthHeaders();
-  const response = await fetch(
+  const response = await authFetch(
     `${BACKEND_URL}/users/${encodeURIComponent(username)}`,
-    {
-      method: "DELETE",
-      headers,
-    },
+    { method: "DELETE" },
   );
   if (!response.ok) {
     throw new Error(`Failed to delete user: ${response.statusText}`);
@@ -69,11 +54,11 @@ export async function editUser(
     payload.role = updates.role;
   }
 
-  const response = await fetch(
+  const response = await authFetch(
     `${BACKEND_URL}/users/${encodeURIComponent(username)}`,
     {
       method: "PATCH",
-      headers: getAuthHeaders(),
+      headers: JSON_HEADERS,
       body: JSON.stringify(payload),
     },
   );
@@ -86,11 +71,9 @@ export async function editUser(
 }
 
 export async function loginRequest(data: LoginFormData) {
-  const response = await fetch(`${BACKEND_URL}/login`, {
+  const response = await authFetch(`${BACKEND_URL}/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: JSON_HEADERS,
     body: JSON.stringify(data),
   });
 
@@ -101,5 +84,5 @@ export async function loginRequest(data: LoginFormData) {
     throw new Error(message);
   }
 
-  return (await response.json()) as { token: string };
+  return (await response.json()) as { user: CurrentUser };
 }

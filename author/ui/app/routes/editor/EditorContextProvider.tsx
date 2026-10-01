@@ -3,7 +3,7 @@ import React, { createContext, useCallback, useContext, useState } from "react";
 import COMPONENT_REGISTRY from "~/components/authoring/registry";
 import { BACKEND_URL } from "~/consts";
 import type { Page } from "@aemm/common";
-import { getAuthHeaders } from "~/routes/sites/dialogs/mutations";
+import { authFetch } from "~/lib/auth";
 
 export interface EditorNode {
   id: string;
@@ -86,10 +86,9 @@ export function useEditor(path: string) {
       };
 
       // Use PATCH to update the page
-      const response = await fetch(`${BACKEND_URL}/scr${path}`, {
+      const response = await authFetch(`${BACKEND_URL}/scr${path}`, {
         method: "PATCH",
         headers: {
-          ...getAuthHeaders(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedPage),

@@ -1,5 +1,5 @@
 import { BACKEND_URL } from "~/consts";
-import { getAuthHeaders } from "~/routes/admin/UsersTab/mutations";
+import { authFetch } from "~/lib/auth";
 
 /**
  * Fetch all users from the database.
@@ -7,10 +7,7 @@ import { getAuthHeaders } from "~/routes/admin/UsersTab/mutations";
 export async function fetchUsers() {
   console.log("Fetching all users...");
 
-  const response = await fetch(`${BACKEND_URL}/users`, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
+  const response = await authFetch(`${BACKEND_URL}/users`);
   if (!response.ok) {
     throw new Error(`Failed to fetch users: ${response.statusText}`);
   }

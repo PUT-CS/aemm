@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { FaTools } from "react-icons/fa";
 import { FaFileCode, FaFileLines, FaFilePen } from "react-icons/fa6";
 import HomeIcon from "./HomeIcon";
-import { isAdmin } from "~/lib/auth";
+import { useCurrentUser } from "~/lib/auth";
 
 export function meta() {
   return [
@@ -13,6 +13,7 @@ export function meta() {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { data: user } = useCurrentUser();
 
   return (
     <div className="h-full flex items-center justify-center">
@@ -27,7 +28,7 @@ export default function Home() {
           icon={FaFilePen}
           onClick={() => navigate("/editor")}
         />
-        {isAdmin() && (
+        {user?.role === "admin" && (
           <HomeIcon
             text="Administration"
             icon={FaTools}
