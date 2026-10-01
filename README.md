@@ -17,18 +17,25 @@ cd ../author/core && npm install
 cd ../author/ui && npm install
 ```
 
-Or run the setup script:
+### Configuration
+
+Core reads its settings from `author/core/.env`:
 
 ```bash
-./setup.sh
+JWT_SECRET=change-me
+CONTENT_ROOT=../../content
 ```
+
+Optional: `PORT` (default `4501`), `DATABASE_PATH` (default `data/core.sqlite`), `JWT_EXPIRES_IN` (default `1h`).
+
+On first start core creates the default user `admin` with password `admin123`.
 
 ### Build & Run
 
 ```bash
 # From root directory
 npm run watch:common   # Terminal 1: Watch common for changes
-npm run dev:core       # Terminal 2: Run backend (port 3000)
+npm run dev:core       # Terminal 2: Run backend (port 4501)
 npm run dev:ui         # Terminal 3: Run frontend (port 4502)
 ```
 
@@ -58,7 +65,7 @@ This creates a symlink: `node_modules/@aemm/common` → `../../common`
 Import like any other package:
 
 ```typescript
-import { ScrNode, ScrType } from "@aemm/common/scr";
+import { ScrNode, NodeType } from "@aemm/common/scr";
 ```
 
 ## Available Scripts
@@ -80,10 +87,6 @@ import { ScrNode, ScrType } from "@aemm/common/scr";
 
 - `npm run start:core` - Start backend server
 - `npm run start:ui` - Start frontend server
-
-## Documentation
-
-See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed documentation.
 
 ## Tech Stack
 
