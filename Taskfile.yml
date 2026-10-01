@@ -1,0 +1,97 @@
+version: "3"
+
+tasks:
+  install:
+    desc: Install dependencies of all packages
+    cmds:
+      - cd common && npm install && npm run build
+      - cd author/core && npm install
+      - cd author/ui && npm install
+      - cd e2e && npm install
+
+  build:
+    desc: Build common, core and ui
+    cmds:
+      - npm run build
+
+  build:common:
+    desc: Build shared types
+    cmds:
+      - npm run build:common
+
+  build:core:
+    desc: Build backend
+    cmds:
+      - npm run build:core
+
+  build:ui:
+    desc: Build frontend
+    cmds:
+      - npm run build:ui
+
+  watch:common:
+    desc: Watch common for changes
+    cmds:
+      - npm run watch:common
+
+  dev:core:
+    desc: Run backend dev server
+    cmds:
+      - npm run dev:core
+
+  dev:ui:
+    desc: Run frontend dev server
+    cmds:
+      - npm run dev:ui
+
+  start:core:
+    desc: Start backend server
+    cmds:
+      - npm run start:core
+
+  start:ui:
+    desc: Start frontend server
+    cmds:
+      - npm run start:ui
+
+  test:e2e:
+    desc: Run e2e tests against core in Docker
+    cmds:
+      - npm run test:e2e
+
+  format:
+    desc: Check formatting like CI does
+    cmds:
+      - npx --prefix author/core prettier --check "author/core/**/*.{ts,js,json,md}" "common/**/*.{ts,js,json,md}"
+      - cd author/ui && npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
+      - cd e2e && npx prettier --check .
+
+  lint:
+    desc: Lint backend
+    cmds:
+      - cd author/core && npm run lint
+
+  typecheck:
+    desc: Type check frontend and e2e tests
+    cmds:
+      - cd author/ui && npm run typecheck
+      - cd e2e && npm run typecheck
+
+  ci:
+    desc: Run the same checks as CI
+    cmds:
+      - task: format
+      - task: lint
+      - task: typecheck
+      - task: build
+      - task: test:e2e
+
+  docker:up:
+    desc: Build and start core and ui with docker compose
+    cmds:
+      - docker compose up --build
+
+  docker:down:
+    desc: Stop docker compose services
+    cmds:
+      - docker compose down
