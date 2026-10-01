@@ -1,0 +1,10 @@
+{
+  "type": "aemm:site",
+  "title": "Test Site",
+  "languageCode": "en",
+  "page": {},
+  "createdAt": 1767225600000,
+  "updatedAt": 1767225600000,
+  "id": "0b9a2f4e-6c1d-4c5e-9a57-1f0d3b8e2a01",
+  "name": "testsite"
+}
