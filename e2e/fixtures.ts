@@ -1,4 +1,9 @@
-import { expect, test as base, type APIRequestContext } from '@playwright/test';
+import {
+  expect,
+  request as playwrightRequest,
+  test as base,
+  type APIRequestContext,
+} from '@playwright/test';
 import { AuthApi } from './api/AuthApi';
 import { BackupApi } from './api/BackupApi';
 import { ContentApi } from './api/ContentApi';
@@ -24,25 +29,28 @@ function api(request: APIRequestContext, token?: string): Api {
 }
 
 async function login(
-  request: APIRequestContext,
+  baseURL: string | undefined,
   credentials: { username: string; password: string },
 ) {
-  const response = await new AuthApi(request).login(credentials);
+  const context = await playwrightRequest.newContext({ baseURL });
+  const response = await new AuthApi(context).login(credentials);
   expect(response.status()).toBe(200);
-  return (await response.json()).token as string;
+  const token = (await response.json()).token as string;
+  await context.dispose();
+  return token;
 }
 
 export const test = base.extend<{ anonymous: Api; admin: Api; editor: Api }>({
   anonymous: async ({ request }, use) => {
     await use(api(request));
   },
-  admin: async ({ request }, use) => {
-    await use(api(request, await login(request, ADMIN)));
+  admin: async ({ request, baseURL }, use) => {
+    await use(api(request, await login(baseURL, ADMIN)));
   },
-  editor: async ({ request, admin }, use) => {
+  editor: async ({ request, admin, baseURL }, use) => {
     const user = newUser({ role: 'editor' });
     expect((await admin.users.create(user)).status()).toBe(201);
-    await use(api(request, await login(request, user)));
+    await use(api(request, await login(baseURL, user)));
   },
 });
 

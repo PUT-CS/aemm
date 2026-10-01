@@ -15,6 +15,7 @@ import { deleteNode } from './routes/deleteNode';
 import { getBackup } from './routes/getBackup';
 import { setBackup } from './routes/setBackup';
 import { login } from './routes/login';
+import { logout, me } from './routes/session';
 import { requireAuth } from './middlewares/requireAuth';
 import { requireAdmin } from './middlewares/requireAdmin';
 import { loginRateLimit } from './middlewares/loginRateLimit';
@@ -22,6 +23,8 @@ import { loginRateLimit } from './middlewares/loginRateLimit';
 const router = Router();
 
 router.post('/login', loginRateLimit, login);
+router.post('/logout', logout);
+router.get('/me', requireAuth, me);
 router.get('/scrtree', getTree);
 router.get('/scr*queryPath', getNode);
 

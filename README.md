@@ -29,6 +29,8 @@ CONTENT_ROOT=../../content
 
 Optional: `PORT` (default `4501`), `DATABASE_PATH` (default `data/core.sqlite`), `JWT_EXPIRES_IN` (default `1h`), `MAX_UPLOAD_SIZE` (default `25mb`), `CORS_ORIGINS` (comma separated, default `http://localhost:4502`).
 
+With `NODE_ENV=production` the session cookie is `Secure`, so core has to be served over HTTPS.
+
 On first start core creates the user `admin` with the password from `ADMIN_PASSWORD`. It's only read when that user doesn't exist yet, change the password from the admin panel afterwards.
 
 ### Build & Run
