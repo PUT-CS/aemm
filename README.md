@@ -91,10 +91,11 @@ See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed documentation.
 - **Frontend:** React Router v7, Vite, TailwindCSS, TypeScript
 - **Shared:** npm file: dependencies
 
-### E2E Tests
+## E2E Tests
 
 ```bash
 cd e2e && npm install
 cd .. && npm run test:e2e
 ```
-Playwright builds the author core image and starts it on port 4599 with a copy of `e2e/data/content` and a fresh database. Set `E2E_BASE_URL` to run against an already running backend instead.
+
+Playwright builds the author core Docker image and starts it on port 4599 with a copy of `e2e/data/content` and a fresh database. Set `E2E_BASE_URL` to run against an already running backend instead.
