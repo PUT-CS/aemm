@@ -93,7 +93,7 @@ class YouTube extends AEMMComponent<z.infer<typeof schema>> {
       );
     }
 
-    const embedSrc = `https://www.youtube.com/embed/${videoId}`;
+    const embedSrc = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
     const useAspectRatio = aspectRatio && aspectRatio !== "none";
     const aspectRatioClass = useAspectRatio
       ? ASPECT_RATIO_CLASSES[aspectRatio]

@@ -1,11 +1,12 @@
 import * as z from "zod";
 import React from "react";
 import AEMMComponent from "~/components/authoring/AEMMComponent";
-import { buildTextDescription } from "~/components/authoring/utils";
+import { buildTextDescription, isSafeUrl } from "~/components/authoring/utils";
 
 const schema = z.object({
   src: z
     .string()
+    .refine((src) => isSafeUrl(src), "Must be a relative or http(s) URL")
     .describe(
       buildTextDescription(
         "url",
@@ -90,7 +91,7 @@ class Embed extends AEMMComponent<z.infer<typeof schema>> {
       className,
     } = this.props;
 
-    if (!src) {
+    if (!isSafeUrl(src)) {
       return (
         <div
           data-aemm-component="Embed"
