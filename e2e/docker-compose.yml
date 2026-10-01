@@ -12,6 +12,7 @@ services:
       CONTENT_ROOT: /app/content
       DATABASE_PATH: /app/data/core.sqlite
       JWT_SECRET: e2e-secret
+      ADMIN_PASSWORD: admin123
       BCRYPT_SALT_ROUNDS: '4'
     volumes:
       - ./data/content:/seed:ro
