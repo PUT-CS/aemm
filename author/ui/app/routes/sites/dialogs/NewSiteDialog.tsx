@@ -50,6 +50,15 @@ const newSiteSchema = z.object({
         "Path to a page template that will be used by default for all pages in this site.",
       ),
     ),
+  themePath: z
+    .string()
+    .optional()
+    .describe(
+      buildTextDescription(
+        "plainText",
+        "Path to the theme used by all pages in this site.",
+      ),
+    ),
 });
 
 export default function NewSiteDialog({
@@ -117,6 +126,7 @@ export default function NewSiteDialog({
                 title: existingSite?.title,
                 description: existingSite?.description,
                 defaultPageTemplatePath: existingSite?.defaultPageTemplatePath,
+                themePath: existingSite?.themePath,
               }
             : { name: "" }
         }

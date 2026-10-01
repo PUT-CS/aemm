@@ -34,5 +34,6 @@ export interface Folder extends ScrNode {
 export interface Site extends ScrNode {
   type: NodeType.SITE;
   defaultPageTemplatePath?: string;
+  themePath?: string;
   description?: string;
 }
