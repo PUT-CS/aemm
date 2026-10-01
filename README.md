@@ -98,4 +98,4 @@ cd e2e && npm install
 cd .. && npm run test:e2e
 ```
 
-Playwright builds author core and starts it on port 4599 with a copy of `e2e/fixtures/content` and a fresh database, so real content is never touched. Set `E2E_BASE_URL` to run against an already running backend instead.
+Playwright builds author core and starts it on port 4599 with a copy of `e2e/fixtures/content` and a fresh database. Set `E2E_BASE_URL` to run against an already running backend instead.
