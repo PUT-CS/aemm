@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { Navigate } from "react-router";
 import UsersTab from "~/routes/admin/UsersTab/UsersTab";
 import { NavTabs, type TabItem } from "~/components/aemm/NavTabs";
+import { isAdmin } from "~/lib/auth";
 
 export function meta() {
   return [{ title: "Administration | AEMM" }];
@@ -15,6 +17,10 @@ export default function Admin() {
     { id: "users", label: "Users" },
     { id: "system", label: "System" },
   ];
+
+  if (!isAdmin()) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto">

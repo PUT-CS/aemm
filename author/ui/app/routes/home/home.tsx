@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { FaTools } from "react-icons/fa";
 import { FaFileCode, FaFileLines, FaFilePen } from "react-icons/fa6";
 import HomeIcon from "./HomeIcon";
+import { isAdmin } from "~/lib/auth";
 
 export function meta() {
   return [
@@ -26,11 +27,13 @@ export default function Home() {
           icon={FaFilePen}
           onClick={() => navigate("/editor")}
         />
-        <HomeIcon
-          text="Administration"
-          icon={FaTools}
-          onClick={() => navigate("/admin")}
-        />
+        {isAdmin() && (
+          <HomeIcon
+            text="Administration"
+            icon={FaTools}
+            onClick={() => navigate("/admin")}
+          />
+        )}
         <HomeIcon
           text="Demo (internal)"
           icon={FaFileCode}
