@@ -29,6 +29,18 @@ test.describe('GET /scrtree', () => {
       expect.objectContaining({ name: 'hello.txt', type: 'aemm:file' }),
     ]);
   });
+
+  test('uses content paths as file ids', async ({ anonymous }) => {
+    const response = await anonymous.content.tree();
+    const root: TreeNode = await response.json();
+
+    const site = root.children!.find((node) => node.name === 'testsite')!;
+    const staticFolder = site.children!.find((node) => node.name === 'static')!;
+    expect(staticFolder.children![0]).toMatchObject({
+      id: '/testsite/static/hello.txt',
+    });
+    expect(await response.text()).not.toContain('/app/content');
+  });
 });
 
 test.describe('GET /scr', () => {
