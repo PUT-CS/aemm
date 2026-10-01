@@ -15,11 +15,11 @@ import { getBackup } from './routes/getBackup';
 import { setBackup } from './routes/setBackup';
 import { login } from './routes/login';
 import { requireAuth } from './middlewares/requireAuth';
+import { requireAdmin } from './middlewares/requireAdmin';
 
 const router = Router();
 
 router.post('/login', login);
-router.post('/register', createUser);
 router.get('/scrtree', getTree);
 router.get('/scr*queryPath', getNode);
 
@@ -31,10 +31,10 @@ router.delete('/scr*queryPath', requireAuth, deleteNode);
 router.get('/backup*queryPath', requireAuth, getBackup);
 router.post('/backup*queryPath', requireAuth, setBackup);
 
-router.get('/users', requireAuth, fetchUsers);
-router.post('/users', requireAuth, createUser);
-router.get('/users/:name', requireAuth, getUser);
-router.patch('/users/:name', requireAuth, updateUser);
-router.delete('/users/:name', requireAuth, deleteUser);
+router.get('/users', requireAuth, requireAdmin, fetchUsers);
+router.post('/users', requireAuth, requireAdmin, createUser);
+router.get('/users/:name', requireAuth, requireAdmin, getUser);
+router.patch('/users/:name', requireAuth, requireAdmin, updateUser);
+router.delete('/users/:name', requireAuth, requireAdmin, deleteUser);
 
 export default router;
