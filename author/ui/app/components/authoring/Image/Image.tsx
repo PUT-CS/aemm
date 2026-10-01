@@ -1,7 +1,7 @@
 import * as z from "zod";
 import React from "react";
 import AEMMComponent from "~/components/authoring/AEMMComponent";
-import { buildTextDescription } from "~/components/authoring/utils";
+import { buildTextDescription, isSafeUrl } from "~/components/authoring/utils";
 
 export type ImageKind = "url" | "plainText";
 
@@ -9,6 +9,7 @@ const schema = z.object({
   src: z
     .string()
     .url("Must be a valid URL")
+    .refine((src) => isSafeUrl(src), "Must be a http(s) URL")
     .describe(buildTextDescription("url", "The source URL of the image.")),
   alt: z
     .string()
@@ -78,7 +79,7 @@ const OBJECT_FIT_CLASSES: Record<
 
 class Image extends AEMMComponent<z.infer<typeof schema>> {
   static defaultProps = {
-    src: "https://raw.githubusercontent.com/NicheDevelopers/ace-of-hearts/refs/heads/main/public/dziadu.webp?token=GHSAT0AAAAAADKWJH3QIJN622TM76N65THU2J5L77Q",
+    src: "https://picsum.photos/800/600",
     alt: "Placeholder image",
   };
 
@@ -98,7 +99,7 @@ class Image extends AEMMComponent<z.infer<typeof schema>> {
       rounded = false,
     } = this.props;
 
-    if (!src) {
+    if (!isSafeUrl(src)) {
       return (
         <div>
           {this.isAuthoring() ? (

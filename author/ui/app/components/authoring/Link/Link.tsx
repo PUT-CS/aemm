@@ -2,6 +2,8 @@ import { z } from "zod";
 import AEMMComponent from "~/components/authoring/AEMMComponent";
 import {
   buildTextDescription,
+  isSafeUrl,
+  LINK_PROTOCOLS,
   processUserClassNames,
 } from "~/components/authoring/utils";
 
@@ -12,6 +14,10 @@ const schema = z.object({
     .describe(buildTextDescription("plainText", "The label of the button.")),
   href: z
     .string()
+    .refine(
+      (href) => isSafeUrl(href, LINK_PROTOCOLS),
+      "Must be a relative, http(s), mailto or tel URL",
+    )
     .optional()
     .describe(
       buildTextDescription("plainText", "The URL the button links to."),
@@ -50,7 +56,7 @@ class Link extends AEMMComponent<z.infer<typeof schema>> {
 
     return (
       <a
-        href={href}
+        href={isSafeUrl(href, LINK_PROTOCOLS) ? href : undefined}
         target={openInNewTab ? "_blank" : "_self"}
         rel={openInNewTab ? "noopener noreferrer" : undefined}
         className={className}
