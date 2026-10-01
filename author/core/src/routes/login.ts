@@ -52,6 +52,7 @@ export async function login(
       id: user.id!,
       username: user.username,
       role: user.role,
+      tokenVersion: user.tokenVersion!,
     });
 
     addInfoEvent(req, res, 'auth.login.success', {

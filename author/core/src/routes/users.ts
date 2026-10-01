@@ -5,9 +5,9 @@ import { addInfoEvent } from '../middlewares/requestLogger';
 import { z } from 'zod';
 import { hashPassword } from '../auth/authService';
 
-function toPublicUser(user: User): Omit<User, 'passwordHash'> {
+function toPublicUser(user: User): Omit<User, 'passwordHash' | 'tokenVersion'> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { passwordHash: _ignored, ...publicUser } = user;
+  const { passwordHash: _hash, tokenVersion: _version, ...publicUser } = user;
   return publicUser;
 }
 

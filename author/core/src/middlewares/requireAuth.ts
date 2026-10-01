@@ -1,7 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { addInfoEvent } from './requestLogger';
-import { getJwtSecret, type AuthPayload } from '../auth/authService';
+import {
+  getJwtSecret,
+  type AuthPayload,
+  type TokenPayload,
+} from '../auth/authService';
 import { Db } from '../db/db';
 
 export interface AuthenticatedRequest extends Request {
@@ -41,9 +45,9 @@ export async function requireAuth(
     return;
   }
 
-  let decoded: AuthPayload;
+  let decoded: TokenPayload;
   try {
-    decoded = jwt.verify(token, getJwtSecret()) as AuthPayload;
+    decoded = jwt.verify(token, getJwtSecret()) as TokenPayload;
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       addInfoEvent(req, res, 'auth.tokenExpired', { message: err.message });
@@ -65,7 +69,11 @@ export async function requireAuth(
   }
 
   const user = await Db.getUser(decoded.username);
-  if (!user || user.id !== decoded.id) {
+  if (
+    !user ||
+    user.id !== decoded.id ||
+    user.tokenVersion !== decoded.tokenVersion
+  ) {
     addInfoEvent(req, res, 'auth.userGone', { username: decoded.username });
     res.status(401).json({ message: 'Invalid token' });
     return;

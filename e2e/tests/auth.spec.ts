@@ -178,6 +178,33 @@ test.describe('token of changed user', () => {
     expect((await demoted.list()).status()).toBe(403);
   });
 
+  test('is rejected after a password change', async ({ admin, request }) => {
+    const user = newUser({ role: 'admin' });
+    await admin.users.create(user);
+    const login = await request.post('/login', { data: user });
+    const old = new UsersApi(request, (await login.json()).token);
+
+    await admin.users.update(user.username, { password: 'new-secret' });
+
+    expect((await old.list()).status()).toBe(401);
+    const relogin = await request.post('/login', {
+      data: { username: user.username, password: 'new-secret' },
+    });
+    const fresh = new UsersApi(request, (await relogin.json()).token);
+    expect((await fresh.list()).status()).toBe(200);
+  });
+
+  test('keeps working after a role change', async ({ admin, request }) => {
+    const user = newUser();
+    await admin.users.create(user);
+    const login = await request.post('/login', { data: user });
+    const promoted = new UsersApi(request, (await login.json()).token);
+
+    await admin.users.update(user.username, { role: 'admin' });
+
+    expect((await promoted.list()).status()).toBe(200);
+  });
+
   test('is rejected when the user is recreated', async ({ admin, request }) => {
     const user = newUser({ role: 'admin' });
     await admin.users.create(user);
