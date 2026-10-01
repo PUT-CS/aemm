@@ -16,7 +16,6 @@ import { useNavigate, useLocation } from "react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { loginRequest } from "~/routes/admin/UsersTab/mutations";
-import { setAuthToken } from "~/lib/auth";
 
 export const formSchema = z.object({
   username: z
@@ -47,8 +46,7 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: loginRequest,
     onSuccess: (data) => {
-      // Persist JWT token for subsequent authenticated requests
-      setAuthToken(data.token);
+      queryClient.setQueryData(["me"], data.user);
       queryClient.invalidateQueries({ queryKey: ["users"] });
       // Reset form and navigate to the originally requested page or home
       form.reset({ username: "", password: "" });

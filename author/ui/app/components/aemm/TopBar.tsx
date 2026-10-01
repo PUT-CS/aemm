@@ -6,7 +6,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Button } from "~/components/ui/button";
-import { FaMoon, FaSun } from "react-icons/fa6";
+import { FaMoon, FaRightFromBracket, FaSun } from "react-icons/fa6";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
+import { logout } from "~/lib/auth";
 
 function ThemeSwitcher() {
   const { setTheme } = useTheme();
@@ -34,6 +37,24 @@ function ThemeSwitcher() {
   );
 }
 
+function LogoutButton() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    queryClient.clear();
+    navigate("/login", { replace: true });
+  };
+
+  return (
+    <Button variant="outline" size="icon" onClick={handleLogout}>
+      <FaRightFromBracket className="h-[1.2rem] w-[1.2rem]" />
+      <span className="sr-only">Log out</span>
+    </Button>
+  );
+}
+
 export default function TopBar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
@@ -41,7 +62,10 @@ export default function TopBar() {
         <a href="/" className="font-bold">
           AEMM Author
         </a>
-        <ThemeSwitcher />
+        <div className="flex gap-2">
+          <ThemeSwitcher />
+          <LogoutButton />
+        </div>
       </div>
     </header>
   );
